@@ -109,12 +109,12 @@ public class SecurityConfig extends OncePerRequestFilter implements Authenticati
 
 	@Override
 	public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
-
+		response.sendRedirect("/");
 	}
 
 	@Override
 	public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
-
+		response.sendRedirect("/");
 	}
 
 }

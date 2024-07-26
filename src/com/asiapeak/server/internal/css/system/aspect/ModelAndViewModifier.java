@@ -16,7 +16,7 @@ public class ModelAndViewModifier {
 	@Autowired
 	SecurityService securityService;
 
-	@AfterReturning(pointcut = "execution(org.springframework.web.servlet.ModelAndView *.**(..))", returning = "modelAndView")
+	@AfterReturning(pointcut = "execution(org.springframework.web.servlet.ModelAndView com.asiapeak.server.internal.css.functions.*.*.*(..))", returning = "modelAndView")
 	public void afterReturningControllerMethod(ModelAndView modelAndView) {
 		if (modelAndView != null) {
 			String userName = securityService.currentUser.get();

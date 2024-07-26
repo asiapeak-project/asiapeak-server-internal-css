@@ -38,7 +38,7 @@ public class SystemController {
 		if (StringUtils.isBlank(securityService.currentUser.get())) {
 			view = new ModelAndView("view/login");
 		} else {
-			view = new ModelAndView("view/customers/customers");
+			view = new ModelAndView("redirect:customers");
 		}
 		return view;
 	}
