@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/page.html}">
+
+<head>
+	<title>Test index</title>
+	<script th:inline="javascript">
+		$(() => {
+			DocumentUtils.setSideBarActived("products")
+		})
+	</script>
+</head>
+
+<body layout:fragment="content">
+	Hello World
+</body>
+
+</html>
