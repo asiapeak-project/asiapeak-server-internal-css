@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/base.html}">
+
+<head>
+	<title>玉山科技-客戶服務系統</title>
+	<style>
+		html, body {
+			height: 100%;
+		}
+
+		body {
+			display: flex;
+			align-items: center;
+			padding-top: 0px;
+			padding-bottom: 40px;
+			background-color: #f5f5f5;
+		}
+		.form-signin {
+			width: 100%;
+			max-width: 330px;
+			padding: 15px;
+			margin: auto;
+		}
+
+		.form-signin .checkbox {
+			font-weight: 400;
+		}
+
+		.form-signin .form-floating:focus-within {
+			z-index: 2;
+		}
+
+		.form-signin input[type="text"] {
+			margin-bottom: -1px;
+			border-bottom-right-radius: 0;
+			border-bottom-left-radius: 0;
+		}
+
+		.form-signin input[type="password"] {
+			margin-bottom: 10px;
+			border-top-left-radius: 0;
+			border-top-right-radius: 0;
+		}
+
+
+		.bd-placeholder-img {
+			font-size: 1.125rem;
+			text-anchor: middle;
+			-webkit-user-select: none;
+			-moz-user-select: none;
+			user-select: none;
+		}
+
+		@media (min-width: 768px) {
+			.bd-placeholder-img-lg {
+				font-size: 3.5rem;
+			}
+		}
+	</style>
+	<script th:inline="javascript">
+		const doLogin = () => {
+			const name = $('#floatingInput').val();
+			const password = $('#floatingPassword').val();
+			
+			HttpUtils.doPost({
+				url: "/login",
+				data: {name, password},
+				success: (response) => {
+					if(response.data === true){
+						 window.location = "/";
+					} else {
+						PromptUtils.error(response.message);
+					}
+				}
+			})
+		}
+		
+		const onPasswordKeyDown = (event) => {
+			 const keyId = event.key;
+			 if(keyId === 'Enter'){
+				 doLogin();
+			 }
+		}
+		
+	</script>
+</head>
+
+<body layout:fragment="base" class="text-center">
+	<main class="form-signin">
+		<div>
+			<h1 class="h3 mb-1 fw-normal">玉山科技-客戶服務系統</h1>
+			<img class="mb-1" th:src="@{/resources/logo/asiapeak-logo-original.webp}" style="width: 300px">
+			<div class="form-floating">
+				<input type="text" class="form-control" id="floatingInput" placeholder="Name">
+				<label for="floatingInput">Name</label>
+			</div>
+			<div class="form-floating">
+				<input type="password" class="form-control" id="floatingPassword" placeholder="Password" onkeydown="onPasswordKeyDown(event)">
+				<label for="floatingPassword">Password</label>
+			</div>
+			<button class="w-100 btn btn-lg btn-primary" type="buttom" onclick="doLogin()">登入</button>
+			<p class="mt-5 mb-3 text-muted">玉山科技 版權所有 © Copyright AsiaPeak 2024, All Rights Reserved </p>
+		</div>
+	</main>
+</body>
+
+</html>

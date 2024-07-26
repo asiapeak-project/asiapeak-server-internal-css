@@ -1,0 +1,49 @@
+玉山科技 客戶服務管理系統
+
+系統的概念:
+	1. 依照客戶公司做分類
+	
+	2. 主頁面直接顯示出所有公司客戶列表
+		顯示的欄位:
+			中文名稱
+			英文名稱
+			顯示的備註
+			最後更新日期
+			
+	3. 點選後進入客戶資訊後 顯示方式為
+		1. 使用 Tab 風格
+		2. 第一個 Tab 是客戶資訊，包含
+			1. 基本資料，顯示的備註
+			2. 聯絡人資訊(可多個)
+			3. 訊息紀錄(可多個)，也可以附上附件
+			4. 上傳附件，可一次上傳多個檔案，有包含備註欄位
+				attachment {					
+					description: string
+					files: [
+						{
+							description: string
+							filepath: string
+						}
+					]
+				}
+		3. 可新增 Tab，標題可以用產品名稱之類的
+			Tab 的內容
+				1. 資料的區塊(允許多個)，可使用 template 導入，或是手動新增
+					[
+						{
+							label: string,
+							columns: [ { key: string, value: string }, { key: string, value: string } ],
+							
+						},
+						[ { key: string, value: string }, { key: string, value: string } ],
+						[ { key: string, value: string }, { key: string, value: string } ],
+						[ { key: string, value: string }, { key: string, value: string } ]
+					]
+				2. 訊息紀錄(可多個)，也可以附上附件
+				3. 上傳附件
+			
+				
+			
+			
+			
+		

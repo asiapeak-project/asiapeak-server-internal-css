@@ -1,0 +1,116 @@
+功能:	
+	客戶資料
+		Table:	
+			Customer:
+				uuid ID
+				cname 中文名稱
+				ename 英文名稱
+				uniform number 統編
+				cdate 建立日期
+				cuser 建立者
+				udate 修改日期
+				uuser 修改者
+				ddate 刪除日期
+				duser 刪除者
+			
+			CustomerHistory
+				rowid
+				refCustome
+				original cname 中文名稱
+				modified cname 中文名稱
+				original ename 英文名稱
+				modified ename 英文名稱
+				original uniform number 統編
+				modified uniform number 統編
+				
+			CustomerTab
+				rowid
+				refCustomer
+				title
+				sequence 排序(號碼越大在越上面)
+				cdate 建立日期
+				cuser 建立者
+				udate 修改日期
+				uuser 修改者
+				ddate 刪除日期
+				duser 刪除者
+			
+			CustomerTabContent
+				rowid
+				refCustomerTab
+				title
+				sequence 排序(號碼越大在越上面)
+				type (form/note/file)
+				content
+				cdate 建立日期
+				cuser 建立者
+				udate 修改日期
+				uuser 修改者
+				ddate 刪除日期
+				duser 刪除者
+				
+			CustomerTabHistory
+				rowid
+				refCustomerTab
+				action 動作( CreateTab / EditTab / DeleteTab / CreateContent / EditContent / DeleteContent )
+				adate 動作日期
+				auser 動作者
+				
+				
+				// 在畫面右上方可以查看歷程記錄
+				select * from CustomerTabHistory where refCustomerTab = ?
+				
+				// 要可以恢復已刪除的內容
+				
+				// 歷程列表 右邊的按鈕可以查看歷程內容
+				// 如果是 DeleteTab 的話就要撈出該 tab 底下所有的東西
+				select 
+					CustomerTabContent.*
+				form 					
+					CustomerTabHistory
+				left join CustomerTabContentHistory on CustomerTabHistory.rowid = CustomerTabContentHistory.refCustomerTabHistory
+				left join CustomerTabContent on CustomerTabContentHistory.refCustomerTab = CustomerTabContent.refCustomerTab 
+				where
+					CustomerTabHistory = ?
+				// 然後在每個 Content 中還是可以查看歷程記錄
+				select * from CustomerTabContentHistory where refCustomerTabContent = ? order by 
+				
+			CustomerTabContentHistory
+				rowid
+				refCustomerTab
+				refCustomerTabContent
+				refCustomerTabHistory
+				originalContent 原始資料
+				modifiedContent	修改後的資料
+				adate 動作日期
+				auser 動作者		
+			
+	雲端檔案
+		純粹上傳下載檔案，不與資料庫做連結
+	
+	表單模板管理	
+		可以預先設定好一些表單的版型
+	
+	使用者管理
+		要有權限管理			
+	
+
+客戶資料-頁簽設計
+	1. 上方有 tab 可以新增頁簽
+	2. 採用分頁機制 可選擇幾筆幾頁
+	3. 可以依照 最後編輯日期 / 建立日期 / 預設排序(sequence) 進行排序 
+	4. 要有歷程記錄表	
+
+客戶資料-頁簽內容類型 
+	1. 表單 type 有 text, date, number, textarea 
+		[
+			{name, value, type},
+			{name, value, type},
+			{name, value, type},		
+		]
+	
+	2. 圖文筆記(文字+圖片 看要不要使用 ckeditor)		
+	3. 附件檔案(文字+檔案)
+	p.s. 圖文筆記與附件檔案上傳的位置放在 
+		 com.asiapeak.server.internal.css.upload-folder / Customer.uuid / CustomerTab.rowid / CustomerTabContent.rowid / 底下	
+		
