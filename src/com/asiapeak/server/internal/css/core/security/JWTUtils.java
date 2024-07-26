@@ -48,7 +48,6 @@ public class JWTUtils {
 		if (!signedJWT.verify(verifier)) {
 			throw new RuntimeException("JWT signature is valid");
 		}
-
 		return signedJWT.getJWTClaimsSet();
 	}
 }

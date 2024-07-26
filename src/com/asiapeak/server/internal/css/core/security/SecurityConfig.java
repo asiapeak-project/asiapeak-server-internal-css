@@ -78,17 +78,17 @@ public class SecurityConfig extends OncePerRequestFilter implements Authenticati
 		errorException.remove();
 
 		try {
+			String queryPath = request.getServletPath();
+
 			String authToken = SecurityUtils.getCookieValue(request, HttpHeaders.AUTHORIZATION, null);
 
 			if (StringUtils.isEmpty(authToken)) {
-				String queryPath = request.getServletPath();
 				throw new TokenNotFoundException("Token Not Found, path=" + queryPath);
 			}
 
 			String userName = securityService.verifyJWT(authToken, request);
 
 			if (StringUtils.isEmpty(userName)) {
-				String queryPath = request.getServletPath();
 				throw new TokenNotValidException("Token Not Valid, path=" + queryPath);
 			}
 

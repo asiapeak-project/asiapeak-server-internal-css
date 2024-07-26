@@ -1,0 +1,11 @@
+maintenanceCcontract
+	rowid
+	refCustomer
+	product
+	quantity
+	startDate
+	endDate
+	originalPrice 原始成交價
+	finalPriceYear 成交價
+	profitYear 	
+	memo
