@@ -1,0 +1,30 @@
+data-folder
+	- [customer-uuid]
+	- [customer-uuid]
+	- [customer-uuid]
+		- contracts
+			- [Contracts-rowid]
+			- [Contracts-rowid]
+			- [Contracts-rowid]				
+				-- {uploaded files}
+		- deployments
+			- [Deployment-rowid]
+			- [Deployment-rowid]
+			- [Deployment-rowid]
+				-- {uploaded files}
+		- documents
+			- [Document-rowid]
+			- [Document-rowid]
+			- [Document-rowid]
+				- [images]
+					-- {image files}
+				- [files] 
+					-- {uploaded files}
+		- record
+			- [Record-rowid]
+			- [Record-rowid]
+			- [Record-rowid]
+				- [images]
+					-- {image files}
+				- [files] 
+					-- {uploaded files}

@@ -1,11 +1,91 @@
-maintenanceCcontract
+Customer 客戶資訊
+	uuid
+	name
+	cname
+	ename	
+	phone
+	address
+	website
+	unumber
+	industry
+	memo
+	
+Contact 客戶聯絡人
 	rowid
 	refCustomer
-	product
-	quantity
+	name
+	cname
+	ename	
+	email
+	mobilePhone
+	officePhone
+	position 職務職位	
+	memo
+			
+Contract 合約
+	rowid
+	refCustomer
 	startDate
 	endDate
+	product
+	quantity	
 	originalPrice 原始成交價
 	finalPriceYear 成交價
-	profitYear 	
+	profitYear
 	memo
+	udate
+
+Deployment 部屬資訊
+	rowid
+	refCustomer
+	subject
+	infoColumns
+	infoValues
+	udate
+	
+Document 文件文檔
+	rowid
+	refCustomer
+	subject
+	content
+	udate
+	
+ServiceRecord 服務紀錄
+	rowid
+	refCustomer	
+	subject
+	content
+	udate	
+	
+ContactRecord 通訊紀錄
+	rowid
+	refCustomer
+	subject
+	content
+	rdate 紀錄時間
+	udate
+	
+User
+	rowid
+	account
+	password
+	secretKey
+
+UserAuth
+	rowid
+	refUser
+	authName
+	
+Templates
+	rowid
+	name	
+	infoColumns
+	
+	
+
+
+	
+	
+	
+	
+	
