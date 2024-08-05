@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/clear.html}">
+
+<head>
+	<script th:inline="javascript">
+		
+		const rowid = /*[[${rowid}]]*/ "";
+		
+		$(() => {
+			
+			HttpUtils.doPost({
+				url: "/customers/qryInfo/" + rowid,
+				success: (response) => {
+					$("#dname").val(response.data.dname);
+					$("#cname").val(response.data.cname);
+					$("#ename").val(response.data.ename);
+					$("#unumber").val(response.data.unumber);
+					$("#phone").val(response.data.phone);
+					$("#address").val(response.data.address);
+					$("#industry").val(response.data.industry);
+					$("#website").val(response.data.website);
+					$("#memo").val(response.data.memo);
+				}
+			})
+			
+			
+			$("#save-btn").click(() => {
+				DialogUtils.confirm({
+					title: "更新資料確認",
+					text: "是否要更新「" + $("#dname").val() + "」的資訊?",
+					onConfirm: () => {
+						const formData = new FormData(document.getElementById("myform"));
+					    const data = {};
+					    formData.forEach((value, key) => {
+					        data[key] = value;
+					    });
+						
+						HttpUtils.doPost({
+							url: "/customers/editInfo/" + rowid,
+							data: data,
+							success: () => {
+								PromptUtils.success("更新成功")
+								DialogUtils.closeWindow(window, true);
+							}
+						})
+					}
+				})
+			})
+			
+		})
+		
+	</script>
+</head>
+
+<body layout:fragment="content">
+	
+	<form id="myform" class="row g-3 py-3">
+		<div class="col-md-12">
+			<label for="dname" class="form-label">顯示名稱</label>
+			<input type="text" class="form-control" id="dname" name="dname" readonly />
+		</div>
+		
+		<div class="col-md-6">
+			<label for="cname" class="form-label">中文名稱</label>
+			<input type="text" class="form-control" id="cname" name="cname" />
+		</div>
+		
+		<div class="col-md-6">
+			<label for="ename" class="form-label">英文名稱</label>
+			<input type="text" class="form-control" id="ename" name="ename" />
+		</div>
+		
+		<div class="col-md-6">
+			<label for="unumber" class="form-label">統一編號</label>
+			<input type="text" class="form-control" id="unumber" name="unumber" />
+		</div>
+		
+		<div class="col-md-6">
+			<label for="phone" class="form-label">電話號碼</label>
+			<input type="text" class="form-control" id="phone" name="phone" />
+		</div>
+		
+		<div class="col-md-12">
+			<label for="address" class="form-label">地址</label>
+			<input type="text" class="form-control" id="address" name="address" />
+		</div>
+		
+		<div class="col-md-6">
+			<label for="industry" class="form-label">產業</label>
+			<input type="text" class="form-control" id="industry" name="industry" />
+		</div>
+		
+		<div class="col-md-6">
+			<label for="website" class="form-label">網站</label>
+			<input type="text" class="form-control" id="website" name="website" />
+		</div>
+		
+		<div class="col-md-12">
+			<label for="memo" class="form-label">備註</label>
+			<textarea class="form-control" id="memo" name="memo" rows="3"></textarea>
+		</div>
+		
+		<div class="text-end">
+			<button id="save-btn" type="button" class="btn btn-success">更新</button>
+		</div>
+		
+	</form>
+</body>
+
+</html>

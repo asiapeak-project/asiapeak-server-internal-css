@@ -1,9 +1,14 @@
 package com.asiapeak.server.internal.css.dao.entity;
 
+import java.util.Date;
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Type;
@@ -22,7 +27,7 @@ public class Customer {
 	Integer rowid;
 
 	@Type(type = "text")
-	String name;
+	String dname;
 
 	@Type(type = "text")
 	String cname;
@@ -47,5 +52,28 @@ public class Customer {
 
 	@Type(type = "text")
 	String memo;
+	
+	Date udate;
+	
+	@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
+	List<Contact> contacts;
+	
+	@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
+	List<Product> products;
+	
+	@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
+	List<Contract> contracts;
+	
+	@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
+	List<Deployment> deployments;
+	
+	@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
+	List<Document> documents;
+	
+	@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
+	List<ServiceRecord> serviceRecords;
+	
+	@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
+	List<ContactRecord> contactRecord;
 
 }

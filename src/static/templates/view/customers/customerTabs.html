@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/page.html}">
+
+<head>
+	<title>客戶服務系統-客戶資訊-[[${dname}]]</title>
+	<script th:inline="javascript">
+		
+		const rowid = /*[[${rowid}]]*/ "";
+		
+		$(() => {
+			DocumentUtils.setSideBarActived("customers")
+			
+			
+			ElementUtils.createTabs({
+				div: document.getElementById("myTabs"),
+				tabs: [
+					{label: "客戶資訊", url: "/customers/info/" + rowid},
+					{label: "聯絡人資訊", url: "/customers/contact/" + rowid},
+					{label: "產品資訊", url: "/customers/product/" + rowid},
+					{label: "維護合約", url: "/customers/contract/" + rowid},
+					{label: "環境部屬", url: "/customers/deployment/" + rowid},
+					{label: "文件文檔", url: "/customers/document/" + rowid},
+					{label: "服務歷程", url: "/customers/serviceRecord/" + rowid},
+					{label: "通訊紀錄", url: "/customers/contactRecord/" + rowid},
+				]
+			})
+			
+		})
+	</script>
+</head>
+
+<body layout:fragment="content">
+	<nav aria-label="breadcrumb">
+		<ol class="breadcrumb">
+			<li class="breadcrumb-item"><a href="/customers">客戶資訊</a></li>
+			<li class="breadcrumb-item active" aria-current="page">[[${dname}]]</li>
+		</ol>
+	</nav>
+	
+	<div id="myTabs" style="height: calc(100dvh - 240px)"></div>
+	
+</body>
+
+</html>

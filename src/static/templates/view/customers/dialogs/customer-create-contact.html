@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/clear.html}">
+
+<head>
+	<title>客戶服務系統-客戶資訊-[[${dname}]]</title>
+	<script th:inline="javascript">
+		
+		const rowid = /*[[${rowid}]]*/ "";
+		
+		$(() => {
+			
+			$("#save-btn").click(() => {
+
+				const formData = new FormData(document.getElementById("myform"));
+			    const data = {};
+			    formData.forEach((value, key) => {
+			        data[key] = value;
+			    });
+				
+				if(!data.dname){
+					PromptUtils.warning("「聯絡名稱」為必填！")
+					return;
+				}
+				
+				HttpUtils.doPost({
+					url: "/customers/createContact/" + rowid,
+					data: data,
+					success: (response) => {
+						if(response.data){
+							PromptUtils.success("新增成功")
+							DialogUtils.closeWindow(window, true)
+						}
+					}
+				})
+				
+			})
+			
+		})
+		
+	</script>
+</head>
+
+<body layout:fragment="content">
+	
+	<form id="myform" class="row g-3 py-3">
+		<div class="col-md-4">
+			<label for="dname" class="form-label">
+				聯絡名稱
+				<span class="text-danger">*</span>
+			</label>
+			<input type="text" class="form-control" id="dname" name="dname" />
+		</div>
+		
+		<div class="col-md-4">
+			<label for="cname" class="form-label">中文名稱</label>
+			<input type="text" class="form-control" id="cname" name="cname" />
+		</div>
+		
+		<div class="col-md-4">
+			<label for="ename" class="form-label">英文名稱</label>
+			<input type="text" class="form-control" id="ename" name="ename" />
+		</div>
+		
+		<div class="col-md-6">
+			<label for="unumber" class="form-label">職位</label>
+			<input type="text" class="form-control" id="position" name="position" />
+		</div>
+		
+		<div class="col-md-6">
+			<label for="phone" class="form-label">E-Mail</label>
+			<input type="text" class="form-control" id="email" name="email" />
+		</div>
+		
+		<div class="col-md-6">
+			<label for="address" class="form-label">手機號碼</label>
+			<input type="text" class="form-control" id="mobilePhone" name="mobilePhone" />
+		</div>
+		
+		<div class="col-md-6">
+			<label for="industry" class="form-label">辦公室號碼</label>
+			<input type="text" class="form-control" id="officePhone" name="officePhone" />
+		</div>
+		
+		<div class="col-md-12">
+			<label for="memo" class="form-label">備註</label>
+			<textarea class="form-control" id="memo" name="memo" rows="3"></textarea>
+		</div>
+		
+	</form>
+	
+	<div class="text-end">
+		<button id="save-btn" type="button" class="btn btn-success">新增</button>
+	</div>
+</body>
+
+</html>

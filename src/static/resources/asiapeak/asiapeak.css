@@ -124,6 +124,25 @@ body, .ap-main-body {
 	left: 0px;
 }
 
+.ap-tab-ul {
+	display: block;
+	overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+}
+
+.ap-tab-label {
+	display: inline-block;
+}
+
+.ap-tab-iframe {
+	width: 100%;
+	height: 100%;
+	overflow: auto;
+	border: 0px;
+}
+
+
 .none-select {
   -webkit-touch-callout: none;
   -webkit-user-select: none;

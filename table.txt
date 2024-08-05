@@ -46,6 +46,7 @@ Deployment 部屬資訊
 Document 文件文檔
 	rowid
 	refCustomer
+	category
 	subject
 	content
 	udate

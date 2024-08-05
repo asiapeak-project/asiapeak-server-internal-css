@@ -15,7 +15,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -31,13 +30,14 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.asiapeak.server.internal.css.core.security.exceptions.TokenNotFoundException;
 import com.asiapeak.server.internal.css.core.security.exceptions.TokenNotValidException;
 
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
 public class SecurityConfig extends OncePerRequestFilter implements AuthenticationEntryPoint, AccessDeniedHandler {
+
+	public static final String USER_SESSION_KEY = "MY_USER_SESSION_KEY";
 
 	final static ThreadLocal<Throwable> errorException = new ThreadLocal<Throwable>();
 
@@ -56,11 +56,12 @@ public class SecurityConfig extends OncePerRequestFilter implements Authenticati
 		return http //
 				.cors(cors -> cors.disable()) //
 				.csrf(csrf -> csrf.disable()) //
+				.headers(header -> header.frameOptions().sameOrigin()) //
 				.formLogin(login -> login.disable()) //
 				.logout(logout -> logout.disable()) //
 				.httpBasic(basic -> basic.disable()) //
 				.anonymous(anonymous -> anonymous.disable()) //
-				.sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) //
+				.sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.ALWAYS)) //
 				.exceptionHandling(handling -> handling.authenticationEntryPoint(this).accessDeniedHandler(this)) //
 				.authorizeHttpRequests(authorize -> {
 					securityUrlPermits.forEach(url -> {
@@ -74,19 +75,12 @@ public class SecurityConfig extends OncePerRequestFilter implements Authenticati
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-		securityService.currentUser.remove();
 		errorException.remove();
 
 		try {
 			String queryPath = request.getServletPath();
 
-			String authToken = SecurityUtils.getCookieValue(request, HttpHeaders.AUTHORIZATION, null);
-
-			if (StringUtils.isEmpty(authToken)) {
-				throw new TokenNotFoundException("Token Not Found, path=" + queryPath);
-			}
-
-			String userName = securityService.verifyJWT(authToken, request);
+			String userName = securityService.getCurrentUserName();
 
 			if (StringUtils.isEmpty(userName)) {
 				throw new TokenNotValidException("Token Not Valid, path=" + queryPath);
@@ -98,7 +92,6 @@ public class SecurityConfig extends OncePerRequestFilter implements Authenticati
 
 			SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
-			securityService.currentUser.set(userName);
 		} catch (Exception e) {
 			errorException.set(e);
 		} finally {

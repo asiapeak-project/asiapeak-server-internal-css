@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -69,6 +70,7 @@ public class DBConfig {
 	public long datasourceMaxLifetime;
 
 	@Bean
+	@Primary
 	@Qualifier("entityManagerFactory")
 	LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
@@ -85,6 +87,7 @@ public class DBConfig {
 	}
 
 	@Bean
+	@Primary
 	@Qualifier(DBConfig.TransactionManager)
 	JpaTransactionManager transactionManager() {
 		JpaTransactionManager transactionManager = new JpaTransactionManager();
@@ -93,6 +96,7 @@ public class DBConfig {
 	}
 
 	@Bean
+	@Primary
 	@Qualifier("dataSource")
 	DataSource dataSource() {
 		HikariConfig config = new HikariConfig();

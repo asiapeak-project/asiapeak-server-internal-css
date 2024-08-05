@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/clear.html}">
+
+<head>
+	<title>客戶服務系統-客戶資訊-[[${dname}]]</title>
+	<style>
+		.contect-container{
+			background: #F9F9F9;
+		}
+		.contect-item {
+			background: #FFFFFF;
+		}
+		
+	</style>
+	<script th:inline="javascript">
+		
+		const rowid = /*[[${rowid}]]*/ "";
+		
+		$(() => {
+			
+			const doQuery = () => {
+				HttpUtils.doPost({
+					url: "/customers/qryContact/" + rowid,
+					success: (response) => {
+						renderContact(response.data);
+					}
+				})
+				
+			}
+			
+			const renderContact = (data) => {
+				
+				const contects = document.getElementById("contects");
+				
+				contects.innerHTML = "";
+				
+				data.forEach(item => {
+					const contact = ElementUtils.createElement(`
+						<div class="row border p-2 mb-4 contect-item">
+							<div class="col-md-4 mb-2">
+								<label for="dname" class="form-label">聯絡名稱</label>
+								<input type="text" class="form-control" name="dname" readonly />
+							</div>
+							
+							<div class="col-md-4 mb-2">
+								<label for="cname" class="form-label">中文名稱</label>
+								<input type="text" class="form-control" name="cname" readonly />
+							</div>
+							
+							<div class="col-md-4 mb-2">
+								<label for="ename" class="form-label">英文名稱</label>
+								<input type="text" class="form-control" name="ename" readonly />
+							</div>
+							
+							<div class="col-md-6 mb-2">
+								<label for="unumber" class="form-label">職位</label>
+								<input type="text" class="form-control" name="position" readonly />
+							</div>
+							
+							<div class="col-md-6 mb-2">
+								<label for="phone" class="form-label">E-Mail</label>
+								<input type="text" class="form-control" name="email" readonly />
+							</div>
+							
+							<div class="col-md-6 mb-2">
+								<label for="address" class="form-label">手機號碼</label>
+								<input type="text" class="form-control" name="mobilePhone" readonly />
+							</div>
+							
+							<div class="col-md-6 mb-2">
+								<label for="industry" class="form-label">辦公室號碼</label>
+								<input type="text" class="form-control" name="officePhone" readonly />
+							</div>
+							
+							<div class="col-md-12 mb-2">
+								<label for="memo" class="form-label">備註</label>
+								<textarea class="form-control" name="memo" rows="3" readonly></textarea>
+							</div>
+							<div class="col-md-6 mb-2">
+								<button class="btn btn-danger my-2" type="button" name="delete-btn">
+									<i class="bi bi-trash3-fill"></i>
+								</button>
+							</div>
+							<div class="col-md-6 text-end mb-2">
+								<button class="btn btn-success my-2" type="button" name="edit-btn">
+									<i class="bi bi-pencil-fill"></i>
+								</button>
+							</div>
+						</div>
+					`)
+					
+					contact.querySelector("[name=dname]").value = item.dname;
+					contact.querySelector("[name=cname]").value = item.cname;
+					contact.querySelector("[name=ename]").value = item.ename;
+					contact.querySelector("[name=position]").value = item.position;
+					contact.querySelector("[name=email]").value = item.email;
+					contact.querySelector("[name=mobilePhone]").value = item.mobilePhone;
+					contact.querySelector("[name=officePhone]").value = item.officePhone;
+					contact.querySelector("[name=memo]").value = item.memo;
+										
+					contact.querySelector("[name=delete-btn]").addEventListener("click", () => {
+						DialogUtils.confirm({
+							title: "刪除聯絡人",
+							text: "是否要刪除「" + item.dname + "」聯絡人?",
+							onConfirm: () => {
+								HttpUtils.doPost({
+									url: "/customers/delContact/" + item.rowid,
+									success: () => {
+										PromptUtils.success("刪除成功")
+										doQuery();
+									}
+								})
+								
+							}
+						})
+					})
+					
+					contact.querySelector("[name=edit-btn]").addEventListener("click", () => {
+						DialogUtils.window({
+							title: "編輯聯絡人「" + item.dname + "」",
+							url: "/customers/editContactData/" + item.rowid,
+							callback: (rtnVal) => {
+								if(rtnVal === true){
+									doQuery();
+								}
+							}
+						})
+					})
+					
+					contects.appendChild(contact);
+				})
+				
+			}
+			
+			$("#create-btn").click(() => {
+				DialogUtils.window({
+					title: "建立聯絡人",
+					url: "/customers/createContact/" + rowid,
+					callback: (rtnVal) => {
+						if(rtnVal === true){
+							doQuery();
+						}
+					}
+				})
+			})
+			
+			doQuery();
+			
+		})
+	</script>
+</head>
+
+<body layout:fragment="content" class="contect-container">
+	<div class="text-end">
+		<button id="create-btn" class="btn btn-success" type="button">
+			<i class="bi bi-plus"></i>
+		</button>
+	</div>
+
+	<div id="contects" class="p-3"></div>
+	
+</body>
+
+</html>

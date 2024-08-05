@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/clear.html}">
+
+<head>
+	<title>客戶服務系統-客戶資訊-[[${dname}]]</title>
+	<script th:inline="javascript">
+		
+		const rowid = /*[[${rowid}]]*/ "";
+		
+		$(() => {
+			const doQuery = () => {
+				HttpUtils.doPost({
+					url: "/customers/qryInfo/" + rowid,
+					success: (response) => {
+						fillForm(response.data);
+					}
+				})
+			}
+			
+			const fillForm = (data) => {
+				$("#dname").val(data.dname);
+				$("#cname").val(data.cname);
+				$("#ename").val(data.ename);
+				$("#unumber").val(data.unumber);
+				$("#phone").val(data.phone);
+				$("#address").val(data.address);
+				$("#industry").val(data.industry);
+				$("#website").val(data.website);
+				$("#memo").val(data.memo);
+			}
+			
+			$("#edit-btn").click(() => {
+				
+				DialogUtils.window({
+					title: "編輯客戶資訊「" + $("#dname").val() + "」",
+					url: "/customers/editInfo/" + rowid,
+					callback: (rtnVal) => {
+						if(rtnVal === true){
+							doQuery();
+						}
+					}
+				})
+				
+			})
+			
+			doQuery();
+		})
+		
+	</script>
+</head>
+
+<body layout:fragment="content">
+		
+	<div class="row g-3 py-3">
+		<div class="col-md-12">
+			<label for="dname" class="form-label">顯示名稱</label>
+			<input type="text" class="form-control" id="dname" readonly />
+		</div>
+		
+		<div class="col-md-6">
+			<label for="cname" class="form-label">中文名稱</label>
+			<input type="text" class="form-control" id="cname" readonly />
+		</div>
+		
+		<div class="col-md-6">
+			<label for="ename" class="form-label">英文名稱</label>
+			<input type="text" class="form-control" id="ename" readonly />
+		</div>
+		
+		<div class="col-md-6">
+			<label for="unumber" class="form-label">統一編號</label>
+			<input type="text" class="form-control" id="unumber" readonly />
+		</div>
+		
+		<div class="col-md-6">
+			<label for="phone" class="form-label">電話號碼</label>
+			<input type="text" class="form-control" id="phone" readonly />
+		</div>
+		
+		<div class="col-md-12">
+			<label for="address" class="form-label">地址</label>
+			<input type="text" class="form-control" id="address" readonly />
+		</div>
+		
+		<div class="col-md-6">
+			<label for="industry" class="form-label">產業</label>
+			<input type="text" class="form-control" id="industry" readonly />
+		</div>
+		
+		<div class="col-md-6">
+			<label for="website" class="form-label">網站</label>
+			<input type="text" class="form-control" id="website" readonly />
+		</div>
+		
+		<div class="col-md-12">
+			<label for="memo" class="form-label">備註</label>
+			<textarea class="form-control" id="memo" readonly rows="3"></textarea>
+		</div>
+		
+		<div class="col-md-12 text-end">
+			<button id="edit-btn" class="btn btn-success" type="button">
+				<i class="bi bi-pencil-fill"></i>
+			</button>
+		</div>
+		
+	</div>
+	
+	
+</body>
+
+</html>

@@ -18,7 +18,7 @@ import lombok.experimental.Accessors;
 @Table
 @Entity
 @Accessors(chain = true)
-public class ContactRecord {
+public class Product {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -28,13 +28,13 @@ public class ContactRecord {
 	String subject;
 
 	@Type(type = "text")
-	String content;
+	String infoColumns;
 
-	Date rdate;
+	@Type(type = "text")
+	String infoValues;
 
 	Date udate;
 
 	@ManyToOne
 	Customer customer;
-
 }

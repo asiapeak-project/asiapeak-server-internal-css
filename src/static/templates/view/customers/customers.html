@@ -4,16 +4,166 @@
 	layout:decorate="~{layouts/page.html}">
 
 <head>
-	<title>Test index</title>
+	<title>客戶服務系統-客戶資訊</title>
 	<script th:inline="javascript">
 		$(() => {
-			DocumentUtils.setSideBarActived("customers")
-		})
+			DocumentUtils.setSideBarActived("customers");
+			
+			const tableObject = {
+				list: [],
+				parts: [],
+				pageNum: 0,
+				pageSize: 10,				
+				sortKey: "",
+				sortDir: "",
+				filter: "",
+				calc: () => {
+					tableObject.parts = ArrayUtils.partition(tableObject.list.filter(item => {
+						return (
+							(item.dname ? item.dname.toLowerCase().includes(tableObject.filter) : false) ||
+							(item.cname ? item.cname.toLowerCase().includes(tableObject.filter) : false) ||
+							(item.ename ? item.ename.toLowerCase().includes(tableObject.filter) : false)
+						);
+					}).sort((a, b) => {
+						if(tableObject.sortKey && tableObject.sortDir){
+							if(tableObject.sortDir === "desc"){
+								return b[tableObject.sortKey].toString().localeCompare(a[tableObject.sortKey].toString())
+							}else{
+								return a[tableObject.sortKey].toString().localeCompare(b[tableObject.sortKey].toString())
+							}
+						}else{
+							return 0;
+						}
+					}), tableObject.pageSize);
+					if(tableObject.pageNum > tableObject.parts.length - 1){
+						tableObject.pageNum = tableObject.parts.length - 1
+					}
+				},
+				getPart: () => {
+					return tableObject.parts[tableObject.pageNum]
+				}
+			};
+			
+			const doQuery = (show) => {
+				tableObject.pageNum = 0;
+				HttpUtils.doPost({
+					url: "/customers/qryCustomers",
+					success: (response) => {
+						tableObject.list = response.data;
+						tableObject.calc();
+						renderTable();
+						if(show){
+							PromptUtils.success("重新整理成功！")
+						}
+					}				
+				});
+			}
+			
+			const renderTable = () => {
+				ElementUtils.renderTable({
+					table: document.getElementById("table"),
+					data: tableObject.getPart(),
+					thead:  ElementUtils.createSortableTableHeader({
+						thead: [
+							{html: "名稱", sortKey: "dname"},
+							{html: "中文名稱", sortKey: "cname"},
+							{html: "英文名稱", sortKey: "ename"},
+							{html: "更新時間", sortKey: "udate", style: "width: 120px"},
+						],
+						onEvent: (key, dir) => {
+							tableObject.sortKey = key;
+							tableObject.sortDir = dir;
+							tableObject.calc();
+							renderTable();
+						},
+						sortKey: tableObject.sortKey,
+						sortDir: tableObject.sortDir
+					}),
+					tbody: [
+						{html: "<a href='/customers/@{rowid}'>@{dname}</a>"},
+						{html: "@{cname}"},
+						{html: "@{ename}"},
+						{html: "@{udate:date}"}
+					]					
+				})
+				
+				ElementUtils.renderPager({
+					div: document.getElementById("pager"),
+					onEvent: (pageNum, pageSize) => {
+						tableObject.pageNum = pageNum;
+						tableObject.pageSize = pageSize;
+						tableObject.calc();
+						renderTable();
+					},
+					pageNum: tableObject.pageNum,
+					pageSize: tableObject.pageSize,
+					totalPages: tableObject.parts.length,
+					totalSize: tableObject.list.length
+				});
+			}
+			
+			$("#filter").on("input", () => {
+				tableObject.filter =  $("#filter").val();
+				tableObject.calc();
+				renderTable();
+				
+				if(tableObject.filter){
+					$("#clearFilter").show();
+				}else{
+					$("#clearFilter").hide();
+				}
+			});
+			
+			$("#clearFilter").click(() => {
+				$("#filter").val("")
+				tableObject.filter = "";
+				tableObject.calc();
+				renderTable();
+				$("#clearFilter").hide();
+			})
+			
+			$("#reload-btn").click(() => {
+				doQuery(true)
+			})
+			
+			$("#clearFilter").hide();
+			doQuery();
+			
+		});
 	</script>
 </head>
 
 <body layout:fragment="content">
-	Hello World
+	
+	<nav aria-label="breadcrumb">
+		<ol class="breadcrumb">
+			<li class="breadcrumb-item active" aria-current="page">客戶資訊</li>
+		</ol>
+	</nav>
+	
+	<table style="width: 100%">
+		<tr>
+			<td style="width: 44px;">
+				<button id="reload-btn" title="重新整理" class="btn btn-secondary" type="button">
+					<i class="bi bi-arrow-clockwise"></i>
+				</button>
+			</td>
+			<td class="py-2">
+				<input id="filter" class="form-control" type="text" placeholder="過濾器" />
+				<i id="clearFilter" class="bi bi-x clickable" style="color: red; position: absolute; right: 64px; top: 64px; font-size: 26px"></i>
+			</td>
+			<td style="width: 44px;">
+				<a href="/customers/newCustomer" title="新增客戶" class="btn btn-success" type="button">
+					<i class="bi bi-plus"></i>
+				</a>
+			</td>
+		</tr>
+	</table>
+	
+	<br />
+	
+	<table id="table" class="table table-striped table-hover table-bordered"></table>
+	<div id="pager" class="d-flex justify-content-between"></div>
 </body>
 
 </html>

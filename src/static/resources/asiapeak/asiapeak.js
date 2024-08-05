@@ -578,7 +578,7 @@ var ElementUtils = top.ElementUtils || {
 
 		let $info = ElementUtils.createElement(
 			`
-			<span>
+			<span style="padding-top: 6px">
 				第${pageNum + 1}頁 第${startIndex}-${endIndex}筆 共${totalSize}筆 
 			<span>
 			`
@@ -751,7 +751,88 @@ var ElementUtils = top.ElementUtils || {
 			div.appendChild($button);
 		}
 
+	},
+	/**
+	 * 建立 Tabs
+	 * 
+	 * 參數: 
+	 * div = HTML Div DOM 物件
+	 * tabs = Tab 設定，使用範例:
+	 * 			tabs : [
+	 * 				{label: "", url: ""},
+	 * 				{label: "", url: ""}
+	 * 			]
+	 * 
+	 */
+	createTabs: (options = []) => {
+		const div = options.div || ElementUtils.createElement("<div></div>");
+		const tabs = options.tabs || [];
+		
+		div.innerHTML = "";
+		
+		const tabUL = ElementUtils.createElement(`<ul class="nav nav-tabs ap-tab-ul"></ul>`)
+		const tabContentDiv = ElementUtils.createElement(`<div class="tab-content border-start border-end border-bottom h-100"></div>`)
+		
+		const tabLabels = [];
+		const tabPanes = [];
+
+		const paneLoaded = [];
+		
+		tabs.forEach((item, index) => {
+			const labelClasses = ["nav-link", "none-select", "clickable", "ap-tab-label"];
+			const paneClasses = ["tab-pane", "h-100"];
+			
+			if(index === 0){
+				labelClasses.push("active");
+				paneClasses.push("active");
+				paneLoaded.push(true)
+			}else{
+				paneLoaded.push(false)
+			}
+			
+			tabLabels.push(ElementUtils.createElement(`
+				<label class="${labelClasses.join(' ')}">
+					${item.label}
+				</label>
+			`))
+			
+			tabPanes.push(ElementUtils.createElement(`
+				<div class="${paneClasses.join(' ')}">
+				</div>
+			`))
+			
+			if(index === 0){
+				tabPanes[0].appendChild(ElementUtils.createElement(`
+					<iframe class="ap-tab-iframe" src="${item.url}"></iframe>
+				`))
+			}
+			
+		})
+		
+		tabLabels.forEach((item, index) => {
+			tabUL.appendChild(item);
+			item.addEventListener('click', () =>  {
+				tabLabels.forEach(_item => { _item.classList.remove('active')})
+				tabPanes.forEach(_item => { _item.classList.remove('active')})
+				tabLabels[index].classList.add('active');
+				tabPanes[index].classList.add('active');
+				if(!paneLoaded[index]){
+					tabPanes[index].appendChild(ElementUtils.createElement(`
+						<iframe class="ap-tab-iframe" src="${tabs[index].url}"></iframe>
+					`))
+				}
+				paneLoaded[index] = true;
+			})
+		})
+		
+		tabPanes.forEach(item => {
+			tabContentDiv.appendChild(item);
+		})
+		
+		div.appendChild(tabUL);
+		div.appendChild(tabContentDiv);
 	}
+	
 }
 /** 跳出警示提醒 */
 var PromptUtils = top.PromptUtils || {
@@ -919,5 +1000,26 @@ var HttpUtils = top.HttpUtils || {
 		$a.setAttribute("href", urlQueryString);
 		$a.setAttribute("download", "");
 		$a.click();
+	}
+}
+
+var ArrayUtils = top.ArrayUtils || {
+	partition: (list, num) => {
+		if(!list){
+			return [];
+		}
+		const parts = [];
+		let part = []
+		for(let i = 0 ; i < list.length ; i++){
+			if(i % num == 0 && i > 0){
+				parts.push(Array.from(part));
+				part = [];						
+			}
+			part.push(list[i]);			
+		}
+		if(part.length > 0){
+			parts.push(Array.from(part));
+		}
+		return parts;
 	}
 }

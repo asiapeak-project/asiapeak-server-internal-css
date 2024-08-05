@@ -50,20 +50,7 @@
 						<i class="bi bi-person-fill"></i>
 						<span th:text="${USER_NAME}" />
 					</button>
-					<ul class="dropdown-menu dropdown-menu-end">
-						<li>
-							<a tabindex="-1" class="dropdown-item" href="/userInfo">使用者資訊</a>
-						</li>
-						<li>
-							<a tabindex="-1" class="dropdown-item" href="/changePassword">修改密碼</a>
-						</li>
-						<li>
-							<hr class="dropdown-divider">
-						</li>
-						<li>
-							<a tabindex="-1" class="dropdown-item" onclick="doLogout()">登出</a>
-						</li>
-					</ul>
+					<th:block th:replace="fragments/usermenu.html :: usermenu"></th:block>
 				</div>
 			</div>
 		</nav>
@@ -74,28 +61,12 @@
 				客戶服務系統
 			</a>
 			<hr />
-			<ul class="nav nav-pills flex-column mb-auto">
-				<li class="nav-item">
-					<a data-id="customers" href="/customers" class="nav-link text-white" tabindex="-1">
-						客戶資訊
-					</a>
-				</li>
-				<li>
-					<a data-id="maintenance" href="/maintenance" class="nav-link text-white" tabindex="-1">
-						維護合約
-					</a>
-				</li>
-				<li>
-					<a data-id="search" href="/search" class="nav-link text-white" tabindex="-1">
-						進階搜尋
-					</a>
-				</li>
-			</ul>
+			<th:block th:replace="fragments/sidebar.html :: sidebar"></th:block>
 		</div>
 		
 		<main id="ap-content" class="d-flex flex-column">
 			<div class="flex-grow-1" style="padding-bottom: 56px ">
-				<main class="container-fluid py-1">
+				<main class="container-fluid pt-3">
 					<div layout:fragment="content" />
 				</main>
 			</div>
