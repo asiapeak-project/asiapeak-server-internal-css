@@ -36,6 +36,10 @@
 				
 				contects.innerHTML = "";
 				
+				if(data.length === 0){
+					contects.innerHTML = "<h3 class='none-select position-absolute top-50 end-50'>尚無資料</h3>"
+				}
+				
 				data.forEach(item => {
 					const contact = ElementUtils.createElement(`
 						<div class="row border p-2 mb-4 contect-item">
@@ -78,12 +82,11 @@
 								<label for="memo" class="form-label">備註</label>
 								<textarea class="form-control" name="memo" rows="3" readonly></textarea>
 							</div>
-							<div class="col-md-6 mb-2">
+							<div class="col-md-12 mb-2 d-flex justify-content-between">
 								<button class="btn btn-danger my-2" type="button" name="delete-btn">
 									<i class="bi bi-trash3-fill"></i>
 								</button>
-							</div>
-							<div class="col-md-6 text-end mb-2">
+								
 								<button class="btn btn-success my-2" type="button" name="edit-btn">
 									<i class="bi bi-pencil-fill"></i>
 								</button>

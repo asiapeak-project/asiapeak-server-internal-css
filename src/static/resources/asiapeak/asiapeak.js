@@ -762,7 +762,7 @@ var ElementUtils = top.ElementUtils || {
 	 * 				{label: "", url: ""},
 	 * 				{label: "", url: ""}
 	 * 			]
-	 * 
+	 * on
 	 */
 	createTabs: (options = []) => {
 		const div = options.div || ElementUtils.createElement("<div></div>");
@@ -837,30 +837,39 @@ var ElementUtils = top.ElementUtils || {
 /** 跳出警示提醒 */
 var PromptUtils = top.PromptUtils || {
 	info: (msg) => {
-		PromptUtils.prompt("alert-info", msg, 3000);
+		PromptUtils.prompt("alert-info", "infoIcon", msg, 3000);
 	},
 	success: (msg) => {
-		PromptUtils.prompt("alert-success", msg, 3000);
+		PromptUtils.prompt("alert-success", "successIcon", msg, 3000);
 	},
 	warning: (msg) => {
-		PromptUtils.prompt("alert-warning", msg, 5000);
+		PromptUtils.prompt("alert-warning", "exclamationIcon", msg, 5000);
 	},
 	error: (msg) => {
-		PromptUtils.prompt("alert-danger", msg, 10000);
+		PromptUtils.prompt("alert-danger", "exclamationIcon", msg, 10000);
 	},
-	prompt: (alertClass = "", msg = "", interval = 3000) => {
-
-		let html = ` 
+	prompt: (alertClass = "", alertIcon = "exclamationIcon", msg = "", interval = 3000) => {
+		const icon = PromptUtils[alertIcon];
+		const html = ` 
 			<div class="alert ${alertClass} prompt" role="alert" style="z-index: 2080">
-			  ${msg}
+				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" 
+					fill="currentColor" 
+					style="margin-top: -3px;"
+					class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2" 
+					viewBox="0 0 16 16" role="img">
+					${icon}
+				</svg>
+				<div class="d-inline-block">
+					${msg}
+				</div>
 			</div> 
 		`;
 
-		let e = ElementUtils.createElement(html);
+		const e = ElementUtils.createElement(html);
 
 		DocumentUtils.appendToTop(e);
 
-		let timeout = TimeoutUtils.setTimeout(function() {
+		const timeout = TimeoutUtils.setTimeout(function() {
 			DocumentUtils.removeFromTop(e);
 		}, interval);
 
@@ -868,7 +877,16 @@ var PromptUtils = top.PromptUtils || {
 			DocumentUtils.removeFromTop(e);
 			TimeoutUtils.clearTimeout(timeout);
 		});
-	}
+	},
+	infoIcon: `
+		<path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+	`,
+	successIcon: `
+		<path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+	`,
+	exclamationIcon: `
+		<path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+	`
 }
 /** 核心套件，文字套件 */
 var TextUtils = top.TextUtils || {
@@ -896,7 +914,7 @@ var TextUtils = top.TextUtils || {
 			while (text.includes(key)) {
 				if (item[k]) {
 					let date = new Date(item[k]);
-					let formattedDate = `${date.getFullYear()}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
+					let formattedDate = TextUtils.formatDate(date);
 					text = text.replace(key, formattedDate);
 				} else {
 					text = text.replace(key, "");
@@ -904,6 +922,12 @@ var TextUtils = top.TextUtils || {
 			}
 		});
 		return text;
+	},
+	/**
+	 * 傳入 Date 物件，轉換成 yyyy/MM/dd HH:mm:ss 格式
+	 */
+	formatDate: (date) => {
+		return `${date.getFullYear()}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
 	},
 	objectToQuerystring: (obj = {}) => {
 		return Object.keys(obj).filter((key) => obj[key] != undefined && obj[key] != '').reduce((str, key, i) => {

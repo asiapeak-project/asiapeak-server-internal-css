@@ -36,7 +36,7 @@
 						}
 					}), tableObject.pageSize);
 					if(tableObject.pageNum > tableObject.parts.length - 1){
-						tableObject.pageNum = tableObject.parts.length - 1
+						tableObject.pageNum = 0
 					}
 				},
 				getPart: () => {
@@ -80,9 +80,9 @@
 						sortDir: tableObject.sortDir
 					}),
 					tbody: [
-						{html: "<a href='/customers/@{rowid}'>@{dname}</a>"},
-						{html: "@{cname}"},
-						{html: "@{ename}"},
+						{html: "<a href='/customers/@{rowid}'>@{dname}</a>", style: "vertical-align: middle;"},
+						{html: "@{cname}", style: "vertical-align: middle;"},
+						{html: "@{ename}", style: "vertical-align: middle;"},
 						{html: "@{udate:date}"}
 					]					
 				})

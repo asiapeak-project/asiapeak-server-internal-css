@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/clear.html}">
+
+<head>
+	<title>客戶服務系統-客戶資訊-[[${dname}]]</title>
+	<script th:inline="javascript">
+		
+		const rowid = /*[[${rowid}]]*/ "";
+		
+		$(() => {
+			
+			const doQuery = () => {
+				HttpUtils.doPost({
+					url: "/customers/qryImportantRecords/" + rowid,
+					success: (response) => {
+						renderItems(response.data);
+					}
+				})
+			}
+			
+			const renderItems = (items) => {
+				const mydiv = document.getElementById("mydiv")
+				mydiv.innerHTML = "";
+				items.forEach((item) => {
+					const msg = createItem(item);
+					mydiv.appendChild(msg);
+				})
+			}
+			
+			const createItem = (item) => {
+				const msg = ElementUtils.createElement(`
+					<div class="card mb-3">
+					  <div class="card-body py-1">
+					    <div class="d-flex justify-content-between">
+							<span data-btn-mark class="${item.marked ? "text-danger" : "text-secondary"} clickable none-select fs-2">
+								<i class="bi bi-exclamation-circle"></i>	
+							</span>
+							<span data-btn-del class="text-secondary clickable none-select">
+								<i class="bi bi-trash3-fill"></i>
+							</span>
+						</div>
+					    <div class="p-2" style="white-space: pre-line;">${item.record}</div>
+					    <div class="text-end">
+							<span>
+								${TextUtils.formatDate(new Date(item.udate))}
+							</span>	
+						</div>
+					  </div>
+				`);
+				
+				msg.querySelector("[data-btn-mark]").addEventListener("click", () => {
+					HttpUtils.doPost({
+						url: `/customers/updateImportantRecord/${item.rowid}/${!item.marked}`,
+						success: () => {
+							doQuery();	
+						}
+					})
+				})
+				
+				msg.querySelector("[data-btn-del]").addEventListener("click", () => {
+					DialogUtils.confirm({
+						title: "刪除確認",
+						text: `是否要刪除「${item.record}」?`,
+						onConfirm: () => {
+							HttpUtils.doPost({
+								url: `/customers/delImportantRecord/${item.rowid}`,
+								success: () => {
+									doQuery();	
+								}
+							})
+						}
+					})
+				})
+				return msg;
+			}
+			
+			doQuery();
+			
+			$("#create-btn").click(() => {
+				DialogUtils.window({
+					title: "新增重要事項",
+					url: "/customers/createImportantRecord/" + rowid,
+					callback: (rtval) => {
+						if(rtval){
+							doQuery();
+						}
+					}
+				})
+			})
+			
+		})
+		
+	</script>
+</head>
+
+<body layout:fragment="content">
+	
+	<div class="text-end mb-3">
+		<button id="create-btn" class="btn btn-success" type="button">
+			<i class="bi bi-plus"></i>
+		</button>
+	</div>
+	
+	<div id="mydiv"></div>
+	
+</body>
+
+</html>

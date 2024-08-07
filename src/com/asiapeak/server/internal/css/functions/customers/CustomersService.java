@@ -11,9 +11,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.asiapeak.server.internal.css.dao.entity.Contact;
 import com.asiapeak.server.internal.css.dao.entity.Customer;
+import com.asiapeak.server.internal.css.dao.entity.ImportantRecord;
 import com.asiapeak.server.internal.css.dao.repo.ContactRepo;
 import com.asiapeak.server.internal.css.dao.repo.CustomerRepo;
+import com.asiapeak.server.internal.css.dao.repo.ImportantRecordRepo;
 import com.asiapeak.server.internal.css.functions.customers.dto.CustomerContactDto;
+import com.asiapeak.server.internal.css.functions.customers.dto.CustomerImportantRecordInputDto;
+import com.asiapeak.server.internal.css.functions.customers.dto.CustomerImportantRecordOutputDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.CustomerInfoDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.CustomerInputDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.CustomerOutputDto;
@@ -26,6 +30,9 @@ public class CustomersService {
 
 	@Autowired
 	ContactRepo contactRepo;
+
+	@Autowired
+	ImportantRecordRepo importantRecordRepo;
 
 	@Transactional
 	public List<CustomerOutputDto> qryCustomers() {
@@ -139,6 +146,7 @@ public class CustomersService {
 		contact.setCustomer(customer);
 
 		contactRepo.save(contact);
+		customerRepo.touchUdate(rowid);
 
 		return null;
 	}
@@ -151,6 +159,7 @@ public class CustomersService {
 			return "聯絡人不存在";
 		}
 
+		customerRepo.touchUdate(contact.getCustomer().getRowid());
 		contactRepo.delete(contact);
 
 		return null;
@@ -194,6 +203,7 @@ public class CustomersService {
 		cdto.setPosition(c.getPosition());
 		cdto.setMemo(c.getMemo());
 		cdto.setUdate(c.getUdate());
+
 		return cdto;
 	}
 
@@ -215,7 +225,68 @@ public class CustomersService {
 		contact.setUdate(new Date());
 
 		contactRepo.save(contact);
+		customerRepo.touchUdate(contact.getCustomer().getRowid());
+		return null;
+	}
 
+	@Transactional
+	public List<CustomerImportantRecordOutputDto> qryImportantRecords(Integer rowid) {
+		Customer customer = customerRepo.findById(rowid).orElse(null);
+		if (customer == null) {
+			return new ArrayList<>();
+		}
+
+		return customer.getImportantRecords().stream().map(i -> {
+			CustomerImportantRecordOutputDto dto = new CustomerImportantRecordOutputDto();
+			dto.setRowid(i.getRowid());
+			dto.setRecord(i.getRecord());
+			dto.setUdate(i.getUdate());
+			dto.setMarked(i.getMarked());
+			return dto;
+		}).collect(Collectors.toList());
+	}
+
+	@Transactional
+	public String createImportantRecord(Integer rowid, CustomerImportantRecordInputDto dto) {
+
+		Customer customer = customerRepo.findById(rowid).orElse(null);
+		if (customer == null) {
+			return "客戶資訊不存在";
+		}
+
+		ImportantRecord dao = new ImportantRecord();
+		dao.setMarked(true);
+		dao.setRecord(dto.getRecord());
+		dao.setUdate(new Date());
+		dao.setCustomer(customer);
+
+		importantRecordRepo.save(dao);
+		customerRepo.touchUdate(rowid);
+		return null;
+	}
+
+	@Transactional
+	public String updateImportantRecord(Integer rowid, Boolean marked) {
+		ImportantRecord dao = importantRecordRepo.findById(rowid).orElse(null);
+		if (dao == null) {
+			return "重要事項不存在";
+		}
+		dao.setMarked(marked);
+		dao.setUdate(new Date());
+		importantRecordRepo.save(dao);
+		customerRepo.touchUdate(rowid);
+		return null;
+	}
+
+	@Transactional
+	public String delImportantRecord(Integer rowid) {
+		ImportantRecord dao = importantRecordRepo.findById(rowid).orElse(null);
+		if (dao == null) {
+			return "重要事項不存在";
+		}
+		customerRepo.touchUdate(dao.getCustomer().getRowid());
+		importantRecordRepo.delete(dao);
+		;
 		return null;
 	}
 

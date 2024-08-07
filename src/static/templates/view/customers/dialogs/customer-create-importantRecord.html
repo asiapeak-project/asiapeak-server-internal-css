@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/clear.html}">
+
+<head>
+	<title>客戶服務系統-客戶資訊-[[${dname}]]</title>
+	<script th:inline="javascript">
+		
+		const rowid = /*[[${rowid}]]*/ "";
+		
+		$(() => {
+			
+			$("#save-btn").click(() => {
+				
+				HttpUtils.doPost({
+					url: "/customers/createImportantRecord/" + rowid,
+					data: {
+						record: document.getElementById("mytext").value
+					},
+					success: (response) => {
+						if(response.data){
+							PromptUtils.success("新增成功")
+							DialogUtils.closeWindow(window, true)
+						}
+					}
+				})
+				
+			})
+			
+		})
+		
+	</script>
+</head>
+
+<body layout:fragment="content">
+	<div class="mb-3">
+		<label for="mytext" class="form-label">重要事項</label>
+		<textarea class="form-control" id="mytext" rows="6"></textarea>
+	</div>
+	
+	<br />
+	
+	<div class="text-end">
+		<button id="save-btn" type="button" class="btn btn-success">新增</button>
+	</div>
+	
+	<br />
+</body>
+
+</html>

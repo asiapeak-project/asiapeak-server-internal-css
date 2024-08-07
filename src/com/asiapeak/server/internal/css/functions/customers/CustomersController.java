@@ -16,6 +16,8 @@ import org.springframework.web.servlet.ModelAndView;
 import com.asiapeak.server.internal.css.core.dto.ResponseBean;
 import com.asiapeak.server.internal.css.dao.entity.Customer;
 import com.asiapeak.server.internal.css.functions.customers.dto.CustomerContactDto;
+import com.asiapeak.server.internal.css.functions.customers.dto.CustomerImportantRecordInputDto;
+import com.asiapeak.server.internal.css.functions.customers.dto.CustomerImportantRecordOutputDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.CustomerInfoDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.CustomerInputDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.CustomerOutputDto;
@@ -202,6 +204,74 @@ public class CustomersController {
 	@PostMapping("delContact/{rowid}")
 	public ResponseBean<Boolean> delContact(@PathVariable("rowid") Integer rowid) {
 		String msg = customersService.delContact(rowid);
+		if (StringUtils.isBlank(msg)) {
+			return ResponseBean.success(true);
+		} else {
+			return ResponseBean.error(true).message(msg);
+		}
+	}
+
+	@GetMapping("importantRecord/{rowid}")
+	public ModelAndView importantRecord(@PathVariable("rowid") Integer rowid) {
+		ModelAndView view = new ModelAndView("view/customers/tabs/customer-importantRecord");
+		Customer customer = customersService.findCustomer(rowid);
+		if (customer == null) {
+			view.addObject("dname", "不存在");
+			view.addObject("rowid", "-1");
+		} else {
+			view.addObject("dname", customer.getDname());
+			view.addObject("rowid", customer.getRowid());
+		}
+		return view;
+	}
+
+	@ResponseBody
+	@PostMapping("qryImportantRecords/{rowid}")
+	public ResponseBean<List<CustomerImportantRecordOutputDto>> qryImportantRecords(@PathVariable("rowid") Integer rowid) {
+		List<CustomerImportantRecordOutputDto> list = customersService.qryImportantRecords(rowid);
+		return ResponseBean.success(list);
+	}
+	
+	@GetMapping("createImportantRecord/{rowid}")
+	public ModelAndView createImportantRecord(@PathVariable("rowid") Integer rowid) {
+		ModelAndView view = new ModelAndView("view/customers/dialogs/customer-create-importantRecord");
+		Customer customer = customersService.findCustomer(rowid);
+		if (customer == null) {
+			view.addObject("dname", "不存在");
+			view.addObject("rowid", "-1");
+		} else {
+			view.addObject("dname", customer.getDname());
+			view.addObject("rowid", customer.getRowid());
+		}
+		return view;
+	}
+
+	@ResponseBody
+	@PostMapping("createImportantRecord/{rowid}")
+	public ResponseBean<Boolean> createImportantRecord(@PathVariable("rowid") Integer rowid, @RequestBody CustomerImportantRecordInputDto dto) {
+		String msg = customersService.createImportantRecord(rowid, dto);
+		if (StringUtils.isBlank(msg)) {
+			return ResponseBean.success(true);
+		} else {
+			return ResponseBean.error(true).message(msg);
+		}
+	}
+
+	@ResponseBody
+	@PostMapping("updateImportantRecord/{rowid}/{marked}")
+	public ResponseBean<Boolean> updateImportantRecord(@PathVariable("rowid") Integer rowid, @PathVariable("marked") Boolean marked) {
+		String msg = customersService.updateImportantRecord(rowid, marked);
+		if (StringUtils.isBlank(msg)) {
+			return ResponseBean.success(true);
+		} else {
+			return ResponseBean.error(true).message(msg);
+		}
+	}
+
+	@ResponseBody
+	@PostMapping("delImportantRecord/{rowid}")
+	public ResponseBean<Boolean> delImportantRecord(@PathVariable("rowid") Integer rowid) {
+		String msg = customersService.delImportantRecord(rowid);
 		if (StringUtils.isBlank(msg)) {
 			return ResponseBean.success(true);
 		} else {

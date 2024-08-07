@@ -52,28 +52,31 @@ public class Customer {
 
 	@Type(type = "text")
 	String memo;
-	
+
 	Date udate;
-	
+
 	@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
 	List<Contact> contacts;
-	
+
 	@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
 	List<Product> products;
-	
+
 	@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
 	List<Contract> contracts;
-	
+
 	@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
 	List<Deployment> deployments;
-	
+
 	@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
 	List<Document> documents;
-	
+
 	@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
 	List<ServiceRecord> serviceRecords;
-	
+
 	@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
-	List<ContactRecord> contactRecord;
+	List<ContactRecord> contactRecords;
+
+	@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
+	List<ImportantRecord> importantRecords;
 
 }
