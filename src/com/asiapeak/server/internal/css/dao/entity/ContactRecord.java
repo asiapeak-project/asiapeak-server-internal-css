@@ -32,6 +32,14 @@ public class ContactRecord {
 
 	Date rdate;
 
+	@Type(type = "text")
+	String cuser;
+
+	Date cdate;
+
+	@Type(type = "text")
+	String uuser;
+	
 	Date udate;
 
 	@ManyToOne

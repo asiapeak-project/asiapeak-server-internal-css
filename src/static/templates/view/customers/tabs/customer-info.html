@@ -29,10 +29,12 @@
 				$("#industry").val(data.industry);
 				$("#website").val(data.website);
 				$("#memo").val(data.memo);
+				
+				$("#udate").text(TextUtils.formatDate(new Date(data.udate)));
+				$("#uuser").text(data.uuser);
 			}
 			
 			$("#edit-btn").click(() => {
-				
 				DialogUtils.window({
 					title: "編輯客戶資訊「" + $("#dname").val() + "」",
 					url: "/customers/editInfo/" + rowid,
@@ -42,7 +44,6 @@
 						}
 					}
 				})
-				
 			})
 			
 			doQuery();
@@ -54,6 +55,7 @@
 <body layout:fragment="content">
 		
 	<div class="row g-3 py-3">
+		
 		<div class="col-md-12">
 			<label for="dname" class="form-label">顯示名稱</label>
 			<input type="text" class="form-control" id="dname" readonly />
@@ -103,6 +105,17 @@
 			<button id="edit-btn" class="btn btn-success" type="button">
 				<i class="bi bi-pencil-fill"></i>
 			</button>
+		</div>
+		
+		<div class="text-secondary d-flex justify-content-evenly">
+			<span>
+				<span>更新日期:</span>
+				<span id="udate"></span>
+			</span>
+			<span>
+				<span>更新者:</span>
+				<span id="uuser"></span>
+			</span>
 		</div>
 		
 	</div>

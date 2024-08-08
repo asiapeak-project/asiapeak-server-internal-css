@@ -19,17 +19,30 @@
 				filter: "",
 				calc: () => {
 					tableObject.parts = ArrayUtils.partition(tableObject.list.filter(item => {
-						return (
-							(item.dname ? item.dname.toLowerCase().includes(tableObject.filter) : false) ||
-							(item.cname ? item.cname.toLowerCase().includes(tableObject.filter) : false) ||
-							(item.ename ? item.ename.toLowerCase().includes(tableObject.filter) : false)
-						);
+						if(item.dname){
+							if(item.dname.toLowerCase().includes(tableObject.filter.toLowerCase())){
+								return true;
+							}
+						}
+						if(item.cname){
+							if(item.cname.toLowerCase().includes(tableObject.filter.toLowerCase())){
+								return true;
+							}
+						}
+						if(item.ename){
+							if(item.ename.toLowerCase().includes(tableObject.filter.toLowerCase())){
+								return true;
+							}
+						}
+						return false;
 					}).sort((a, b) => {
 						if(tableObject.sortKey && tableObject.sortDir){
+							const aVal = a[tableObject.sortKey] ? a[tableObject.sortKey].toString() : "";
+							const bVal = b[tableObject.sortKey] ? b[tableObject.sortKey].toString() : "";
 							if(tableObject.sortDir === "desc"){
-								return b[tableObject.sortKey].toString().localeCompare(a[tableObject.sortKey].toString())
+								return TextUtils.stringCompare(bVal, aVal)
 							}else{
-								return a[tableObject.sortKey].toString().localeCompare(b[tableObject.sortKey].toString())
+								return TextUtils.stringCompare(aVal, bVal)
 							}
 						}else{
 							return 0;
@@ -68,7 +81,8 @@
 							{html: "名稱", sortKey: "dname"},
 							{html: "中文名稱", sortKey: "cname"},
 							{html: "英文名稱", sortKey: "ename"},
-							{html: "更新時間", sortKey: "udate", style: "width: 120px"},
+							{html: "更新時間", sortKey: "detailUdate", style: "width: 120px"},
+							{html: "更新者", sortKey: "detailUuser", style: "width: 120px"},
 						],
 						onEvent: (key, dir) => {
 							tableObject.sortKey = key;
@@ -83,7 +97,8 @@
 						{html: "<a href='/customers/@{rowid}'>@{dname}</a>", style: "vertical-align: middle;"},
 						{html: "@{cname}", style: "vertical-align: middle;"},
 						{html: "@{ename}", style: "vertical-align: middle;"},
-						{html: "@{udate:date}"}
+						{html: "@{detailUdate:date}"},
+						{html: "@{detailUuser}"},
 					]					
 				})
 				
@@ -153,7 +168,7 @@
 				<i id="clearFilter" class="bi bi-x clickable" style="color: red; position: absolute; right: 64px; top: 64px; font-size: 26px"></i>
 			</td>
 			<td style="width: 44px;">
-				<a href="/customers/newCustomer" title="新增客戶" class="btn btn-success" type="button">
+				<a href="/customers/createCustomer" title="新增客戶" class="btn btn-success" type="button">
 					<i class="bi bi-plus"></i>
 				</a>
 			</td>

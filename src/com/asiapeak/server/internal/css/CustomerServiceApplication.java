@@ -1,5 +1,7 @@
 package com.asiapeak.server.internal.css;
 
+import java.util.UUID;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -24,6 +26,8 @@ import nz.net.ultraq.thymeleaf.layoutdialect.decorators.strategies.GroupingStrat
 @SpringBootApplication(exclude = { DataSourceAutoConfiguration.class, ThymeleafAutoConfiguration.class, JdbcTemplateAutoConfiguration.class, UserDetailsServiceAutoConfiguration.class })
 @ComponentScan("com.asiapeak")
 public class CustomerServiceApplication implements WebMvcConfigurer {
+
+	public static final String RESOURCE_UUID = UUID.randomUUID().toString();
 
 	public static void main(String[] args) {
 		SpringApplication.run(CustomerServiceApplication.class, args);

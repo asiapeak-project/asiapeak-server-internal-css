@@ -5,15 +5,30 @@ import java.util.Date;
 import lombok.Data;
 
 @Data
-public class CustomerOutputDto {
+public class ContactDto {
 
 	Integer rowid;
-	
+
 	String dname;
-	
+
 	String cname;
-	
+
 	String ename;
-	
+
+	String email;
+
+	String mobilePhone;
+
+	String officePhone;
+
+	String position;
+
+	String memo;
+
 	Date udate;
+	String uuser;
+	
+	Date cdate;
+	String cuser;
+	
 }

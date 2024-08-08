@@ -23,7 +23,7 @@
 				}
 				
 				HttpUtils.doPost({
-					url: "/customers/newCustomer",
+					url: "/customers/createCustomer",
 					data: data,
 					success: (response) => {
 						if(response.data){
@@ -38,6 +38,25 @@
 					}
 				})
 				
+			})
+			
+			ElementUtils.selectOptions({
+				select: document.getElementById("industry"),
+				items: [
+					"",
+					"傳統製造業",
+					"傳統服務業",
+					"金融業",
+					"資訊服務",
+					"半導體",
+					"通訊網路",
+					"電腦與周邊",
+					"其他電子",
+					"政府機構",
+					"財團法人",
+					"其他",
+				].map(item => ({ text: item, value: item})),
+				selectedValue: ""
 			})
 			
 		});
@@ -97,7 +116,7 @@
 			
 			<div class="col-md-6">
 				<label for="industry" class="form-label">產業</label>
-				<input type="text" class="form-control" id="industry" name="industry" />
+				<select class="form-select" id="industry" name="industry"></select>
 			</div>
 			
 			<div class="col-md-6">

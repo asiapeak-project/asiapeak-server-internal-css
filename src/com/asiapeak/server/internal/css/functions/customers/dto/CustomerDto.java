@@ -5,8 +5,10 @@ import java.util.Date;
 import lombok.Data;
 
 @Data
-public class CustomerInfoDto {
-	
+public class CustomerDto {
+
+	Integer rowid;
+
 	String dname;
 
 	String cname;
@@ -24,7 +26,14 @@ public class CustomerInfoDto {
 	String industry;
 
 	String memo;
-	
+
 	Date udate;
+	String uuser;
+
+	Date cdate;
+	String cuser;
+
+	String detailUuser;
+	Date detailUdate;
 
 }

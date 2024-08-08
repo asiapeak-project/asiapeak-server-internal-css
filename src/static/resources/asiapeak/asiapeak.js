@@ -345,14 +345,17 @@ var ElementUtils = top.ElementUtils || {
 	 * 建立 select option 物件
 	 * 參數:
 	 * select = HTML Select DOM 物件
-	 * options = 選項陣列 [ { text:"文字", value:"數值" } ]
+	 * items = 選項陣列 [ { text:"文字", value:"數值" } ]
 	 * selectedValue = 預設選擇的選項值
 	 */
-	selectOptions: (select, options = [], selectedValue) => {
+	selectOptions: (options = {}) => {
+		const select = options.select || ElementUtils.createElement("<select></select>") 
+		const items = options.items || [];
+		const selectedValue = options.selectedValue || "";
 		let buffer = []
-		options.forEach(option => {
-			let selected = option.value == selectedValue ? "selected" : "";
-			buffer.push(`<option ${selected} value="${option.value}">${option.text}</option>`);
+		items.forEach(item => {
+			let selected = item.value == selectedValue ? "selected" : "";
+			buffer.push(`<option ${selected} value="${item.value}">${item.text}</option>`);
 		});
 		select.innerHTML = buffer.join("");
 	},
@@ -962,6 +965,26 @@ var TextUtils = top.TextUtils || {
 			_text = _appender + _text;
 		}
 		return _text;
+	},
+	generateUUID: () => {
+		return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+	        (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+	    )
+	},
+	stringComparator: new Intl.Collator('zh-Hans-CN', {
+	    numeric: true,
+	    sensitivity: 'base'
+	}),
+	stringCompare: (s1, s2) => {
+		const isChineseA = /[\u4e00-\u9fa5]/.test(s1);
+	    const isChineseB = /[\u4e00-\u9fa5]/.test(s2);
+	    if (isChineseA && !isChineseB) {
+	        return 1; 
+	    } else if (!isChineseA && isChineseB) {
+	        return -1;
+	    } else {
+	        return TextUtils.stringComparator.compare(s1, s2); // 其他情況使用 localeCompare
+	    }
 	}
 }
 

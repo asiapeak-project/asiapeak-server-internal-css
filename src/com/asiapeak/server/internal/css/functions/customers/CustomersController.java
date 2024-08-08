@@ -15,12 +15,10 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.asiapeak.server.internal.css.core.dto.ResponseBean;
 import com.asiapeak.server.internal.css.dao.entity.Customer;
-import com.asiapeak.server.internal.css.functions.customers.dto.CustomerContactDto;
-import com.asiapeak.server.internal.css.functions.customers.dto.CustomerImportantRecordInputDto;
-import com.asiapeak.server.internal.css.functions.customers.dto.CustomerImportantRecordOutputDto;
-import com.asiapeak.server.internal.css.functions.customers.dto.CustomerInfoDto;
-import com.asiapeak.server.internal.css.functions.customers.dto.CustomerInputDto;
-import com.asiapeak.server.internal.css.functions.customers.dto.CustomerOutputDto;
+import com.asiapeak.server.internal.css.functions.customers.dto.ContactDto;
+import com.asiapeak.server.internal.css.functions.customers.dto.CustomerDto;
+import com.asiapeak.server.internal.css.functions.customers.dto.ProductDto;
+import com.asiapeak.server.internal.css.functions.customers.dto.ImportantRecordDto;
 
 @Controller
 @RequestMapping("customers")
@@ -36,20 +34,20 @@ public class CustomersController {
 
 	@ResponseBody
 	@PostMapping("qryCustomers")
-	public ResponseBean<List<CustomerOutputDto>> qryCustomers() {
-		List<CustomerOutputDto> list = customersService.qryCustomers();
+	public ResponseBean<List<CustomerDto>> qryCustomers() {
+		List<CustomerDto> list = customersService.qryCustomers();
 		return ResponseBean.success(list);
 	}
 
-	@GetMapping("newCustomer")
-	public ModelAndView newCustomer() {
-		return new ModelAndView("view/customers/newCustomer");
+	@GetMapping("createCustomer")
+	public ModelAndView createCustomer() {
+		return new ModelAndView("view/customers/createCustomer");
 	}
 
 	@ResponseBody
-	@PostMapping("newCustomer")
-	public ResponseBean<Boolean> newCustomer(@RequestBody CustomerInputDto dto) {
-		String msg = customersService.newCustomer(dto);
+	@PostMapping("createCustomer")
+	public ResponseBean<Boolean> createCustomer(@RequestBody CustomerDto dto) {
+		String msg = customersService.createCustomer(dto);
 		if (StringUtils.isBlank(msg)) {
 			return ResponseBean.success(true);
 		} else {
@@ -93,14 +91,14 @@ public class CustomersController {
 
 	@ResponseBody
 	@PostMapping("qryInfo/{rowid}")
-	public ResponseBean<CustomerInfoDto> qryInfo(@PathVariable("rowid") Integer rowid) {
-		CustomerInfoDto dto = customersService.qryInfo(rowid);
+	public ResponseBean<CustomerDto> qryInfo(@PathVariable("rowid") Integer rowid) {
+		CustomerDto dto = customersService.qryInfo(rowid);
 		return ResponseBean.success(dto);
 	}
 
 	@GetMapping("editInfo/{rowid}")
 	public ModelAndView editInfo(@PathVariable("rowid") Integer rowid) {
-		ModelAndView view = new ModelAndView("view/customers/dialogs/customer-edit-info");
+		ModelAndView view = new ModelAndView("view/customers/dialogs/customer-info-edit");
 
 		Customer customer = customersService.findCustomer(rowid);
 
@@ -117,7 +115,7 @@ public class CustomersController {
 
 	@ResponseBody
 	@PostMapping("editInfo/{rowid}")
-	public ResponseBean<Boolean> editInfo(@PathVariable("rowid") Integer rowid, @RequestBody CustomerInfoDto dto) {
+	public ResponseBean<Boolean> editInfo(@PathVariable("rowid") Integer rowid, @RequestBody CustomerDto dto) {
 		String msg = customersService.editInfo(rowid, dto);
 		if (StringUtils.isBlank(msg)) {
 			return ResponseBean.success(true);
@@ -144,15 +142,15 @@ public class CustomersController {
 	}
 
 	@ResponseBody
-	@PostMapping("qryContact/{rowid}")
-	public ResponseBean<List<CustomerContactDto>> qryContact(@PathVariable("rowid") Integer rowid) {
-		List<CustomerContactDto> list = customersService.qryContact(rowid);
+	@PostMapping("qryContacts/{rowid}")
+	public ResponseBean<List<ContactDto>> qryContacts(@PathVariable("rowid") Integer rowid) {
+		List<ContactDto> list = customersService.qryContacts(rowid);
 		return ResponseBean.success(list);
 	}
 
 	@GetMapping("createContact/{rowid}")
 	public ModelAndView createContact(@PathVariable("rowid") Integer rowid) {
-		ModelAndView view = new ModelAndView("view/customers/dialogs/customer-create-contact");
+		ModelAndView view = new ModelAndView("view/customers/dialogs/customer-contact-create");
 		Customer customer = customersService.findCustomer(rowid);
 		if (customer == null) {
 			view.addObject("dname", "不存在");
@@ -166,7 +164,7 @@ public class CustomersController {
 
 	@ResponseBody
 	@PostMapping("createContact/{rowid}")
-	public ResponseBean<Boolean> createContact(@PathVariable("rowid") Integer rowid, @RequestBody CustomerContactDto dto) {
+	public ResponseBean<Boolean> createContact(@PathVariable("rowid") Integer rowid, @RequestBody ContactDto dto) {
 		String msg = customersService.createContact(rowid, dto);
 		if (StringUtils.isBlank(msg)) {
 			return ResponseBean.success(true);
@@ -176,23 +174,23 @@ public class CustomersController {
 	}
 
 	@ResponseBody
-	@PostMapping("qryContactData/{rowid}")
-	public ResponseBean<CustomerContactDto> qryContactData(@PathVariable("rowid") Integer rowid) {
-		CustomerContactDto dto = customersService.qryContactData(rowid);
+	@PostMapping("qryContact/{rowid}")
+	public ResponseBean<ContactDto> qryContact(@PathVariable("rowid") Integer rowid) {
+		ContactDto dto = customersService.qryContact(rowid);
 		return ResponseBean.success(dto);
 	}
 
-	@GetMapping("editContactData/{rowid}")
-	public ModelAndView editContactData(@PathVariable("rowid") Integer rowid) {
-		ModelAndView view = new ModelAndView("view/customers/dialogs/customer-edit-contact");
+	@GetMapping("editContact/{rowid}")
+	public ModelAndView editContact(@PathVariable("rowid") Integer rowid) {
+		ModelAndView view = new ModelAndView("view/customers/dialogs/customer-contact-edit");
 		view.addObject("rowid", rowid);
 		return view;
 	}
 
 	@ResponseBody
-	@PostMapping("editContactData")
-	public ResponseBean<Boolean> editContactData(@RequestBody CustomerContactDto dto) {
-		String msg = customersService.editContactData(dto);
+	@PostMapping("editContact")
+	public ResponseBean<Boolean> editContact(@RequestBody ContactDto dto) {
+		String msg = customersService.editContact(dto);
 		if (StringUtils.isBlank(msg)) {
 			return ResponseBean.success(true);
 		} else {
@@ -227,14 +225,14 @@ public class CustomersController {
 
 	@ResponseBody
 	@PostMapping("qryImportantRecords/{rowid}")
-	public ResponseBean<List<CustomerImportantRecordOutputDto>> qryImportantRecords(@PathVariable("rowid") Integer rowid) {
-		List<CustomerImportantRecordOutputDto> list = customersService.qryImportantRecords(rowid);
+	public ResponseBean<List<ImportantRecordDto>> qryImportantRecords(@PathVariable("rowid") Integer rowid) {
+		List<ImportantRecordDto> list = customersService.qryImportantRecords(rowid);
 		return ResponseBean.success(list);
 	}
-	
+
 	@GetMapping("createImportantRecord/{rowid}")
 	public ModelAndView createImportantRecord(@PathVariable("rowid") Integer rowid) {
-		ModelAndView view = new ModelAndView("view/customers/dialogs/customer-create-importantRecord");
+		ModelAndView view = new ModelAndView("view/customers/dialogs/customer-importantRecord-create");
 		Customer customer = customersService.findCustomer(rowid);
 		if (customer == null) {
 			view.addObject("dname", "不存在");
@@ -248,7 +246,7 @@ public class CustomersController {
 
 	@ResponseBody
 	@PostMapping("createImportantRecord/{rowid}")
-	public ResponseBean<Boolean> createImportantRecord(@PathVariable("rowid") Integer rowid, @RequestBody CustomerImportantRecordInputDto dto) {
+	public ResponseBean<Boolean> createImportantRecord(@PathVariable("rowid") Integer rowid, @RequestBody ImportantRecordDto dto) {
 		String msg = customersService.createImportantRecord(rowid, dto);
 		if (StringUtils.isBlank(msg)) {
 			return ResponseBean.success(true);
@@ -293,6 +291,82 @@ public class CustomersController {
 		return view;
 	}
 
+	@ResponseBody
+	@PostMapping("qryProducts/{rowid}")
+	public ResponseBean<List<ProductDto>> qryProducts(@PathVariable("rowid") Integer rowid) {
+		List<ProductDto> list = customersService.qryProducts(rowid);
+		return ResponseBean.success(list);
+	}
+
+	@GetMapping("createProduct/{rowid}")
+	public ModelAndView createProduct(@PathVariable("rowid") Integer rowid) {
+		ModelAndView view = new ModelAndView("view/customers/dialogs/customer-product-create");
+		Customer customer = customersService.findCustomer(rowid);
+		if (customer == null) {
+			view.addObject("dname", "不存在");
+			view.addObject("rowid", "-1");
+		} else {
+			view.addObject("dname", customer.getDname());
+			view.addObject("rowid", customer.getRowid());
+		}
+		return view;
+	}
+
+	@ResponseBody
+	@PostMapping("createProduct/{rowid}")
+	public ResponseBean<Boolean> createProduct(@PathVariable("rowid") Integer rowid, @RequestBody ProductDto dto) {
+		String msg = customersService.createProduct(rowid, dto);
+		if (StringUtils.isBlank(msg)) {
+			return ResponseBean.success(true);
+		} else {
+			return ResponseBean.error(true).message(msg);
+		}
+	}
+
+	@ResponseBody
+	@PostMapping("delProduct/{rowid}")
+	public ResponseBean<Boolean> delProduct(@PathVariable("rowid") Integer rowid) {
+		String msg = customersService.delProduct(rowid);
+		if (StringUtils.isBlank(msg)) {
+			return ResponseBean.success(true);
+		} else {
+			return ResponseBean.error(true).message(msg);
+		}
+	}
+
+	@GetMapping("editProduct/{rowid}")
+	public ModelAndView editProduct(@PathVariable("rowid") Integer rowid) {
+		ModelAndView view = new ModelAndView("view/customers/dialogs/customer-product-edit");
+		view.addObject("rowid", rowid);
+		return view;
+	}
+
+	@ResponseBody
+	@PostMapping("qryProduct/{rowid}")
+	public ResponseBean<ProductDto> qryProduct(@PathVariable("rowid") Integer rowid) {
+		ProductDto dto = customersService.qryProduct(rowid);
+		return ResponseBean.success(dto);
+	}
+
+	@ResponseBody
+	@PostMapping("editProduct")
+	public ResponseBean<Boolean> editProduct(@RequestBody ProductDto dto) {
+		String msg = customersService.editProduct(dto);
+		if (StringUtils.isBlank(msg)) {
+			return ResponseBean.success(true);
+		} else {
+			return ResponseBean.error(true).message(msg);
+		}
+	}
+
+	////
+	////
+	////
+	////////
+	////////
+	////////
+	////
+	
 	@GetMapping("contract/{rowid}")
 	public ModelAndView customerContract(@PathVariable("rowid") Integer rowid) {
 		ModelAndView view = new ModelAndView("view/customers/tabs/customer-contract");

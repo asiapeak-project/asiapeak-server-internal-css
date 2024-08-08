@@ -12,18 +12,22 @@ import org.springframework.transaction.annotation.Transactional;
 import com.asiapeak.server.internal.css.dao.entity.Contact;
 import com.asiapeak.server.internal.css.dao.entity.Customer;
 import com.asiapeak.server.internal.css.dao.entity.ImportantRecord;
+import com.asiapeak.server.internal.css.dao.entity.Product;
 import com.asiapeak.server.internal.css.dao.repo.ContactRepo;
 import com.asiapeak.server.internal.css.dao.repo.CustomerRepo;
 import com.asiapeak.server.internal.css.dao.repo.ImportantRecordRepo;
-import com.asiapeak.server.internal.css.functions.customers.dto.CustomerContactDto;
-import com.asiapeak.server.internal.css.functions.customers.dto.CustomerImportantRecordInputDto;
-import com.asiapeak.server.internal.css.functions.customers.dto.CustomerImportantRecordOutputDto;
-import com.asiapeak.server.internal.css.functions.customers.dto.CustomerInfoDto;
-import com.asiapeak.server.internal.css.functions.customers.dto.CustomerInputDto;
-import com.asiapeak.server.internal.css.functions.customers.dto.CustomerOutputDto;
+import com.asiapeak.server.internal.css.dao.repo.ProductRepo;
+import com.asiapeak.server.internal.css.functions.customers.dto.ContactDto;
+import com.asiapeak.server.internal.css.functions.customers.dto.CustomerDto;
+import com.asiapeak.server.internal.css.functions.customers.dto.ProductDto;
+import com.asiapeak.server.internal.css.functions.customers.dto.ImportantRecordDto;
+import com.asiapeak.server.internal.css.system.UserNameService;
 
 @Service
 public class CustomersService {
+
+	@Autowired
+	UserNameService userNameService;
 
 	@Autowired
 	CustomerRepo customerRepo;
@@ -34,25 +38,25 @@ public class CustomersService {
 	@Autowired
 	ImportantRecordRepo importantRecordRepo;
 
+	@Autowired
+	ProductRepo productRepo;
+
 	@Transactional
-	public List<CustomerOutputDto> qryCustomers() {
+	public List<CustomerDto> qryCustomers() {
 		return customerRepo.findAll().stream().map(c -> {
-			CustomerOutputDto dto = new CustomerOutputDto();
+			CustomerDto dto = new CustomerDto();
 			dto.setRowid(c.getRowid());
 			dto.setDname(c.getDname());
 			dto.setCname(c.getCname());
 			dto.setEname(c.getEname());
-			dto.setUdate(c.getUdate());
+			dto.setDetailUdate(c.getDetailUdate());
+			dto.setDetailUuser(c.getDetailUuser());
 			return dto;
 		}).collect(Collectors.toList());
 	}
 
 	@Transactional
-	public String newCustomer(CustomerInputDto dto) {
-
-		if (customerRepo.findByDname(dto.getDname()).isPresent()) {
-			return "顯示名稱存在，請使用另一個名稱。";
-		}
+	public String createCustomer(CustomerDto dto) {
 
 		Customer customer = new Customer();
 		customer.setDname(dto.getDname());
@@ -61,10 +65,19 @@ public class CustomersService {
 		customer.setIndustry(dto.getIndustry());
 		customer.setMemo(dto.getMemo());
 		customer.setPhone(dto.getPhone());
-		customer.setUdate(new Date());
 		customer.setUnumber(dto.getUnumber());
 		customer.setWebsite(dto.getWebsite());
 		customer.setAddress(dto.getAddress());
+
+		String user = userNameService.getCurrentUserName();
+		Date now = new Date();
+
+		customer.setUdate(now);
+		customer.setUuser(user);
+		customer.setCdate(now);
+		customer.setCuser(user);
+		customer.setDetailUdate(now);
+		customer.setDetailUuser(user);
 
 		customerRepo.saveAndFlush(customer);
 
@@ -77,7 +90,7 @@ public class CustomersService {
 	}
 
 	@Transactional
-	public CustomerInfoDto qryInfo(Integer rowid) {
+	public CustomerDto qryInfo(Integer rowid) {
 
 		Customer customer = customerRepo.findById(rowid).orElse(null);
 
@@ -85,47 +98,54 @@ public class CustomersService {
 			return null;
 		}
 
-		CustomerInfoDto dto = new CustomerInfoDto();
+		CustomerDto dto = new CustomerDto();
 		dto.setDname(customer.getDname());
 		dto.setCname(customer.getCname());
 		dto.setEname(customer.getEname());
 		dto.setIndustry(customer.getIndustry());
 		dto.setMemo(customer.getMemo());
 		dto.setPhone(customer.getPhone());
-		dto.setUdate(customer.getUdate());
 		dto.setUnumber(customer.getUnumber());
 		dto.setWebsite(customer.getWebsite());
 		dto.setAddress(customer.getAddress());
+
+		dto.setUdate(customer.getUdate());
+		dto.setUuser(customer.getUuser());
+		dto.setCdate(customer.getCdate());
+		dto.setCuser(customer.getCuser());
 
 		return dto;
 	}
 
 	@Transactional
-	public List<CustomerContactDto> qryContact(Integer rowid) {
+	public List<ContactDto> qryContacts(Integer rowid) {
 		Customer customer = customerRepo.findById(rowid).orElse(null);
 
 		if (customer == null) {
 			return new ArrayList<>();
 		}
 
-		return customer.getContacts().stream().map(c -> {
-			CustomerContactDto cdto = new CustomerContactDto();
-			cdto.setRowid(c.getRowid());
-			cdto.setDname(c.getDname());
-			cdto.setCname(c.getCname());
-			cdto.setEname(c.getEname());
-			cdto.setEmail(c.getEmail());
-			cdto.setMobilePhone(c.getMobilePhone());
-			cdto.setOfficePhone(c.getOfficePhone());
-			cdto.setPosition(c.getPosition());
-			cdto.setMemo(c.getMemo());
-			cdto.setUdate(c.getUdate());
-			return cdto;
+		return customer.getContacts().stream().map(dao -> {
+			ContactDto dto = new ContactDto();
+			dto.setRowid(dao.getRowid());
+			dto.setDname(dao.getDname());
+			dto.setCname(dao.getCname());
+			dto.setEname(dao.getEname());
+			dto.setEmail(dao.getEmail());
+			dto.setMobilePhone(dao.getMobilePhone());
+			dto.setOfficePhone(dao.getOfficePhone());
+			dto.setPosition(dao.getPosition());
+			dto.setMemo(dao.getMemo());
+			dto.setUdate(dao.getUdate());
+			dto.setUuser(dao.getUuser());
+			dto.setCdate(dao.getCdate());
+			dto.setCuser(dao.getCuser());
+			return dto;
 		}).collect(Collectors.toList());
 	}
 
 	@Transactional
-	public String createContact(Integer rowid, CustomerContactDto dto) {
+	public String createContact(Integer rowid, ContactDto dto) {
 
 		Customer customer = customerRepo.findById(rowid).orElse(null);
 
@@ -133,20 +153,27 @@ public class CustomersService {
 			return "客戶不存在！";
 		}
 
-		Contact contact = new Contact();
-		contact.setDname(dto.getDname());
-		contact.setCname(dto.getCname());
-		contact.setEname(dto.getEname());
-		contact.setEmail(dto.getEmail());
-		contact.setMobilePhone(dto.getMobilePhone());
-		contact.setOfficePhone(dto.getOfficePhone());
-		contact.setPosition(dto.getPosition());
-		contact.setMemo(dto.getMemo());
-		contact.setUdate(new Date());
-		contact.setCustomer(customer);
+		Contact dao = new Contact();
+		dao.setDname(dto.getDname());
+		dao.setCname(dto.getCname());
+		dao.setEname(dto.getEname());
+		dao.setEmail(dto.getEmail());
+		dao.setMobilePhone(dto.getMobilePhone());
+		dao.setOfficePhone(dto.getOfficePhone());
+		dao.setPosition(dto.getPosition());
+		dao.setMemo(dto.getMemo());
+		dao.setCustomer(customer);
 
-		contactRepo.save(contact);
-		customerRepo.touchUdate(rowid);
+		String user = userNameService.getCurrentUserName();
+		Date now = new Date();
+
+		dao.setUdate(now);
+		dao.setUuser(user);
+		dao.setCdate(now);
+		dao.setCuser(user);
+
+		contactRepo.save(dao);
+		customerRepo.updateDetailTime(rowid, user);
 
 		return null;
 	}
@@ -159,95 +186,114 @@ public class CustomersService {
 			return "聯絡人不存在";
 		}
 
-		customerRepo.touchUdate(contact.getCustomer().getRowid());
+		customerRepo.updateDetailTime(contact.getCustomer().getRowid(), userNameService.getCurrentUserName());
 		contactRepo.delete(contact);
 
 		return null;
 	}
 
 	@Transactional
-	public String editInfo(Integer rowid, CustomerInfoDto dto) {
-		Customer customer = customerRepo.findById(rowid).orElse(null);
+	public String editInfo(Integer rowid, CustomerDto dto) {
+		Customer dao = customerRepo.findById(rowid).orElse(null);
 
-		if (customer == null) {
+		if (dao == null) {
 			return "客戶資訊不存在";
 		}
 
-		customer.setCname(dto.getCname());
-		customer.setEname(dto.getEname());
-		customer.setIndustry(dto.getIndustry());
-		customer.setMemo(dto.getMemo());
-		customer.setPhone(dto.getPhone());
-		customer.setUnumber(dto.getUnumber());
-		customer.setWebsite(dto.getWebsite());
-		customer.setAddress(dto.getAddress());
-		customer.setUdate(new Date());
+		dao.setDname(dto.getDname());
+		dao.setCname(dto.getCname());
+		dao.setEname(dto.getEname());
+		dao.setIndustry(dto.getIndustry());
+		dao.setMemo(dto.getMemo());
+		dao.setPhone(dto.getPhone());
+		dao.setUnumber(dto.getUnumber());
+		dao.setWebsite(dto.getWebsite());
+		dao.setAddress(dto.getAddress());
+
+		String user = userNameService.getCurrentUserName();
+		Date now = new Date();
+		dao.setUdate(now);
+		dao.setUuser(user);
+		dao.setDetailUdate(now);
+		dao.setDetailUuser(user);
+
+		customerRepo.save(dao);
 
 		return null;
 	}
 
 	@Transactional
-	public CustomerContactDto qryContactData(Integer rowid) {
-		Contact c = contactRepo.findById(rowid).orElse(null);
-		if (c == null) {
+	public ContactDto qryContact(Integer rowid) {
+		Contact dao = contactRepo.findById(rowid).orElse(null);
+		if (dao == null) {
 			return null;
 		}
-		CustomerContactDto cdto = new CustomerContactDto();
-		cdto.setRowid(c.getRowid());
-		cdto.setDname(c.getDname());
-		cdto.setCname(c.getCname());
-		cdto.setEname(c.getEname());
-		cdto.setEmail(c.getEmail());
-		cdto.setMobilePhone(c.getMobilePhone());
-		cdto.setOfficePhone(c.getOfficePhone());
-		cdto.setPosition(c.getPosition());
-		cdto.setMemo(c.getMemo());
-		cdto.setUdate(c.getUdate());
+		ContactDto dto = new ContactDto();
+		dto.setRowid(dao.getRowid());
+		dto.setDname(dao.getDname());
+		dto.setCname(dao.getCname());
+		dto.setEname(dao.getEname());
+		dto.setEmail(dao.getEmail());
+		dto.setMobilePhone(dao.getMobilePhone());
+		dto.setOfficePhone(dao.getOfficePhone());
+		dto.setPosition(dao.getPosition());
+		dto.setMemo(dao.getMemo());
+		dto.setUdate(dao.getUdate());
+		dto.setUuser(dao.getUuser());
+		dto.setCdate(dao.getCdate());
+		dto.setCuser(dao.getCuser());
 
-		return cdto;
+		return dto;
 	}
 
 	@Transactional
-	public String editContactData(CustomerContactDto dto) {
-		Contact contact = contactRepo.findById(dto.getRowid()).orElse(null);
-		if (contact == null) {
+	public String editContact(ContactDto dto) {
+		Contact dao = contactRepo.findById(dto.getRowid()).orElse(null);
+		if (dao == null) {
 			return "聯絡人不存在";
 		}
 
-		contact.setDname(dto.getDname());
-		contact.setCname(dto.getCname());
-		contact.setEname(dto.getEname());
-		contact.setEmail(dto.getEmail());
-		contact.setMobilePhone(dto.getMobilePhone());
-		contact.setOfficePhone(dto.getOfficePhone());
-		contact.setPosition(dto.getPosition());
-		contact.setMemo(dto.getMemo());
-		contact.setUdate(new Date());
+		dao.setDname(dto.getDname());
+		dao.setCname(dto.getCname());
+		dao.setEname(dto.getEname());
+		dao.setEmail(dto.getEmail());
+		dao.setMobilePhone(dto.getMobilePhone());
+		dao.setOfficePhone(dto.getOfficePhone());
+		dao.setPosition(dto.getPosition());
+		dao.setMemo(dto.getMemo());
 
-		contactRepo.save(contact);
-		customerRepo.touchUdate(contact.getCustomer().getRowid());
+		String user = userNameService.getCurrentUserName();
+
+		dao.setUdate(new Date());
+		dao.setUuser(user);
+
+		contactRepo.save(dao);
+		customerRepo.updateDetailTime(dao.getCustomer().getRowid(), user);
 		return null;
 	}
 
 	@Transactional
-	public List<CustomerImportantRecordOutputDto> qryImportantRecords(Integer rowid) {
+	public List<ImportantRecordDto> qryImportantRecords(Integer rowid) {
 		Customer customer = customerRepo.findById(rowid).orElse(null);
 		if (customer == null) {
 			return new ArrayList<>();
 		}
 
-		return customer.getImportantRecords().stream().map(i -> {
-			CustomerImportantRecordOutputDto dto = new CustomerImportantRecordOutputDto();
-			dto.setRowid(i.getRowid());
-			dto.setRecord(i.getRecord());
-			dto.setUdate(i.getUdate());
-			dto.setMarked(i.getMarked());
+		return customer.getImportantRecords().stream().map(dao -> {
+			ImportantRecordDto dto = new ImportantRecordDto();
+			dto.setRowid(dao.getRowid());
+			dto.setRecord(dao.getRecord());
+			dto.setMarked(dao.getMarked());
+			dto.setUdate(dao.getUdate());
+			dto.setUuser(dao.getUuser());
+			dto.setCdate(dao.getCdate());
+			dto.setCuser(dao.getCuser());
 			return dto;
 		}).collect(Collectors.toList());
 	}
 
 	@Transactional
-	public String createImportantRecord(Integer rowid, CustomerImportantRecordInputDto dto) {
+	public String createImportantRecord(Integer rowid, ImportantRecordDto dto) {
 
 		Customer customer = customerRepo.findById(rowid).orElse(null);
 		if (customer == null) {
@@ -257,11 +303,18 @@ public class CustomersService {
 		ImportantRecord dao = new ImportantRecord();
 		dao.setMarked(true);
 		dao.setRecord(dto.getRecord());
-		dao.setUdate(new Date());
 		dao.setCustomer(customer);
 
+		String user = userNameService.getCurrentUserName();
+		Date now = new Date();
+
+		dao.setUdate(now);
+		dao.setUuser(user);
+		dao.setCdate(now);
+		dao.setCuser(user);
+
 		importantRecordRepo.save(dao);
-		customerRepo.touchUdate(rowid);
+		customerRepo.updateDetailTime(rowid, user);
 		return null;
 	}
 
@@ -272,9 +325,13 @@ public class CustomersService {
 			return "重要事項不存在";
 		}
 		dao.setMarked(marked);
+
+		String user = userNameService.getCurrentUserName();
 		dao.setUdate(new Date());
+		dao.setUuser(user);
+
 		importantRecordRepo.save(dao);
-		customerRepo.touchUdate(rowid);
+		customerRepo.updateDetailTime(rowid, user);
 		return null;
 	}
 
@@ -284,9 +341,118 @@ public class CustomersService {
 		if (dao == null) {
 			return "重要事項不存在";
 		}
-		customerRepo.touchUdate(dao.getCustomer().getRowid());
+		customerRepo.updateDetailTime(dao.getCustomer().getRowid(), userNameService.getCurrentUserName());
 		importantRecordRepo.delete(dao);
-		;
+		return null;
+	}
+
+	@Transactional
+	public List<ProductDto> qryProducts(Integer rowid) {
+		Customer customer = customerRepo.findById(rowid).orElse(null);
+		if (customer == null) {
+			return new ArrayList<>();
+		}
+
+		return customer.getProducts().stream().map(dao -> {
+			ProductDto dto = new ProductDto();
+			dto.setRowid(dao.getRowid());
+			dto.setSubject(dao.getSubject());
+			dto.setInfoColumns(dao.getInfoColumns());
+			dto.setInfoValues(dao.getInfoValues());
+			dto.setUdate(dao.getUdate());
+			dto.setUuser(dao.getUuser());
+			dto.setCdate(dao.getCdate());
+			dto.setCuser(dao.getCuser());
+			return dto;
+		}).collect(Collectors.toList());
+	}
+
+	@Transactional
+	public String createProduct(Integer rowid, ProductDto dto) {
+		Customer customer = customerRepo.findById(rowid).orElse(null);
+		if (customer == null) {
+			return "客戶資訊不存在";
+		}
+		Product dao = new Product();
+
+		dao.setSubject(dto.getSubject());
+		dao.setInfoColumns(dto.getInfoColumns());
+		dao.setInfoValues(dto.getInfoValues());
+		dao.setCustomer(customer);
+
+		String user = userNameService.getCurrentUserName();
+		Date now = new Date();
+		dao.setUdate(now);
+		dao.setUuser(user);
+		dao.setCdate(now);
+		dao.setCuser(user);
+
+		productRepo.save(dao);
+
+		customerRepo.updateDetailTime(rowid, user);
+
+		return null;
+	}
+
+	@Transactional
+	public String delProduct(Integer rowid) {
+		Product dao = productRepo.findById(rowid).orElse(null);
+
+		if (dao == null) {
+			return "產品資訊不存在";
+		}
+		String user = userNameService.getCurrentUserName();
+		customerRepo.updateDetailTime(dao.getCustomer().getRowid(), user);
+
+		productRepo.delete(dao);
+
+		return null;
+	}
+
+	@Transactional
+	public ProductDto qryProduct(Integer rowid) {
+		Product dao = productRepo.findById(rowid).orElse(null);
+
+		if (dao == null) {
+			return null;
+		}
+
+		ProductDto dto = new ProductDto();
+		dto.setRowid(dao.getRowid());
+		dto.setSubject(dao.getSubject());
+		dto.setInfoColumns(dao.getInfoColumns());
+		dto.setInfoValues(dao.getInfoValues());
+		dto.setUdate(dao.getUdate());
+		dto.setUuser(dao.getUuser());
+		dto.setCdate(dao.getCdate());
+		dto.setCuser(dao.getCuser());
+		return dto;
+
+	}
+
+	@Transactional
+	public String editProduct(ProductDto dto) {
+		Product dao = productRepo.findById(dto.getRowid()).orElse(null);
+
+		if (dao == null) {
+			return "產品資訊不存在";
+		}
+
+		dao.setSubject(dto.getSubject());
+		dao.setInfoColumns(dto.getInfoColumns());
+		dao.setInfoValues(dto.getInfoValues());
+
+		String user = userNameService.getCurrentUserName();
+		Date now = new Date();
+		dao.setUdate(now);
+		dao.setUuser(user);
+		dao.setCdate(now);
+		dao.setCuser(user);
+
+		productRepo.save(dao);
+
+		customerRepo.updateDetailTime(dao.getCustomer().getRowid(), user);
+
 		return null;
 	}
 

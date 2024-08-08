@@ -53,7 +53,20 @@ public class Customer {
 	@Type(type = "text")
 	String memo;
 
+	@Type(type = "text")
+	String cuser;
+
+	Date cdate;
+
+	@Type(type = "text")
+	String uuser;
+
 	Date udate;
+
+	@Type(type = "text")
+	String detailUuser;
+
+	Date detailUdate;
 
 	@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
 	List<Contact> contacts;

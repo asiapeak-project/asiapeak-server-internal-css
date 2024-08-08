@@ -27,9 +27,17 @@ public class ImportantRecord {
 	@Type(type = "text")
 	String record;
 	
-	Date udate;
-	
 	Boolean marked;
+	
+	@Type(type = "text")
+	String cuser;
+
+	Date cdate;
+
+	@Type(type = "text")
+	String uuser;
+	
+	Date udate;
 	
 	@ManyToOne
 	Customer customer;

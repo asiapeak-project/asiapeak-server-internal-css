@@ -4,7 +4,6 @@
 	layout:decorate="~{layouts/clear.html}">
 
 <head>
-	<title>客戶服務系統-客戶資訊-[[${dname}]]</title>
 	<script th:inline="javascript">
 		
 		const rowid = /*[[${rowid}]]*/ "";
@@ -12,7 +11,7 @@
 		$(() => {
 			
 			HttpUtils.doPost({
-				url: "/customers/qryContactData/" + rowid,
+				url: "/customers/qryContact/" + rowid,
 				success: (response) => {
 					$("#rowid").val(response.data.rowid);
 					$("#dname").val(response.data.dname);
@@ -45,7 +44,7 @@
 					text: "是否要更新此聯絡人?",
 					onConfirm: () => {
 						HttpUtils.doPost({
-							url: "/customers/editContactData/",
+							url: "/customers/editContact/",
 							data: data,
 							success: (response) => {
 								if(response.data){

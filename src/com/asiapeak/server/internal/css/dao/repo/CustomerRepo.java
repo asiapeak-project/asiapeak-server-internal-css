@@ -16,10 +16,11 @@ public interface CustomerRepo extends JpaRepository<Customer, Integer>, JpaSpeci
 	public Optional<Customer> findByDname(String dname);
 
 	@Transactional(transactionManager = DBConfig.TransactionManager)
-	public default void touchUdate(Integer rowid) {
+	public default void updateDetailTime(Integer rowid, String uuser) {
 		Customer c = findById(rowid).orElse(null);
 		if (c != null) {
-			c.setUdate(new Date());
+			c.setDetailUdate(new Date());
+			c.setDetailUuser(uuser);
 			save(c);
 		}
 	}

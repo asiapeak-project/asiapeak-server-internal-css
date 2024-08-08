@@ -33,6 +33,14 @@ public class Document {
 	@Type(type = "text")
 	String content;
 
+	@Type(type = "text")
+	String cuser;
+
+	Date cdate;
+
+	@Type(type = "text")
+	String uuser;
+	
 	Date udate;
 	
 	@ManyToOne

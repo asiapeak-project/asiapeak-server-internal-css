@@ -33,6 +33,14 @@ public class Product {
 	@Type(type = "text")
 	String infoValues;
 
+	@Type(type = "text")
+	String cuser;
+
+	Date cdate;
+
+	@Type(type = "text")
+	String uuser;
+	
 	Date udate;
 
 	@ManyToOne

@@ -4,6 +4,7 @@
 	layout:decorate="~{layouts/base.html}">
 <head>
 	<script>
+		
 		const toggleSidebar = () => {
 			const btn = document.getElementById("ap-side-menu-button");
 			const sideBar = document.getElementById("ap-side-bar");
@@ -78,7 +79,16 @@
 		</main>
 	
 	</div>
-
+	<script>
+		if(/Android|webOS|iPhone|iPad|Mac|Macintosh|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)){
+			const btn = document.getElementById("ap-side-menu-button");
+			const sideBar = document.getElementById("ap-side-bar");
+			const content = document.getElementById("ap-content");
+			btn.classList.remove("ap-side-menu-show");
+			sideBar.classList.add("ap-side-menu-hide");
+			content.classList.add("ap-side-menu-hide");
+		}
+	</script>
 </body>
 
 </html>

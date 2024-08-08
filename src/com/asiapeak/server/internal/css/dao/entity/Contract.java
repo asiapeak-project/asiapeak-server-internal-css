@@ -43,6 +43,14 @@ public class Contract {
 	@Type(type = "text")
 	String memo;
 
+	@Type(type = "text")
+	String cuser;
+
+	Date cdate;
+
+	@Type(type = "text")
+	String uuser;
+	
 	Date udate;
 
 	@ManyToOne

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/clear.html}">
+
+<head>
+	<script th:inline="javascript">
+		
+		const rowid = /*[[${rowid}]]*/ "";
+		
+		$(() => {
+			
+			const rows = [];
+			
+			HttpUtils.doPost({
+				url : "/customers/qryProduct/" + rowid,
+				success: (response) => {
+					document.getElementById("subject").value = response.data.subject;
+					const infoColumns = JSON.parse(response.data.infoColumns);
+					const infoValues = JSON.parse(response.data.infoValues);
+					for(let i = 0 ; i < infoColumns.length ; i++){
+						const label = infoColumns[i];
+						const value = infoValues[i];
+						rows.push({ label, value })
+					}
+					renderRows();
+				}
+			})
+				
+			$("#save-btn").click(() => {
+				
+				const subject = document.getElementById("subject").value;
+				
+				if(!subject){
+					PromptUtils.warning("產品資訊名稱不能為空");
+					return;
+				}
+				
+				const infoColumns = []
+				const infoValues = []
+	
+				rows.forEach(row => {
+					infoColumns.push(row.label)
+					infoValues.push(row.value)
+				})
+				
+				HttpUtils.doPost({
+					url: "/customers/editProduct",
+					data: {
+						rowid: rowid,
+						subject: subject,
+						infoColumns: JSON.stringify(infoColumns),
+						infoValues: JSON.stringify(infoValues)
+					},
+					success: (response) => {
+						if(response.data){
+							DialogUtils.closeWindow(window, true);							
+						}
+					}
+				})
+				
+			});
+
+			const renderRows = () => {
+				const myrows = document.getElementById("myrows");
+				myrows.innerHTML = "";
+				
+				rows.forEach((item, index) => {
+					myrows.appendChild( createDynamicRowElement(index, item) )
+				})
+			};
+			
+			const createDynamicRowElement = (index, item) => {
+				const tr = ElementUtils.createElement(`
+					<tr>
+						<td>
+							<button data-up class="btn btn-secondary">
+								<i class="bi bi-arrow-up"></i>
+							</button>
+						</td>
+						<td>
+							<button data-down class="btn btn-secondary">
+								<i class="bi bi-arrow-down"></i>
+							</button>
+						</td>
+						<td>
+							<input data-label type="text" class="form-control"/>
+						</td>
+						<td>
+							<input data-value type="text" class="form-control"/>
+						</td>
+						<td>
+							<button data-delete class="btn btn-danger">
+								<i class="bi bi-trash3"></i>
+							</button>
+						</td>						
+					</tr>				
+				`)
+				
+				if(index === 0){
+					tr.querySelector("[data-up]").remove()
+				} else {
+					tr.querySelector("[data-up]").addEventListener("click", () => {
+						upRow(index);
+					})
+				}
+				
+				tr.querySelector("[data-label]").value = item.label;
+				tr.querySelector("[data-value]").value = item.value;
+				
+				$("[data-label]", tr).on("input", () => {
+					item.label = tr.querySelector("[data-label]").value
+				})
+				
+				$("[data-value]", tr).on("input", () => {
+					item.value = tr.querySelector("[data-value]").value
+				})
+				
+				if(index >= rows.length - 1){
+					tr.querySelector("[data-down]").remove()
+				} else {
+					tr.querySelector("[data-down]").addEventListener("click", () => {
+						downRow(index);
+					})
+				}
+				
+				tr.querySelector("[data-delete]").addEventListener("click", () => {
+					removeRow(index);
+				})
+				
+				return tr;
+				
+			};
+			
+			const addRow = () => {
+				rows.push({
+					label: "",
+					value: ""
+				})
+				renderRows();
+			}
+			
+			const removeRow = (index) => {
+				rows.splice(index, 1);
+				renderRows();
+			};
+			
+			const upRow = (index) => {
+				if(index <= 0){
+					return;
+				}
+				const tmp = rows[index - 1];
+				rows[index - 1] = rows[index];
+				rows[index] = tmp;
+				renderRows();
+			}
+			
+			const downRow = (index) => {
+				if(index >= rows.length){
+					return;
+				}
+				const tmp = rows[index + 1];
+				rows[index + 1] = rows[index];
+				rows[index] = tmp;
+				renderRows();
+			}
+			
+			document.getElementById("add-btn").addEventListener("click", ()=>{
+				addRow();
+			})
+			
+		});
+		
+	</script>
+</head>
+
+<body layout:fragment="content">
+	
+	<div class="d-flex justify-content-between">
+		<button id="template-btn" type="button" class="btn btn-primary">加入範本</button>
+		<button id="save-btn" type="button" class="btn btn-success">更新產品資訊</button>
+	</div>
+	
+	<div class="input-group my-4">
+		<div class="input-group-text">
+			產品資訊名稱
+			<span class="text-danger">*</span>
+		</div>
+		<input type="text" class="form-control" id="subject">
+    </div>
+	
+	<table class="table my-2">
+		<thead class="none-select">
+			<tr>
+				<th style="width: 58px;">上移</th>
+				<th style="width: 58px;">下移</th>
+				<th>名稱</th>
+				<th>數值</th>
+				<th style="width: 58px;">刪除</th>
+			</tr>
+		</thead>
+		<tbody id="myrows"></tbody>
+	</table>
+	
+	<div class="text-start">
+		<button id="add-btn" type="button" class="btn btn-success">增加一行</button>
+	</div>
+	
+	<br />
+</body>
+
+</html>

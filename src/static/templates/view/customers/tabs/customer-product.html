@@ -5,21 +5,156 @@
 
 <head>
 	<title>客戶服務系統-客戶資訊-[[${dname}]]</title>
+	<style>
+		.contect-container{
+			background: #F9F9F9;
+		}
+		.contect-item {
+			background: #FFFFFF;
+		}
+	</style>
 	<script th:inline="javascript">
 		
 		const rowid = /*[[${rowid}]]*/ "";
 		
 		$(() => {
 			
+			const doQuery = () => {
+				HttpUtils.doPost({
+					url: "/customers/qryProducts/" + rowid,
+					success: (response) => {
+						renderItems(response.data);
+					}
+				})
+			}
+			
+			const renderItems = (items) => {
+				const mydiv = document.getElementById("mydiv");
+				mydiv.innerHTML = "";
+				items.forEach(item => {
+					mydiv.appendChild(createItem(item));
+				})
+			}
+			
+			const createItem = (item) => {
+				const card = ElementUtils.createElement(`
+					<div class="border p-4 mb-4 contect-item">
+						<div class="input-group pb-3">
+							<div class="input-group-text">產品資訊名稱</div>
+							<input data-subject type="text" class="form-control" readonly />
+					    </div>
+						<table class="table table-bordered">
+							<tbody data-rows></tbody>
+						</table>
+						
+						<div class="d-flex justify-content-between">
+							<button data-btn-delete type="button" class="btn btn-danger">
+								<i class="bi bi-trash3"></i>
+							</button>
+							
+							<button data-btn-edit type="button" class="btn btn-secondary">
+								<i class="bi bi-pencil-fill"></i>
+							</button>
+						</div>
+						<div class="text-secondary d-flex justify-content-evenly mt-2">
+							<span>更新日期: ${TextUtils.formatDate(new Date(item.udate))}</span>	
+							<span>更新者: ${item.uuser}</span>
+						</div>
+					</div>
+				`)
+				
+				$("[data-btn-edit]", card).click(() => {
+					DialogUtils.window({
+						title: "編輯產品資訊",
+						url: "/customers/editProduct/" + item.rowid,
+						callback: (rtnVal) => {
+							if(rtnVal){
+								doQuery();
+							}
+						}
+					})
+				});
+				
+				$("[data-btn-delete]", card).click(() => {
+					DialogUtils.confirm({
+						titls: "刪除產品資訊提醒",
+						text: "是否要刪除「" + item.subject + "」?",
+						onConfirm: () => {
+							HttpUtils.doPost({
+								url: "/customers/delProduct/" + item.rowid,
+								success: (response) => {
+									if(response.data){
+										PromptUtils.success("刪除成功")
+										doQuery();
+									}
+								}
+							})
+						}
+					})
+				});
+				
+				$("[data-subject]", card).val(item.subject);
+				
+				const cardRows = card.querySelector("[data-rows]");
+				
+				const infoColumns = JSON.parse(item.infoColumns);
+				const infoValues = JSON.parse(item.infoValues);
+				
+				for(let i = 0 ; i < infoColumns.length ; i++){
+					const column = infoColumns[i];
+					const value = infoValues[i];
+					const row = createRow(column, value);
+					cardRows.appendChild(row);
+				}
+				return card;
+			}
+			
+			const createRow = (column, value) => {
+				const uuid = TextUtils.generateUUID();
+				const row = ElementUtils.createElement(`
+					<tr>
+						<td>
+							<label for="${uuid}"></label>
+						</td>
+						<td>
+							<input id="${uuid}" type="text" class="form-control" readonly value="">
+						</td>
+					</tr>
+				`);
+				
+				$("label", row).text(column);
+				$("input", row).val(value);
+				return row; 		
+			}
+			
+			doQuery();
+			
+			$("#create-btn").click(() => {
+				DialogUtils.window({
+					title: "新增產品資訊",
+					url: "/customers/createProduct/" + rowid,
+					callback: (rtnVal) => {
+						if(rtnVal){
+							doQuery();
+						}
+					}
+				})
+			})
+			
 		})
 		
 	</script>
 </head>
 
-<body layout:fragment="content">
+<body layout:fragment="content" class="contect-container">
 	
+	<div class="text-end mb-3">
+		<button id="create-btn" class="btn btn-success" type="button">
+			<i class="bi bi-plus"></i>
+		</button>
+	</div>
 	
-	
+	<div id="mydiv" class="pb-4"></div>
 	
 </body>
 

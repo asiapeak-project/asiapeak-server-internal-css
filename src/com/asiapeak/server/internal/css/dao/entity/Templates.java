@@ -1,5 +1,7 @@
 package com.asiapeak.server.internal.css.dao.entity;
 
+import java.util.Date;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -26,5 +28,15 @@ public class Templates {
 
 	@Type(type = "text")
 	String infoColumns;
+	
+	@Type(type = "text")
+	String cuser;
+
+	Date cdate;
+
+	@Type(type = "text")
+	String uuser;
+	
+	Date udate;
 
 }

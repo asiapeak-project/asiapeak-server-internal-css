@@ -5,9 +5,14 @@ import java.util.Date;
 import lombok.Data;
 
 @Data
-public class CustomerImportantRecordOutputDto {
+public class ProductDto {
 	Integer rowid;
-	String record;
+	String subject;
+	String infoColumns;
+	String infoValues;
 	Date udate;
-	Boolean marked;
+	String uuser;
+	
+	Date cdate;
+	String cuser;
 }
