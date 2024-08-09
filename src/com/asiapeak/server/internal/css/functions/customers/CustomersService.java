@@ -632,12 +632,14 @@ public class CustomersService {
 
 		dao = documentRepo.save(dao);
 
-		File documentFilder = documentFileService.getDocumentFolder(rowid, dao.getRowid());
+		if (files != null) {
+			File documentFilder = documentFileService.getDocumentFolder(rowid, dao.getRowid());
 
-		for (MultipartFile file : files) {
-			String fileName = file.getOriginalFilename();
-			File saveFile = new File(documentFilder, fileName);
-			file.transferTo(saveFile);
+			for (MultipartFile file : files) {
+				String fileName = file.getOriginalFilename();
+				File saveFile = new File(documentFilder, fileName);
+				file.transferTo(saveFile);
+			}
 		}
 
 		customerRepo.updateDetailTime(customer.getRowid(), user);

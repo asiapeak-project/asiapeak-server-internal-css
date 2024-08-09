@@ -64,8 +64,10 @@
 					url: "/customers/createDocument/" + rowid,
 					width: "calc(100dvw - 20px)",
 					height: "calc(100vh - 122px);",
-					onCallback : (rtnVal) => {
-						doQuery();
+					callback : (rtnVal) => {
+						if(rtnVal){
+							doQuery();
+						}
 					}					
 				})
 			})
