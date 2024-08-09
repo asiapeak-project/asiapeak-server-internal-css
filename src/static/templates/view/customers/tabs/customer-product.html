@@ -31,6 +31,11 @@
 			const renderItems = (items) => {
 				const mydiv = document.getElementById("mydiv");
 				mydiv.innerHTML = "";
+				
+				if(items.length === 0){
+					mydiv.innerHTML = "<h3 class='none-select'>產品資訊-尚無資料</h3>"
+				}
+				
 				items.forEach(item => {
 					mydiv.appendChild(createItem(item));
 				})

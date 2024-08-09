@@ -4,6 +4,7 @@
 	layout:decorate="~{layouts/clear.html}">
 
 <head>
+	<title>客戶服務系統-客戶資訊-[[${dname}]]</title>
 	<script th:inline="javascript">
 		
 		const rowid = /*[[${rowid}]]*/ "";
@@ -11,28 +12,13 @@
 		$(() => {
 			
 			const rows = [];
-			
-			HttpUtils.doPost({
-				url : "/customers/qryProduct/" + rowid,
-				success: (response) => {
-					document.getElementById("subject").value = response.data.subject;
-					const infoColumns = JSON.parse(response.data.infoColumns);
-					const infoValues = JSON.parse(response.data.infoValues);
-					for(let i = 0 ; i < infoColumns.length ; i++){
-						const label = infoColumns[i];
-						const value = infoValues[i];
-						rows.push({ label, value })
-					}
-					renderRows();
-				}
-			})
-				
+								
 			$("#save-btn").click(() => {
 				
 				const subject = document.getElementById("subject").value;
 				
 				if(!subject){
-					PromptUtils.warning("產品資訊名稱不能為空");
+					PromptUtils.warning("環境佈署名稱不能為空");
 					return;
 				}
 				
@@ -44,24 +30,17 @@
 					infoValues.push(row.value)
 				})
 				
-				DialogUtils.confirm({
-					title: "更新提醒",
-					text: "確定要更新?",
-					onConfirm: () => {
-						HttpUtils.doPost({
-							url: "/customers/editProduct",
-							data: {
-								rowid: rowid,
-								subject: subject,
-								infoColumns: JSON.stringify(infoColumns),
-								infoValues: JSON.stringify(infoValues)
-							},
-							success: (response) => {
-								if(response.data){
-									DialogUtils.closeWindow(window, true);							
-								}
-							}
-						})
+				HttpUtils.doPost({
+					url: "/customers/createDeployment/" + rowid,
+					data: {
+						subject: subject,
+						infoColumns: JSON.stringify(infoColumns),
+						infoValues: JSON.stringify(infoValues)
+					},
+					success: (response) => {
+						if(response.data){
+							DialogUtils.closeWindow(window, true);							
+						}
 					}
 				})
 				
@@ -184,12 +163,12 @@
 	
 	<div class="d-flex justify-content-between">
 		<button id="template-btn" type="button" class="btn btn-primary">加入範本</button>
-		<button id="save-btn" type="button" class="btn btn-success">更新產品資訊</button>
+		<button id="save-btn" type="button" class="btn btn-success">新增環境佈署</button>
 	</div>
 	
 	<div class="input-group my-4">
 		<div class="input-group-text">
-			產品資訊名稱
+			環境佈署名稱
 			<span class="text-danger">*</span>
 		</div>
 		<input type="text" class="form-control" id="subject">

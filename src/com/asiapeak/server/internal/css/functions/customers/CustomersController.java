@@ -17,8 +17,9 @@ import com.asiapeak.server.internal.css.core.dto.ResponseBean;
 import com.asiapeak.server.internal.css.dao.entity.Customer;
 import com.asiapeak.server.internal.css.functions.customers.dto.ContactDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.CustomerDto;
-import com.asiapeak.server.internal.css.functions.customers.dto.ProductDto;
+import com.asiapeak.server.internal.css.functions.customers.dto.DeploymentDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.ImportantRecordDto;
+import com.asiapeak.server.internal.css.functions.customers.dto.ProductDto;
 
 @Controller
 @RequestMapping("customers")
@@ -359,14 +360,6 @@ public class CustomersController {
 		}
 	}
 
-	////
-	////
-	////
-	////////
-	////////
-	////////
-	////
-
 	@GetMapping("deployment/{rowid}")
 	public ModelAndView customerDeployment(@PathVariable("rowid") Integer rowid) {
 		ModelAndView view = new ModelAndView("view/customers/tabs/customer-deployment");
@@ -380,6 +373,82 @@ public class CustomersController {
 		}
 		return view;
 	}
+
+	@ResponseBody
+	@PostMapping("qryDeployments/{rowid}")
+	public ResponseBean<List<DeploymentDto>> qryDeployments(@PathVariable("rowid") Integer rowid) {
+		List<DeploymentDto> list = customersService.qryDeployments(rowid);
+		return ResponseBean.success(list);
+	}
+
+	@GetMapping("createDeployment/{rowid}")
+	public ModelAndView createDeployment(@PathVariable("rowid") Integer rowid) {
+		ModelAndView view = new ModelAndView("view/customers/dialogs/customer-deployment-create");
+		Customer customer = customersService.findCustomer(rowid);
+		if (customer == null) {
+			view.addObject("dname", "不存在");
+			view.addObject("rowid", "-1");
+		} else {
+			view.addObject("dname", customer.getDname());
+			view.addObject("rowid", customer.getRowid());
+		}
+		return view;
+	}
+
+	@ResponseBody
+	@PostMapping("createDeployment/{rowid}")
+	public ResponseBean<Boolean> createDeployment(@PathVariable("rowid") Integer rowid, @RequestBody DeploymentDto dto) {
+		String msg = customersService.createDeployment(rowid, dto);
+		if (StringUtils.isBlank(msg)) {
+			return ResponseBean.success(true);
+		} else {
+			return ResponseBean.error(true).message(msg);
+		}
+	}
+
+	@ResponseBody
+	@PostMapping("delDeployment/{rowid}")
+	public ResponseBean<Boolean> delDeployment(@PathVariable("rowid") Integer rowid) {
+		String msg = customersService.delDeployment(rowid);
+		if (StringUtils.isBlank(msg)) {
+			return ResponseBean.success(true);
+		} else {
+			return ResponseBean.error(true).message(msg);
+		}
+	}
+
+	@GetMapping("editDeployment/{rowid}")
+	public ModelAndView editDeployment(@PathVariable("rowid") Integer rowid) {
+		ModelAndView view = new ModelAndView("view/customers/dialogs/customer-deployment-edit");
+		view.addObject("rowid", rowid);
+		return view;
+	}
+
+	@ResponseBody
+	@PostMapping("qryDeployment/{rowid}")
+	public ResponseBean<DeploymentDto> qryDeployment(@PathVariable("rowid") Integer rowid) {
+		DeploymentDto dto = customersService.qryDeployment(rowid);
+		return ResponseBean.success(dto);
+	}
+
+	@ResponseBody
+	@PostMapping("editDeployment")
+	public ResponseBean<Boolean> editDeployment(@RequestBody ProductDto dto) {
+		String msg = customersService.editDeployment(dto);
+		if (StringUtils.isBlank(msg)) {
+			return ResponseBean.success(true);
+		} else {
+			return ResponseBean.error(true).message(msg);
+		}
+	}
+
+	////
+	////
+	////
+	////////
+	////////
+	////////
+	////
 
 	@GetMapping("document/{rowid}")
 	public ModelAndView customerDocument(@PathVariable("rowid") Integer rowid) {

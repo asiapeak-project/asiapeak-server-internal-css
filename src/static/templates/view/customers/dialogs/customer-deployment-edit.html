@@ -13,7 +13,7 @@
 			const rows = [];
 			
 			HttpUtils.doPost({
-				url : "/customers/qryProduct/" + rowid,
+				url : "/customers/qryDeployment/" + rowid,
 				success: (response) => {
 					document.getElementById("subject").value = response.data.subject;
 					const infoColumns = JSON.parse(response.data.infoColumns);
@@ -49,7 +49,7 @@
 					text: "確定要更新?",
 					onConfirm: () => {
 						HttpUtils.doPost({
-							url: "/customers/editProduct",
+							url: "/customers/editDeployment",
 							data: {
 								rowid: rowid,
 								subject: subject,
@@ -64,7 +64,6 @@
 						})
 					}
 				})
-				
 			});
 
 			const renderRows = () => {
@@ -184,12 +183,12 @@
 	
 	<div class="d-flex justify-content-between">
 		<button id="template-btn" type="button" class="btn btn-primary">加入範本</button>
-		<button id="save-btn" type="button" class="btn btn-success">更新產品資訊</button>
+		<button id="save-btn" type="button" class="btn btn-success">更新環境佈署</button>
 	</div>
 	
 	<div class="input-group my-4">
 		<div class="input-group-text">
-			產品資訊名稱
+			環境佈署名稱
 			<span class="text-danger">*</span>
 		</div>
 		<input type="text" class="form-control" id="subject">

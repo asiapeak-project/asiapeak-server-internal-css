@@ -5,18 +5,187 @@
 
 <head>
 	<title>客戶服務系統-客戶資訊-[[${dname}]]</title>
+	<style>
+		.contect-container{
+			background: #F9F9F9;
+		}
+		.contect-item {
+			background: #FFFFFF;
+		}
+	</style>
 	<script th:inline="javascript">
 		
 		const rowid = /*[[${rowid}]]*/ "";
 		
 		$(() => {
 			
+			const doQuery = () => {
+				HttpUtils.doPost({
+					url: "/customers/qryDeployments/" + rowid,
+					success: (response) => {
+						renderItems(response.data);
+					}
+				})
+			}
+			
+			const renderItems = (items) => {
+				const mydiv = document.getElementById("mydiv");
+				mydiv.innerHTML = "";
+				
+				if(items.length === 0){
+					mydiv.innerHTML = "<h3 class='none-select'>環境部屬-尚無資料</h3>"
+				}
+				
+				items.forEach(item => {
+					mydiv.appendChild(createItem(item));
+				})
+			}
+			
+			const createItem = (item) => {
+				
+				const uuid = TextUtils.generateUUID();
+				const header_uuid = "header" + TextUtils.generateUUID();
+				const body_uuid = "body" + TextUtils.generateUUID();
+				
+				const card = ElementUtils.createElement(`
+					<div class="accordion mb-3">
+						<div class="accordion-item">
+							<h2 class="accordion-header" id="${header_uuid}">
+								<button 
+									class="accordion-button collapsed" 
+									type="button" 
+									data-bs-toggle="collapse" 
+									data-bs-target="#${body_uuid}" 
+									aria-expanded="true" 
+									aria-controls="${body_uuid}"
+								>
+									${item.subject}
+								</button>
+							</h2>
+							<div id="${body_uuid}" class="accordion-collapse collapse" aria-labelledby="${header_uuid}">
+								<div class="accordion-body">
+									<div class="p-4 mb-4 contect-item">
+										<div class="input-group pb-3">
+											<div class="input-group-text">環境部屬名稱</div>
+											<input data-subject type="text" class="form-control" readonly />
+									    </div>
+										<table class="table table-bordered">
+											<tbody data-rows></tbody>
+										</table>
+										
+										<div class="d-flex justify-content-between">
+											<button data-btn-delete type="button" class="btn btn-danger">
+												<i class="bi bi-trash3"></i>
+											</button>
+											
+											<button data-btn-edit type="button" class="btn btn-secondary">
+												<i class="bi bi-pencil-fill"></i>
+											</button>
+										</div>
+										<div class="text-secondary d-flex justify-content-evenly mt-2">
+											<span>更新日期: ${TextUtils.formatDate(new Date(item.udate))}</span>	
+											<span>更新者: ${item.uuser}</span>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				`)
+				
+				$("[data-btn-edit]", card).click(() => {
+					DialogUtils.window({
+						title: "編輯環境部屬",
+						url: "/customers/editDeployment/" + item.rowid,
+						callback: (rtnVal) => {
+							if(rtnVal){
+								doQuery();
+							}
+						}
+					})
+				});
+				
+				$("[data-btn-delete]", card).click(() => {
+					DialogUtils.confirm({
+						titls: "刪除環境部屬提醒",
+						text: "是否要刪除「" + item.subject + "」?",
+						onConfirm: () => {
+							HttpUtils.doPost({
+								url: "/customers/delDeployment/" + item.rowid,
+								success: (response) => {
+									if(response.data){
+										PromptUtils.success("刪除成功")
+										doQuery();
+									}
+								}
+							})
+						}
+					})
+				});
+				
+				$("[data-subject]", card).val(item.subject);
+				
+				const cardRows = card.querySelector("[data-rows]");
+				
+				const infoColumns = JSON.parse(item.infoColumns);
+				const infoValues = JSON.parse(item.infoValues);
+				
+				for(let i = 0 ; i < infoColumns.length ; i++){
+					const column = infoColumns[i];
+					const value = infoValues[i];
+					const row = createRow(column, value);
+					cardRows.appendChild(row);
+				}
+				return card;
+			}
+			
+			const createRow = (column, value) => {
+				const uuid = TextUtils.generateUUID();
+				const row = ElementUtils.createElement(`
+					<tr>
+						<td>
+							<label for="${uuid}"></label>
+						</td>
+						<td>
+							<input id="${uuid}" type="text" class="form-control" readonly value="">
+						</td>
+					</tr>
+				`);
+				
+				$("label", row).text(column);
+				$("input", row).val(value);
+				return row; 		
+			}
+			
+			doQuery();
+			
+			$("#create-btn").click(() => {
+				DialogUtils.window({
+					title: "新增環境部屬",
+					url: "/customers/createDeployment/" + rowid,
+					callback: (rtnVal) => {
+						if(rtnVal){
+							doQuery();
+						}
+					}
+				})
+			})
+			
 		})
+		
 	</script>
 </head>
 
-<body layout:fragment="content">
-	customer-deployment
+<body layout:fragment="content" class="contect-container">
+	
+	<div class="text-end mb-3">
+		<button id="create-btn" class="btn btn-success" type="button">
+			<i class="bi bi-plus"></i>
+		</button>
+	</div>
+	
+	<div id="mydiv" class="pb-4"></div>
+	
 </body>
 
 </html>

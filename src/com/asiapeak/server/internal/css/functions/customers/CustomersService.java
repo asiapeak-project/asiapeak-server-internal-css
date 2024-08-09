@@ -11,16 +11,19 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.asiapeak.server.internal.css.dao.entity.Contact;
 import com.asiapeak.server.internal.css.dao.entity.Customer;
+import com.asiapeak.server.internal.css.dao.entity.Deployment;
 import com.asiapeak.server.internal.css.dao.entity.ImportantRecord;
 import com.asiapeak.server.internal.css.dao.entity.Product;
 import com.asiapeak.server.internal.css.dao.repo.ContactRepo;
 import com.asiapeak.server.internal.css.dao.repo.CustomerRepo;
+import com.asiapeak.server.internal.css.dao.repo.DeploymentRepo;
 import com.asiapeak.server.internal.css.dao.repo.ImportantRecordRepo;
 import com.asiapeak.server.internal.css.dao.repo.ProductRepo;
 import com.asiapeak.server.internal.css.functions.customers.dto.ContactDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.CustomerDto;
-import com.asiapeak.server.internal.css.functions.customers.dto.ProductDto;
+import com.asiapeak.server.internal.css.functions.customers.dto.DeploymentDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.ImportantRecordDto;
+import com.asiapeak.server.internal.css.functions.customers.dto.ProductDto;
 import com.asiapeak.server.internal.css.system.UserNameService;
 
 @Service
@@ -40,6 +43,9 @@ public class CustomersService {
 
 	@Autowired
 	ProductRepo productRepo;
+
+	@Autowired
+	DeploymentRepo deploymentRepo;
 
 	@Transactional
 	public List<CustomerDto> qryCustomers() {
@@ -450,6 +456,115 @@ public class CustomersService {
 		dao.setCuser(user);
 
 		productRepo.save(dao);
+
+		customerRepo.updateDetailTime(dao.getCustomer().getRowid(), user);
+
+		return null;
+	}
+
+	@Transactional
+	public List<DeploymentDto> qryDeployments(Integer rowid) {
+		Customer customer = customerRepo.findById(rowid).orElse(null);
+		if (customer == null) {
+			return new ArrayList<>();
+		}
+
+		return customer.getDeployments().stream().map(dao -> {
+			DeploymentDto dto = new DeploymentDto();
+			dto.setRowid(dao.getRowid());
+			dto.setSubject(dao.getSubject());
+			dto.setInfoColumns(dao.getInfoColumns());
+			dto.setInfoValues(dao.getInfoValues());
+			dto.setUdate(dao.getUdate());
+			dto.setUuser(dao.getUuser());
+			dto.setCdate(dao.getCdate());
+			dto.setCuser(dao.getCuser());
+			return dto;
+		}).collect(Collectors.toList());
+	}
+
+	@Transactional
+	public String createDeployment(Integer rowid, DeploymentDto dto) {
+		Customer customer = customerRepo.findById(rowid).orElse(null);
+		if (customer == null) {
+			return "客戶資訊不存在";
+		}
+		Deployment dao = new Deployment();
+
+		dao.setSubject(dto.getSubject());
+		dao.setInfoColumns(dto.getInfoColumns());
+		dao.setInfoValues(dto.getInfoValues());
+		dao.setCustomer(customer);
+
+		String user = userNameService.getCurrentUserName();
+		Date now = new Date();
+		dao.setUdate(now);
+		dao.setUuser(user);
+		dao.setCdate(now);
+		dao.setCuser(user);
+
+		deploymentRepo.save(dao);
+
+		customerRepo.updateDetailTime(rowid, user);
+
+		return null;
+	}
+
+	@Transactional
+	public String delDeployment(Integer rowid) {
+		Deployment dao = deploymentRepo.findById(rowid).orElse(null);
+
+		if (dao == null) {
+			return "佈署環境不存在";
+		}
+		String user = userNameService.getCurrentUserName();
+		customerRepo.updateDetailTime(dao.getCustomer().getRowid(), user);
+
+		deploymentRepo.delete(dao);
+
+		return null;
+	}
+
+	@Transactional
+	public DeploymentDto qryDeployment(Integer rowid) {
+		Deployment dao = deploymentRepo.findById(rowid).orElse(null);
+
+		if (dao == null) {
+			return null;
+		}
+
+		DeploymentDto dto = new DeploymentDto();
+		dto.setRowid(dao.getRowid());
+		dto.setSubject(dao.getSubject());
+		dto.setInfoColumns(dao.getInfoColumns());
+		dto.setInfoValues(dao.getInfoValues());
+		dto.setUdate(dao.getUdate());
+		dto.setUuser(dao.getUuser());
+		dto.setCdate(dao.getCdate());
+		dto.setCuser(dao.getCuser());
+		return dto;
+	}
+
+	@Transactional
+	public String editDeployment(ProductDto dto) {
+		Deployment dao = deploymentRepo.findById(dto.getRowid()).orElse(null);
+
+		if (dao == null) {
+			return "佈署環境不存在";
+		}
+
+		dao.setSubject(dto.getSubject());
+		dao.setInfoColumns(dto.getInfoColumns());
+		dao.setInfoValues(dto.getInfoValues());
+
+		String user = userNameService.getCurrentUserName();
+		Date now = new Date();
+		dao.setUdate(now);
+		dao.setUuser(user);
+		dao.setCdate(now);
+		dao.setCuser(user);
+
+		deploymentRepo.save(dao);
 
 		customerRepo.updateDetailTime(dao.getCustomer().getRowid(), user);
 
