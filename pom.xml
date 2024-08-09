@@ -131,13 +131,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.asiapeak</groupId>
-			<artifactId>asiapeak-spring-downloader</artifactId>
-			<version>1.0</version>
-		</dependency>
-
-
-		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcpkix-jdk18on</artifactId>
 			<version>1.77</version>

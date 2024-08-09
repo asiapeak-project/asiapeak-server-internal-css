@@ -366,20 +366,6 @@ public class CustomersController {
 	////////
 	////////
 	////
-	
-	@GetMapping("contract/{rowid}")
-	public ModelAndView customerContract(@PathVariable("rowid") Integer rowid) {
-		ModelAndView view = new ModelAndView("view/customers/tabs/customer-contract");
-		Customer customer = customersService.findCustomer(rowid);
-		if (customer == null) {
-			view.addObject("dname", "不存在");
-			view.addObject("rowid", "-1");
-		} else {
-			view.addObject("dname", customer.getDname());
-			view.addObject("rowid", customer.getRowid());
-		}
-		return view;
-	}
 
 	@GetMapping("deployment/{rowid}")
 	public ModelAndView customerDeployment(@PathVariable("rowid") Integer rowid) {

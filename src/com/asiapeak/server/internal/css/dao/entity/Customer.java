@@ -75,9 +75,6 @@ public class Customer {
 	List<Product> products;
 
 	@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
-	List<Contract> contracts;
-
-	@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
 	List<Deployment> deployments;
 
 	@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
