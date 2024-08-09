@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/clear.html}">
+<head>
+	<script th:src="@{/resources/vendors/ckeditor/ckeditor.js}"></script>
+	<style>
+		.attachment-delete:hover {
+			background-color: #fde5ef !important;
+		}
+	</style>
+	<script th:inline="javascript">
+		
+		const rowid = /*[[${rowid}]]*/ "";
+		
+		$(() => {
+			
+			HttpUtils.doPost({
+				url:"/customers/qryDocumentCatetories",
+				success: (response) => {
+					ElementUtils.createDropdownTextField({
+						div: document.getElementById("category-select"),
+						id: "category",
+						values: response.data,
+						value: ""
+					})
+				}
+			})
+			
+			const createEditor = () => {
+				CKEDITOR.replace( 'editor', {
+					on: {
+							instanceReady: function( ev1 ) {	        	
+								ev1.editor.on('contentDom', function() {
+									ev1.editor.document.on('drop', function(ev2) {	                	
+										ev2.data.preventDefault(true); 
+									});
+									ev1.editor.document.on('dragover', function(ev2) {	                	
+										ev2.data.preventDefault(true); 
+									});
+									ev1.editor.document.on('dragenter', function(ev2) {						
+										ev2.data.preventDefault(true); 
+									});             
+								});
+								
+								$ev1 = ev1;
+							}	    
+						}
+					}
+				);
+			}
+			
+			const getEditorContent = () => {
+				return CKEDITOR.instances['editor'].getData();
+			}
+			
+			const setEditorContent = (content) => {
+				CKEDITOR.instances['editor'].setData(content);	
+			}
+			
+			const toUploadFileInputs = [];
+			
+			const chooseFiles = (callback = () => {}) => {
+				let $input = document.createElement("input")
+				$input.setAttribute("type", "file");
+				$input.setAttribute("multiple", "multiple");
+				$input.addEventListener("change", () => {
+					if($input.files.length > 0){
+						toUploadFileInputs.push($input);
+						renderUploadInputs();
+					}
+				})
+				$input.click();
+			}
+			
+			const renderUploadInputs = () => {
+				const attachments = document.getElementById("attachments");
+				attachments.innerHTML = "";
+				toUploadFileInputs.forEach($input => {
+					for (let i = 0; i < $input.files.length; i++) {
+						const cmp = createUploadComponent($input, $input.files[i]);
+						attachments.appendChild(cmp);
+					}
+				})
+			}
+			
+			const createUploadComponent = ($input, file) => {
+				const fileName = file.name;
+				const cmp = ElementUtils.createElement(`
+					<div style="width: 300px; min-width: 220px; height: 54px; min-height: 54px;" class="border border-secondary rounded m-2 none-select">
+						<div data-btn-delete style="width: 24px; height: 24px;" class="attachment-delete position-relative top-0 start-100 translate-middle bg-light border border-danger rounded-circle clickable">
+						   <i class="bi bi-x text-danger" style="position: absolute; font-size: 18px; top: -1px; left: 2px;"></i> 
+						</div>
+						<span data-icon style="font-size: 34px; position: relative; left: 11px; top: -25px;">
+						</span>
+						<div data-filename style="position: relative; width: 236px; top: -61px; left: 54px; overflow: hidden; text-overflow: ellipsis;  white-space: nowrap;">
+						</div>
+					</div>
+				`)
+				cmp.querySelector("[data-btn-delete]").addEventListener("click",() => {
+					DialogUtils.confirm({
+						title: "取消上傳附件提醒",
+						text: "是否要取消上傳「" + fileName + "」檔案?",
+						onConfirm: () => {
+							removeFileListItem($input, file);
+						}
+					})
+				});
+				
+				cmp.querySelector("[data-icon]").appendChild(
+					ElementUtils.createFileIcon(fileName)
+				)
+				
+				cmp.title = file.name;
+				cmp.querySelector("[data-filename]").innerText = file.name;
+				return cmp;
+			}
+			
+			const removeFileListItem = ($input, file) => {
+				const dt = new DataTransfer();
+				for (let i = 0; i < $input.files.length; i++) {
+					if($input.files[i] === file){
+						continue;
+					} else {
+						dt.items.add($input.files[i]);
+					}
+			    }
+				$input.files = dt.files;
+				renderUploadInputs();
+			}
+			
+			$("#save-btn").click(() => {
+				const category = document.getElementById("category").value;
+				const subject = document.getElementById("subject").value;
+				const content = getEditorContent();
+
+				if(!category){
+					PromptUtils.warning("類別為必填")
+					return;
+				}				
+				if(!subject){
+					PromptUtils.warning("文件文檔名稱為必填")
+					return;
+				}
+				
+				const formData = new FormData();
+				formData.append("category", category);
+				formData.append("subject", subject);
+				formData.append("content", content);
+				toUploadFileInputs.forEach($input => {
+					for (let i = 0; i < $input.files.length; i++) {
+						formData.append("files", $input.files[i])					
+					}
+				})
+				
+				HttpUtils.upload({
+					url: "/customers/createDocument/" + rowid,
+					formData: formData,
+					success: () => {
+						PromptUtils.success("新增成功")
+						DialogUtils.closeWindow(window, true)
+					}
+				})
+						
+			})
+			
+			$("#upload-btn").click(() => {
+				chooseFiles();
+			})
+			
+			createEditor();
+		})
+		
+	</script>
+</head>
+
+<body layout:fragment="content">
+	
+	<div class="input-group my-4">
+		<div class="input-group-text">
+			類別
+			<span class="text-danger">*</span>
+		</div>
+		<div id="category-select"></div>
+		<div class="input-group-text">
+			文件文檔名稱
+			<span class="text-danger">*</span>
+		</div>
+		<input type="text" class="form-control" id="subject">
+		<button id="save-btn" type="button" class="btn btn-success">
+			新增
+		</button>
+    </div>
+	
+	<textarea id="editor"></textarea>
+	
+	<div id="attachments" class="d-flex flex-wrap mt-3"></div>
+	
+	<div class="my-3">
+		<button id="upload-btn" class="btn btn-primary">
+			<i class="bi bi-cloud-upload-fill"></i>
+			選擇上傳附件
+		</button>
+	</div>	
+		
+</body>
+
+</html>

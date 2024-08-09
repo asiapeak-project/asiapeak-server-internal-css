@@ -93,6 +93,35 @@ body, .ap-main-body {
     z-index: 2147483647;
 }
 
+.uploading-mask{
+	position: fixed;
+	width: 100dvw;
+	height: 100dvh;
+	opacity: 0.2;
+	background: gray;
+	left: 0px;
+	top: 0px;
+	z-index: 2147483646;
+}
+
+.uploading-mask-text{
+	position: fixed;
+    left: calc(50% - 75px);
+    top: calc(50% - 50px);
+    width: 250px;
+    font-size: 24px;
+    z-index: 2147483647;
+}
+
+.uploading-mask-bar{
+	position: fixed;
+	background: white;
+    left: calc(50% - 75px);
+    top: calc(50% - 12px);
+    width: 250px;
+    z-index: 2147483647;
+}
+
 .page-link.actived{
 	background: #7a7aff !important;
 	color: white !important;

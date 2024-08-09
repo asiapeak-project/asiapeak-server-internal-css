@@ -306,6 +306,7 @@ var DocumentUtils = {
 var ElementUtils = top.ElementUtils || {
 	screenMaskCount: 0,
 	screenMaskElement: null,
+	uploadingMaskElement: null,
 	/** 顯示畫面遮擋 */
 	showScreenMask: () => {
 		if(ElementUtils.screenMaskElement === null){
@@ -333,6 +334,43 @@ var ElementUtils = top.ElementUtils || {
 			ElementUtils.screenMaskCount = 0;
 			DocumentUtils.removeFromTop(ElementUtils.screenMaskElement);
 		}
+	},
+	setUploading: (options = {}) => {
+		
+		if(ElementUtils.uploadingMaskElement === null){
+			ElementUtils.uploadingMaskElement = ElementUtils.createElement(`
+				<div class="none-select">
+					<div class="uploading-mask"></div>
+					<div class="uploading-mask-text">資料上傳中，請稍後...</div>
+					<div class="uploading-mask-bar">
+						<div class="progress">
+						  <div class="progress-bar bg-success" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+						</div>
+					</div>
+				</div>
+			`);
+		}
+				
+		if(options.show === true){
+			DocumentUtils.appendToTop(ElementUtils.uploadingMaskElement);
+		} else if(options.show === false) {
+			DocumentUtils.removeFromTop(ElementUtils.uploadingMaskElement);				
+		}
+		
+		if(options.percent !== null){
+			const bar = ElementUtils.uploadingMaskElement.querySelector(".progress-bar");
+			bar.style.width = options.percent + "%";
+			bar.setAttribute("aria-valuenow", "" + options.percent);
+			
+			const msg = ElementUtils.uploadingMaskElement.querySelector(".uploading-mask-text");
+			
+			if(options.percent === 100){
+				msg.innerText = "請等候伺服器處理完畢";
+			}else{
+				msg.innerText = "資料上傳中，請稍後...";
+			}
+		}
+		
 	},
 	/** 建立 DOM 物件 */
 	createElement: (html) => {
@@ -834,6 +872,121 @@ var ElementUtils = top.ElementUtils || {
 		
 		div.appendChild(tabUL);
 		div.appendChild(tabContentDiv);
+	},
+	/**
+	 * 建立 Text Input 下拉選單，需要有 bootstrap 5 套件
+	 * 參數:
+	 * 	div = HTML Div DOM 物件
+	 *  id = input 的 id
+	 *  name = input 的 name
+	 * 	width = input 的長度，預設 '150px'
+	 *  values = 字串陣列，範例: values : ['', 'Option 1', 'Option 2', 'Option 3'],
+	 *  value = 預設的值
+	 * 
+	 */
+	createDropdownTextField: (options = {}) => {
+		const div = options.div || ElementUtils.createElement("<div></div>");
+		const id = options.id || null;
+		const name = options.name || null;
+		const width = options.width || "150px";
+		const values = options.values || [];
+		const value = options.value || (values.length > 0 ? values[0] : "");
+		
+		div.innerHTML = "";
+		
+		const dropdownGroup = ElementUtils.createElement(`<div class="input-group"></div>`)
+		
+		const dropdownContainer = ElementUtils.createElement(`<div style="${width ? 'width:' + width : ""}"></div>`);
+		
+		const select = ElementUtils.createElement(`
+			<select 
+				class="form-select position-absolute"
+				style="${width ? 'width:' + width : ""}"
+			>
+			</select>
+		`);
+		
+		values.forEach(v => {
+			const option = ElementUtils.createElement(`<option ${v === value ? 'selected' : ''}></option>`)
+			option.innerText = v;
+			select.appendChild(option);
+		})
+		
+		const input = ElementUtils.createElement(`
+			<input 
+				type="text" 
+				class="form-control position-absolute rounded-0"
+				style="${width ? 'width:' + width : ""}" 
+				${name ? "name='" + name + "'" : ""}  
+				${id ? "id='" + id + "'" : ""}
+			 />
+		 `);
+		 
+		 input.value = value;
+		
+		const selectButton = ElementUtils.createElement(`
+			<button type="button" class="btn border rounded-0">
+				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-down" viewBox="0 0 16 16">
+					<path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708"/>
+				</svg>
+			</button>
+		`)
+		
+		select.addEventListener('change', () => {
+			console.log("!!")
+			input.value = select.options[select.selectedIndex].text;
+		})
+		
+		selectButton.addEventListener('click', () => {
+			select.showPicker()
+		})
+		
+		dropdownContainer.appendChild(select);
+		dropdownContainer.appendChild(input);
+		dropdownGroup.appendChild(dropdownContainer);
+		dropdownGroup.appendChild(selectButton);
+		
+		div.appendChild(dropdownGroup);
+	},
+	createFileIcon: (fileName = "") => {
+		const lower = fileName.toLowerCase();
+		
+		let type = "file";
+		
+		if(lower.endsWith(".pdf")){
+			type = "pdf";
+		} else if(
+			lower.endsWith(".java") ||
+			lower.endsWith(".xml") ||
+			lower.endsWith(".class") ||
+			lower.endsWith(".js") ||
+			lower.endsWith(".css") ||
+			lower.endsWith(".jar") ||
+			lower.endsWith(".properties") ||
+			lower.endsWith(".config") ||
+			lower.endsWith(".cfg")
+		){
+			type = "code";
+		} else if(lower.endsWith(".doc") || lower.endsWith(".docx")){
+			type = "word";
+		} else if(lower.endsWith(".txt")){
+			type = "text";
+		} else if(lower.endsWith(".png") || lower.endsWith(".jpg") || lower.endsWith(".jpge")){
+			type = "image"
+		} else if(lower.endsWith(".zip") || lower.endsWith(".7z") || lower.endsWith(".rar")){
+			type = "zip"
+		} else if(lower.endsWith(".ppt") || lower.endsWith(".pptx")){
+			type = "richtext";
+		} else if(lower.endsWith(".xls") || lower.endsWith(".xlsx")){
+			type = "excel";
+		}
+		
+		if(type === "file"){
+			return ElementUtils.createElement(`<i class="bi bi-file-earmark"></i>`);
+		}else{
+			return ElementUtils.createElement(`<i class="bi bi-file-earmark-${type}"></i>`);
+		}
+		
 	}
 	
 }
@@ -985,6 +1138,50 @@ var TextUtils = top.TextUtils || {
 	    } else {
 	        return TextUtils.stringComparator.compare(s1, s2); // 其他情況使用 localeCompare
 	    }
+	},
+	formatFileSizeNum: (length) => {
+		const KB = 1024;
+		const MB = KB * 1024;
+		const GB = MB * 1024;
+		const TB = GB * 1024;
+		
+		let size = length * 1;
+		
+		const Size_TB = Math.trunc(size / TB);
+		size -= Size_TB * TB;
+		
+		const Size_GB = Math.trunc(size / GB);
+		size -= Size_GB * GB;
+		
+		const Size_MB = Math.trunc(size / MB);
+		size -= Size_MB * MB;
+		
+		const Size_KB = Math.trunc(size / KB);
+		size -= Size_KB * KB;
+		
+		const result = [];
+		
+		if(Size_TB > 0){
+			result.push(Size_TB + " TB")
+		}
+		
+		if(Size_GB > 0){
+			result.push(Size_GB + " GB")
+		}
+		
+		if(Size_MB > 0){
+			result.push(Size_MB + " MB")
+		}
+		
+		if(Size_KB > 0){
+			result.push(Size_KB + " KB")
+		}
+		
+		if(size > 0){
+			result.push(size + " Byte")
+		}
+		
+		return result.join(" ");
 	}
 }
 
@@ -1047,6 +1244,52 @@ var HttpUtils = top.HttpUtils || {
 		$a.setAttribute("href", urlQueryString);
 		$a.setAttribute("download", "");
 		$a.click();
+	},
+	upload: (options = {}) => {
+		const url = options.url || "";
+		const formData = options.formData || new FormData();
+		const success = options.success || (() => {})
+		const error = options.error || (() => {})
+		
+		ElementUtils.setUploading({
+			show: true,
+			percent: 0
+		})
+		
+		const ajax = new XMLHttpRequest();
+		
+		ajax.addEventListener("load", (event) => {
+			ElementUtils.setUploading({
+				show: false,
+			})
+			success(event);
+		}, false);
+		
+		ajax.upload.addEventListener("progress", (event) => {
+			if (event.total == 0) {
+				ElementUtils.setUploading({
+					percent: 100
+				})
+			} else {
+				let percent = Math.round((event.loaded / event.total) * 100);
+				ElementUtils.setUploading({
+					percent: percent
+				})
+			}
+		}, false);
+		
+		ajax.addEventListener("error", (event) => {
+			const xhr = event.target;
+		    const errorMessage = xhr.statusText || "An error occurred";
+		    PromptUtils.error(`Error ${xhr.status}: ${errorMessage}`)
+		    ElementUtils.setUploading({
+				show: false,
+			})
+		    error(event);
+		}, false);
+		
+		ajax.open("POST", url, true);
+		ajax.send(formData);
 	}
 }
 

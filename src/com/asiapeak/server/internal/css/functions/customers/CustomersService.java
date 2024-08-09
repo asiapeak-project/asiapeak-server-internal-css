@@ -1,5 +1,6 @@
 package com.asiapeak.server.internal.css.functions.customers;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -8,20 +9,25 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.asiapeak.server.internal.css.dao.entity.Contact;
 import com.asiapeak.server.internal.css.dao.entity.Customer;
 import com.asiapeak.server.internal.css.dao.entity.Deployment;
+import com.asiapeak.server.internal.css.dao.entity.Document;
 import com.asiapeak.server.internal.css.dao.entity.ImportantRecord;
 import com.asiapeak.server.internal.css.dao.entity.Product;
 import com.asiapeak.server.internal.css.dao.repo.ContactRepo;
 import com.asiapeak.server.internal.css.dao.repo.CustomerRepo;
 import com.asiapeak.server.internal.css.dao.repo.DeploymentRepo;
+import com.asiapeak.server.internal.css.dao.repo.DocumentRepo;
 import com.asiapeak.server.internal.css.dao.repo.ImportantRecordRepo;
 import com.asiapeak.server.internal.css.dao.repo.ProductRepo;
+import com.asiapeak.server.internal.css.functions.DocumentFileService;
 import com.asiapeak.server.internal.css.functions.customers.dto.ContactDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.CustomerDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.DeploymentDto;
+import com.asiapeak.server.internal.css.functions.customers.dto.DeploymentOutptuDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.ImportantRecordDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.ProductDto;
 import com.asiapeak.server.internal.css.system.UserNameService;
@@ -46,6 +52,12 @@ public class CustomersService {
 
 	@Autowired
 	DeploymentRepo deploymentRepo;
+
+	@Autowired
+	DocumentRepo documentRepo;
+
+	@Autowired
+	DocumentFileService documentFileService;
 
 	@Transactional
 	public List<CustomerDto> qryCustomers() {
@@ -569,6 +581,67 @@ public class CustomersService {
 		customerRepo.updateDetailTime(dao.getCustomer().getRowid(), user);
 
 		return null;
+	}
+
+	@Transactional
+	public List<String> qryDocumentCatetories() {
+		return documentRepo.findDistinctCategories();
+	}
+
+	@Transactional
+	public List<DeploymentOutptuDto> qryDocuments(Integer rowid) {
+		Customer customer = customerRepo.findById(rowid).orElse(null);
+		if (customer == null) {
+			return new ArrayList<>();
+		}
+
+		return customer.getDocuments().stream().map(dao -> {
+			DeploymentOutptuDto dto = new DeploymentOutptuDto();
+			dto.setRowid(dao.getRowid());
+			dto.setCategory(dao.getCategory());
+			dto.setSubject(dao.getSubject());
+			dto.setUdate(dao.getUdate());
+			dto.setUuser(dao.getUuser());
+			dto.setCdate(dao.getCdate());
+			dto.setCuser(dao.getCuser());
+			dto.setAttachments(documentFileService.listDocumentFiles(rowid, dao.getRowid()).size());
+			return dto;
+		}).collect(Collectors.toList());
+	}
+
+	@Transactional
+	public void createDocument(Integer rowid, String category, String subject, String content, List<MultipartFile> files) throws Exception {
+
+		Customer customer = customerRepo.findById(rowid).orElse(null);
+		if (customer == null) {
+			throw new RuntimeException("客戶資訊不存在");
+		}
+
+		Document dao = new Document();
+		dao.setCategory(category);
+		dao.setSubject(subject);
+		dao.setContent(content);
+		dao.setCustomer(customer);
+
+		String user = userNameService.getCurrentUserName();
+		Date now = new Date();
+		dao.setUdate(now);
+		dao.setUuser(user);
+		dao.setCdate(now);
+		dao.setCuser(user);
+
+		dao = documentRepo.save(dao);
+
+		File documentFilder = documentFileService.getDocumentFolder(rowid, dao.getRowid());
+
+		for (MultipartFile file : files) {
+			String fileName = file.getOriginalFilename();
+			File saveFile = new File(documentFilder, fileName);
+			file.transferTo(saveFile);
+		}
+
+		customerRepo.updateDetailTime(customer.getRowid(), user);
+
 	}
 
 }

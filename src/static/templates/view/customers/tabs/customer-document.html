@@ -11,12 +11,85 @@
 		
 		$(() => {
 			
+			HttpUtils.doPost({
+				url:"/customers/qryDocumentCatetories",
+				success: (response) => {
+					const category = document.getElementById("category");
+					response.data.forEach(item => {
+						const option = ElementUtils.createElement(`<option></option>`)
+						option.innerText = item;
+						option.value = item;
+						category.appendChild(option)
+					})
+					ElementUtils.createDropdownTextField({
+						div: document.getElementById("category-select"),
+						id: "category",
+						values: response.data,
+						value: ""
+					})
+				}
+			})
+			
+			const doQuery = () => {
+				HttpUtils.doPost({
+					url: "/customers/qryDocuments/" + rowid,
+					success: (response) => {
+						renderTable(response.data);
+					}
+				})
+			}
+			
+			const renderTable = (data) => {
+				
+				ElementUtils.renderTable({
+					table: document.getElementById("myTable"),
+					data: data,
+					thead: [
+						{html : "類別"},
+						{html : "名稱"},
+						{html : "附件數量"}
+					],
+					tbody: [
+						{html: "@{category}"},
+						{html: "@{subject}"},
+						{html: "@{attachments}"},
+					]
+				})
+				
+			}
+			
+			$("#create-btn").click(() => {
+				DialogUtils.window({
+					title: "新增文件文檔",
+					url: "/customers/createDocument/" + rowid,
+					width: "calc(100dvw - 20px)",
+					height: "calc(100vh - 122px);",
+					onCallback : (rtnVal) => {
+						doQuery();
+					}					
+				})
+			})
+			
+			doQuery();
 		})
+		
 	</script>
 </head>
 
 <body layout:fragment="content">
-	customer-document
+	
+	
+	<div class="d-flex justify-content-between mb-3">
+		<select id="category" class="form-select" style="width: 200px;">
+			<option selected value="">全部</option>
+		</select>
+		<button id="create-btn" class="btn btn-success" type="button">
+			<i class="bi bi-plus"></i>
+		</button>
+	</div>
+	
+	<table id="myTable" class="table table-striped table-hover table-bordered"></table>
+	
 </body>
 
 </html>
