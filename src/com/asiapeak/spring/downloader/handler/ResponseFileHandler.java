@@ -40,6 +40,8 @@ public class ResponseFileHandler extends AbstractDownloadHandler<ResponseFile> {
 
 	@Override
 	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
+		log.info(clazz.getCanonicalName());
+		log.info(mediaType.toString());
 		return ResponseFile.class == clazz;
 	}
 
@@ -47,7 +49,7 @@ public class ResponseFileHandler extends AbstractDownloadHandler<ResponseFile> {
 	protected void write(ResponseFile responseFile, HttpServletRequest request, HttpServletResponse response) throws IOException {
 
 		log.info("ResponseFileHandler.write");
-		
+
 		File file = responseFile.getFile();
 
 		Objects.requireNonNull(file, "file is null");
