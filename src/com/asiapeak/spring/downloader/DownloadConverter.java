@@ -23,6 +23,9 @@ import org.springframework.stereotype.Component;
 
 import com.asiapeak.spring.downloader.abstracts.AbstractDownloadHandler;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class DownloadConverter extends AbstractHttpMessageConverter<Object> {
@@ -41,6 +44,7 @@ public class DownloadConverter extends AbstractHttpMessageConverter<Object> {
 	@PostConstruct
 	private void doInit() {
 		applicationContext.getBeansOfType(AbstractDownloadHandler.class).forEach((key, bean) -> {
+			log.info("add DownloadConverter:" + key);
 			handlers.add(bean);
 		});
 	}
