@@ -26,6 +26,9 @@ import org.springframework.stereotype.Component;
 import com.asiapeak.spring.downloader.abstracts.AbstractDownloadHandler;
 import com.asiapeak.spring.downloader.dto.ResponseFile;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class ResponseFileHandler extends AbstractDownloadHandler<ResponseFile> {
@@ -43,6 +46,8 @@ public class ResponseFileHandler extends AbstractDownloadHandler<ResponseFile> {
 	@Override
 	protected void write(ResponseFile responseFile, HttpServletRequest request, HttpServletResponse response) throws IOException {
 
+		log.info("ResponseFileHandler.write");
+		
 		File file = responseFile.getFile();
 
 		Objects.requireNonNull(file, "file is null");
