@@ -496,7 +496,13 @@ public class CustomersController {
 
 	@ResponseBody
 	@PostMapping(path = "createDocument/{rowid}", consumes = "multipart/form-data")
-	public ResponseBean<Boolean> createDocument(@PathVariable("rowid") Integer rowid, @RequestParam("category") String category, @RequestParam("subject") String subject, @RequestParam("content") String content, @RequestPart(name = "files", required = false) List<MultipartFile> files) throws Exception {
+	public ResponseBean<Boolean> createDocument( //
+			@PathVariable("rowid") Integer rowid, //
+			@RequestParam("category") String category, //
+			@RequestParam("subject") String subject, //
+			@RequestParam("content") String content, //
+			@RequestPart(name = "files", required = false) List<MultipartFile> files //
+	) throws Exception {
 		customersService.createDocument(rowid, category, subject, content, files);
 		return ResponseBean.success(true);
 	}
@@ -534,6 +540,29 @@ public class CustomersController {
 		ResponseZip responseZip = new ResponseZip(file);
 		responseZip.setZipName(zipName);
 		return responseZip;
+	}
+
+	@GetMapping("editDocument/{rowid}")
+	public ModelAndView editDocument(@PathVariable("rowid") Integer rowid) {
+		ModelAndView view = new ModelAndView("view/customers/dialogs/customer-document-edit");
+		String subject = customersService.qryDocumentSubject(rowid);
+		view.addObject("subject", subject);
+		view.addObject("rowid", rowid);
+		return view;
+	}
+
+	@ResponseBody
+	@PostMapping(path = "editDocument/{rowid}", consumes = "multipart/form-data")
+	public ResponseBean<Boolean> editDocument( //
+			@PathVariable("rowid") Integer rowid, //
+			@RequestParam("category") String category, //
+			@RequestParam("subject") String subject, //
+			@RequestParam("content") String content, //
+			@RequestParam(name = "delFiles", required = false) List<String> delFiles, //
+			@RequestPart(name = "files", required = false) List<MultipartFile> files //
+	) throws Exception {
+		customersService.editDocument(rowid, category, subject, content, delFiles, files);
+		return ResponseBean.success(true);
 	}
 
 	////

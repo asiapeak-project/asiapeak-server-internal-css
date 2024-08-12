@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -38,7 +39,7 @@ public class FileService {
 			return new ArrayList<>();
 		}
 
-		return Arrays.asList(documentFolder.listFiles());
+		return Arrays.asList(documentFolder.listFiles()).stream().filter(f -> f.isFile()).collect(Collectors.toList());
 	}
 
 	public File getDocumentFolder(Integer customerRowid, Integer documentRowid) throws IOException {

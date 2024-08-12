@@ -754,4 +754,42 @@ public class CustomersService {
 		return dao.getSubject();
 	}
 
+	@Transactional
+	public void editDocument(Integer rowid, String category, String subject, String content, List<String> delFiles, List<MultipartFile> files) throws IOException {
+		Document dao = documentRepo.findById(rowid).orElse(null);
+		if (dao == null) {
+			throw new RuntimeException("文件文檔不存在");
+		}
+		dao.setCategory(category);
+		dao.setSubject(subject);
+		dao.setContent(content);
+
+		String user = userNameService.getCurrentUserName();
+		Date now = new Date();
+		dao.setUdate(now);
+		dao.setUuser(user);
+
+		File documentFilder = fileService.getDocumentFolder(dao.getCustomer().getRowid(), rowid);
+
+		if (delFiles != null) {
+			for (String delFile : delFiles) {
+				File f = new File(documentFilder, delFile);
+				if (f.exists()) {
+					f.delete();
+				}
+			}
+		}
+
+		if (files != null) {
+			for (MultipartFile file : files) {
+				String fileName = file.getOriginalFilename();
+				File saveFile = new File(documentFilder, fileName);
+				file.transferTo(saveFile);
+			}
+		}
+
+		documentRepo.save(dao);
+		customerRepo.updateDetailTime(dao.getCustomer().getRowid(), user);
+	}
+
 }

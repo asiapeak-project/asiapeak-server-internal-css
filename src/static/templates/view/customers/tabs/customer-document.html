@@ -12,47 +12,97 @@
 		
 		
 		$(() => {
+		
+			let categoryFilter = "";
+			let sortKey = "";
+			let sortDir = "";
 			
-			HttpUtils.doPost({
-				url:"/customers/qryDocumentCatetories",
-				success: (response) => {
-					const category = document.getElementById("category");
-					response.data.forEach(item => {
-						const option = ElementUtils.createElement(`<option></option>`)
-						option.innerText = item;
-						option.value = item;
-						category.appendChild(option)
-					})
-					ElementUtils.createDropdownTextField({
-						div: document.getElementById("category-select"),
-						id: "category",
-						values: response.data,
-						value: ""
-					})
-				}
-			})
+			let list = [];
 			
-			const doQuery = () => {
+			const doQueryCategorySelect = () => {
 				HttpUtils.doPost({
-					url: "/customers/qryDocuments/" + rowid,
+					url:"/customers/qryDocumentCatetories",
 					success: (response) => {
-						renderTable(response.data);
+						const category = document.getElementById("category");
+						category.innerHTML = "";
+						
+						if(!response.data.includes(categoryFilter)){
+							categoryFilter = "";
+						}
+						
+						const defaultOption = ElementUtils.createElement(`<option value="" ${categoryFilter ? "selected" : ""}>全部</option>`)
+						category.appendChild(defaultOption)
+						
+						response.data.forEach(item => {
+							const option = ElementUtils.createElement(`<option></option>`)
+							option.innerText = item;
+							option.value = item;
+							if(option.value === categoryFilter){
+								option.selected = true;
+							}
+							category.appendChild(option)
+						})
 					}
 				})
 			}
 			
-			const renderTable = (data) => {
-				
+			const doQuery = (show) => {
+				HttpUtils.doPost({
+					url: "/customers/qryDocuments/" + rowid,
+					success: (response) => {
+						list = response.data;
+						renderTable();
+						if(show){
+							PromptUtils.success("重新整理成功！")
+						}
+					}
+				})
+			}
+			
+			const getList = () => {
+				return list.map(item => {
+					return item;
+				}).filter(item => {
+					if(categoryFilter){
+						return item.category === categoryFilter;	
+					}else{
+						return true;
+					}					
+				}).sort((a, b) => {
+					if(sortKey && sortDir){
+						const aVal = a[sortKey] ? a[sortKey].toString() : "";
+						const bVal = b[sortKey] ? b[sortKey].toString() : "";
+						if(sortDir === "desc"){
+							return TextUtils.stringCompare(bVal, aVal)
+						}else{
+							return TextUtils.stringCompare(aVal, bVal)
+						}
+					}else{
+						return 0;
+					}
+				})
+			}
+			
+			const renderTable = () => {
 				ElementUtils.renderTable({
 					table: document.getElementById("myTable"),
-					data: data,
-					thead: [
-						{html : "類別"},
-						{html : "名稱"},
-						{html : "附件數量"},
-						{html : "更新日期"},
-						{html : "更新者"}
-					],
+					data: getList(),
+					thead: ElementUtils.createSortableTableHeader({
+						thead: [
+							{html: "類別", sortKey: "category"},
+							{html : "名稱", sortKey: "subject"},
+							{html : "附件數量", sortKey: "attachments"},
+							{html: "更新時間", sortKey: "udate", style: "width: 120px"},
+							{html: "更新者", sortKey: "uuser", style: "width: 120px"},
+						],
+						onEvent: (key, dir) => {
+							sortKey = key;
+							sortDir = dir;
+							renderTable();
+						},
+						sortKey: sortKey,
+						sortDir: sortDir
+					}),
 					tbody: [
 						{html: "@{category}"},
 						{html: "<a data-subject class='clickable text-decoration-underline'>@{subject}</a>"},
@@ -62,12 +112,17 @@
 					],
 					treach: (item, $tr, index) => {
 						
+						$($tr).data("data", item);
+						$($tr).data("index", index);
+						
 						$tr.querySelector("[data-subject]").addEventListener('mousedown', (e) => {
 							
 							if(e.button === 0){
 								DialogUtils.window({
 									title: dname + "-文件文檔",
-									url: "/customers/viewDocument/" + item.rowid,								
+									width: "calc(100dvw - 20px)",
+									height: "calc(100vh - 122px);",
+									url: "/customers/viewDocument/" + item.rowid,
 								})
 							} else if(e.button === 1){
 								window.open("/customers/viewDocument/" + item.rowid, '_blank');
@@ -96,6 +151,18 @@
 				})
 			})
 			
+			$("#reload-btn").click(() => {
+				doQueryCategorySelect();
+				doQuery(true);
+			})
+			
+			
+			$("#category").change(() => {
+				categoryFilter = $("#category").val();
+				renderTable();
+			})
+			
+			doQueryCategorySelect();
 			doQuery();
 		})
 		
@@ -106,9 +173,22 @@
 	
 	
 	<div class="d-flex justify-content-between mb-3">
-		<select id="category" class="form-select" style="width: 200px;">
-			<option selected value="">全部</option>
-		</select>
+		
+		<div class="input-group" style="width: 300px">
+
+			
+			<div class="input-group-text"> 類別 </div>
+			
+			<select id="category" class="form-select">
+				<option selected value="">全部</option>
+			</select>
+			
+			<button id="reload-btn" title="重新整理" class="btn btn-secondary" type="button">
+				<i class="bi bi-arrow-clockwise"></i>
+			</button>
+			
+		</div>
+		
 		<button id="create-btn" class="btn btn-success" type="button">
 			<i class="bi bi-plus"></i>
 		</button>

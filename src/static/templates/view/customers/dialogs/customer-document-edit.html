@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/clear.html}">
+<head>
+	<title>客戶服務系統-文件文檔-[[${subject}]]</title>
+	<script th:src="@{/resources/vendors/ckeditor/ckeditor.js}"></script>
+	<style>
+		.attachment-delete:hover {
+			background-color: #fde5ef !important;
+		}
+		
+		.attachment-delete-line {
+			position: relative;
+		    background-color: red;
+		    width: 304px;
+		    height: 2px;
+		    left: -3px;
+		    top: -102px;
+		    transform: rotate(12deg);
+		}
+	</style>
+	<script th:inline="javascript">
+		
+		const rowid = /*[[${rowid}]]*/ "";
+		let parentRowid;
+		
+		$(() => {
+			
+			
+			
+			const doQuery = () => {
+				HttpUtils.doPost({
+					url:"/customers/qryDocument/" + rowid,
+					success: (response) => {
+						const data = response.data;
+						parentRowid = data.parentRowid;
+						
+						$("#subject").val(data.subject)
+						
+						setEditorContent(data.content);
+						renderUploadedInputs(data.files);
+						
+						HttpUtils.doPost({
+							url:"/customers/qryDocumentCatetories",
+							success: (response) => {
+								ElementUtils.createDropdownTextField({
+									div: document.getElementById("category-select"),
+									id: "category",
+									values: response.data,
+									value: data.category
+								})
+							}
+						})
+						
+						
+					}
+				})
+			}
+			
+			const createEditor = () => {
+				CKEDITOR.replace( 'editor', {
+					on: {
+							instanceReady: function( ev1 ) {	        	
+								ev1.editor.on('contentDom', function() {
+									ev1.editor.document.on('drop', function(ev2) {	                	
+										ev2.data.preventDefault(true); 
+									});
+									ev1.editor.document.on('dragover', function(ev2) {	                	
+										ev2.data.preventDefault(true); 
+									});
+									ev1.editor.document.on('dragenter', function(ev2) {						
+										ev2.data.preventDefault(true); 
+									});             
+								});
+								
+								$ev1 = ev1;
+							}	    
+						}
+					}
+				);
+			}
+			
+			const getEditorContent = () => {
+				return CKEDITOR.instances['editor'].getData();
+			}
+			
+			const setEditorContent = (content) => {
+				CKEDITOR.instances['editor'].setData(content);	
+			}
+									
+			const renderUploadedInputs = (files) => {
+				const attachments = document.getElementById("uploadedAttachments");
+				attachments.innerHTML = "";
+				files.forEach(file => {
+					const cmp = createUploadedComponent(file);
+					attachments.appendChild(cmp);
+				})
+			}
+			
+			const toDeleteUploadedFiles = [];
+			
+			const createUploadedComponent = (file) => {
+				const fileName = file.name;
+				const cmp = ElementUtils.createElement(`
+					<div style="width: 300px; min-width: 220px; height: 70px; min-height: 70px;" class="border border-secondary rounded m-2 none-select">
+						<div data-btn-delete style="width: 24px; height: 24px;" class="attachment-delete position-relative top-0 start-100 translate-middle bg-light border border-danger rounded-circle clickable">
+						   <i data-btn-delete-icon class="bi bi-x text-danger" style="position: absolute; font-size: 18px; top: -1px; left: 2px;"></i> 
+						</div>
+						<span data-icon style="font-size: 34px; position: relative; left: 11px; top: -16px;"></span>
+						<div data-filename style="position: relative; width: 236px; top: -71px; left: 54px; overflow: hidden; text-overflow: ellipsis;  white-space: nowrap;"></div>
+						<div style="font-size: 12px; position: relative; width: 236px; top: -71px; left: 54px; overflow: hidden; text-overflow: ellipsis;  white-space: nowrap;">
+							<span>檔案大小</span>
+							<span data-size></span>
+						</div>
+						<div style="font-size: 12px; position: relative; width: 236px; top: -71px; left: 54px; overflow: hidden; text-overflow: ellipsis;  white-space: nowrap;">
+							<span>檔案日期</span>
+							<span data-udate></span>
+						</div>
+						<div class="attachment-delete-line"></div>
+					</div>
+				`)
+				
+				cmp.querySelector("[data-icon]").appendChild(
+					ElementUtils.createFileIcon(fileName)
+				)
+				
+				const $cmpDeleteBtn = $("[data-btn-delete]", cmp);
+				const $cmpDeleteIcon = $("[data-btn-delete-icon]", cmp);
+				const $cmpDeleteLine = $(".attachment-delete-line", cmp);
+				
+				$cmpDeleteLine.hide();
+				
+				$cmpDeleteBtn.click(() => {					
+					if($cmpDeleteBtn.hasClass("border-danger")){
+						$cmpDeleteIcon.removeClass("bi-x");
+						$cmpDeleteIcon.removeClass("text-danger");
+						$cmpDeleteIcon.addClass("bi-arrow-clockwise");
+						$cmpDeleteIcon.addClass("text-success");
+						
+						$cmpDeleteBtn.addClass("border-success");
+						$cmpDeleteBtn.removeClass("border-danger");
+						$cmpDeleteLine.show();
+						toDeleteUploadedFiles.push(fileName);
+					} else {
+						$cmpDeleteIcon.addClass("bi-x");
+						$cmpDeleteIcon.addClass("text-danger");
+						$cmpDeleteIcon.removeClass("bi-arrow-clockwise");
+						$cmpDeleteIcon.removeClass("text-success");
+						
+						$cmpDeleteBtn.removeClass("border-success");
+						$cmpDeleteBtn.addClass("border-danger");
+						$cmpDeleteLine.hide();
+						
+						ArrayUtils.removeItem(toDeleteUploadedFiles, fileName);
+					}
+				})
+				
+				$("[data-size]", cmp).text(TextUtils.formatFileSizeNum(file.size));
+				$("[data-udate]", cmp).text(TextUtils.formatDate(new Date(file.udate)));
+				
+				cmp.title = file.name;
+				cmp.querySelector("[data-filename]").innerText = file.name;
+				return cmp;
+			}
+			
+			$("#cancel-btn").click(() => {
+				DialogUtils.closeWindow(window, false);
+			});
+			
+			$("#save-btn").click(() => {
+				const category = document.getElementById("category").value;
+				const subject = document.getElementById("subject").value;
+				const content = getEditorContent();
+
+				if(!category){
+					PromptUtils.warning("類別為必填")
+					return;
+				}				
+				if(!subject){
+					PromptUtils.warning("文件文檔名稱為必填")
+					return;
+				}
+				
+				const toUploadList = [];
+				
+				toUploadFileInputs.forEach($input => {
+					for (let i = 0; i < $input.files.length; i++) {
+						toUploadList.push($input.files[i].name)
+					}
+				})
+				
+				
+				DialogUtils.confirm({
+					title: "更新文件文檔提醒",
+					text: `
+						<div class="mb-4">是否要進行更新?</div>
+						<div class="text-danger">
+							${toDeleteUploadedFiles.length > 0 ? "將會移除以下的附件檔案:" : ""}							
+						</div>
+						<ul>
+							${toDeleteUploadedFiles.map(i => '<li class="text-danger">' + i + '</li>').join('')}
+						</ul>
+						<div class="text-success">
+							${toUploadList.length > 0 ? "將會上傳以下的附件檔案，檔名如與已存在的相同則會覆蓋:" : ""}							
+						</div>
+						<ul>
+							${toUploadList.map(i => '<li class="text-success">' + i + '</li>').join('')}
+						</ul>					
+					`,
+					onConfirm: () => {
+						const formData = new FormData();
+						formData.append("category", category);
+						formData.append("subject", subject);
+						formData.append("content", content);
+										
+						toDeleteUploadedFiles.forEach(item => {
+							formData.append("delFiles", item)
+						})
+						
+						toUploadFileInputs.forEach($input => {
+							for (let i = 0; i < $input.files.length; i++) {
+								formData.append("files", $input.files[i])					
+							}
+						})
+						
+						HttpUtils.upload({
+							url: "/customers/editDocument/" + rowid,
+							formData: formData,
+							success: () => {
+								PromptUtils.success("更新成功")
+								DialogUtils.closeWindow(window, true)
+							}
+						})
+					}
+				})
+				
+			})
+			
+			const toUploadFileInputs = [];
+			
+			const chooseFiles = (callback = () => {}) => {
+				let $input = document.createElement("input")
+				$input.setAttribute("type", "file");
+				$input.setAttribute("multiple", "multiple");
+				$input.addEventListener("change", () => {
+					if($input.files.length > 0){
+						toUploadFileInputs.push($input);
+						renderUploadInputs();
+					}
+				})
+				$input.click();
+			}
+			
+			const renderUploadInputs = () => {
+				const attachments = document.getElementById("attachments");
+				attachments.innerHTML = "";
+				toUploadFileInputs.forEach($input => {
+					for (let i = 0; i < $input.files.length; i++) {
+						const cmp = createUploadComponent($input, $input.files[i]);
+						attachments.appendChild(cmp);
+					}
+				})
+			}
+			
+			const createUploadComponent = ($input, file) => {
+				const fileName = file.name;
+				const cmp = ElementUtils.createElement(`
+					<div style="width: 300px; min-width: 220px; height: 54px; min-height: 54px;" class="border border-secondary rounded m-2 none-select">
+						<div data-btn-delete style="width: 24px; height: 24px;" class="attachment-delete position-relative top-0 start-100 translate-middle bg-light border border-danger rounded-circle clickable">
+						   <i class="bi bi-x text-danger" style="position: absolute; font-size: 18px; top: -1px; left: 2px;"></i> 
+						</div>
+						<span data-icon style="font-size: 34px; position: relative; left: 11px; top: -25px;"></span>
+						<div data-filename style="position: relative; width: 236px; top: -61px; left: 54px; overflow: hidden; text-overflow: ellipsis;  white-space: nowrap;"></div>
+					</div>
+				`)
+				cmp.querySelector("[data-btn-delete]").addEventListener("click",() => {
+					DialogUtils.confirm({
+						title: "取消上傳附件提醒",
+						text: "是否要取消上傳「" + fileName + "」檔案?",
+						onConfirm: () => {
+							removeFileListItem($input, file);
+						}
+					})
+				});
+				
+				cmp.querySelector("[data-icon]").appendChild(
+					ElementUtils.createFileIcon(fileName)
+				)
+				
+				cmp.title = file.name;
+				cmp.querySelector("[data-filename]").innerText = file.name;
+				return cmp;
+			}
+			
+			const removeFileListItem = ($input, file) => {
+				const dt = new DataTransfer();
+				for (let i = 0; i < $input.files.length; i++) {
+					if($input.files[i] === file){
+						continue;
+					} else {
+						dt.items.add($input.files[i]);
+					}
+			    }
+				$input.files = dt.files;
+				renderUploadInputs();
+			}
+			
+			$("#upload-btn").click(() => {
+				chooseFiles();
+			})
+			
+			
+			createEditor();
+			doQuery();
+			
+		})
+		
+	</script>
+</head>
+
+<body layout:fragment="content">
+	
+	<div class="d-flex justify-content-between">
+		<button id="cancel-btn" type="button" class="btn btn-secondary">
+			取消
+		</button>
+		<button id="save-btn" type="button" class="btn btn-success">
+			儲存
+		</button>
+	</div>
+	
+	<div class="input-group my-4">
+		<div class="input-group-text">
+			類別
+			<span class="text-danger">*</span>
+		</div>
+		<div id="category-select"></div>
+		<div class="input-group-text">
+			文件文檔名稱
+			<span class="text-danger">*</span>
+		</div>
+		<input type="text" class="form-control" id="subject">
+    </div>
+	
+	<textarea id="editor"></textarea>
+	
+	<div id="uploadedAttachments" class="d-flex flex-wrap mt-3"></div>
+	
+	<hr />
+	
+	<div id="attachments" class="d-flex flex-wrap mt-3"></div>
+	
+	<div class="my-3">
+		<button id="upload-btn" class="btn btn-primary">
+			<i class="bi bi-cloud-upload-fill"></i>
+			選擇上傳附件
+		</button>
+	</div>	
+	
+	
+</body>
+
+</html>

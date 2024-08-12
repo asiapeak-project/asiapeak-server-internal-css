@@ -4,7 +4,6 @@
 	layout:decorate="~{layouts/clear.html}">
 <head>
 	<title>客戶服務系統-文件文檔-[[${subject}]]</title>
-	<script th:src="@{/resources/vendors/ckeditor/ckeditor.js}"></script>
 	<style>
 		.attachment-item:hover {
 			background-color: rgb(192, 192, 192) !important;
@@ -64,10 +63,8 @@
 				const fileName = file.name;
 				const cmp = ElementUtils.createElement(`
 					<div style="width: 300px; min-width: 220px; height: 70px; min-height: 70px;" class="border border-secondary rounded m-2 none-select clickable attachment-item">
-						<span data-icon style="font-size: 34px; position: relative; left: 11px; top: 8px;">
-						</span>
-						<div data-filename style="position: relative; width: 236px; top: -50px; left: 54px; overflow: hidden; text-overflow: ellipsis;  white-space: nowrap;">
-						</div>
+						<span data-icon style="font-size: 34px; position: relative; left: 11px; top: 8px;"></span>
+						<div data-filename style="position: relative; width: 236px; top: -50px; left: 54px; overflow: hidden; text-overflow: ellipsis;  white-space: nowrap;"></div>
 						<div style="font-size: 12px; position: relative; width: 236px; top: -50px; left: 54px; overflow: hidden; text-overflow: ellipsis;  white-space: nowrap;">
 							<span>檔案大小</span>
 							<span data-size></span>
@@ -99,7 +96,17 @@
 			}
 			
 			$("#edit-btn").click(() => {
-						
+				DialogUtils.window({
+					title: "編輯文件文檔",
+					url: "/customers/editDocument/" + rowid,
+					width: "calc(100dvw - 20px)",
+					height: "calc(100vh - 122px);",
+					callback : (rtnVal) => {
+						if(rtnVal){
+							doQuery();
+						}
+					}					
+				})
 			})
 			
 			doQuery();

@@ -1311,5 +1311,13 @@ var ArrayUtils = top.ArrayUtils || {
 			parts.push(Array.from(part));
 		}
 		return parts;
+	},
+	removeItem: (list, item) => {
+		const itemIndex = list.indexOf(item);
+		if(itemIndex > -1){
+			return list.splice(itemIndex, 1);
+		}else{
+			return null;
+		}
 	}
 }
