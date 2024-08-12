@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/clear.html}">
+<head>
+	<title>客戶服務系統-文件文檔-[[${subject}]]</title>
+	<script th:src="@{/resources/vendors/ckeditor/ckeditor.js}"></script>
+	<style>
+		.attachment-item:hover {
+			background-color: rgb(192, 192, 192) !important;
+		}
+	</style>
+	<script th:inline="javascript">
+		
+		const rowid = /*[[${rowid}]]*/ "";
+		let parentRowid;
+		
+		$(() => {
+			
+			const doQuery = () => {
+				HttpUtils.doPost({
+					url:"/customers/qryDocument/" + rowid,
+					success: (response) => {
+						const data = response.data;
+						parentRowid = data.parentRowid;
+						
+						$("#category").val(data.category)
+						$("#subject").val(data.subject)
+						
+						$("#content").html(data.content)
+						if(data.content){
+							$("#content").show();			
+						} else {
+							$("#content").hide();
+						}
+						
+						renderUploadInputs(data.files);
+					}
+				})
+			}
+									
+			const renderUploadInputs = (files) => {
+				const attachments = document.getElementById("attachments");
+				attachments.innerHTML = "";
+				files.forEach(file => {
+					const cmp = createUploadComponent(file);
+					attachments.appendChild(cmp);
+				})
+			}
+			
+			const createUploadComponent = (file) => {
+				const fileName = file.name;
+				const cmp = ElementUtils.createElement(`
+					<div style="width: 300px; min-width: 220px; height: 70px; min-height: 70px;" class="border border-secondary rounded m-2 none-select clickable attachment-item">
+						<span data-icon style="font-size: 34px; position: relative; left: 11px; top: 8px;">
+						</span>
+						<div data-filename style="position: relative; width: 236px; top: -50px; left: 54px; overflow: hidden; text-overflow: ellipsis;  white-space: nowrap;">
+						</div>
+						<div style="font-size: 12px; position: relative; width: 236px; top: -50px; left: 54px; overflow: hidden; text-overflow: ellipsis;  white-space: nowrap;">
+							<span>檔案大小</span>
+							<span data-size></span>
+						</div>
+						<div style="font-size: 12px; position: relative; width: 236px; top: -50px; left: 54px; overflow: hidden; text-overflow: ellipsis;  white-space: nowrap;">
+							<span>檔案日期</span>
+							<span data-udate></span>
+						</div>
+					</div>
+				`)
+				
+				cmp.addEventListener("click",() => {
+					HttpUtils.doDownload({
+						url: "/customers/document/" + parentRowid + "/attachement/" + rowid + "/" + decodeURI(fileName)
+					})
+					PromptUtils.info("「" + fileName + "」已執行下載，請稍號。")
+				});
+				
+				cmp.querySelector("[data-icon]").appendChild(
+					ElementUtils.createFileIcon(fileName)
+				)
+				
+				$("[data-size]", cmp).text(TextUtils.formatFileSizeNum(file.size));
+				$("[data-udate]", cmp).text(TextUtils.formatDate(new Date(file.udate)));
+				
+				cmp.title = file.name;
+				cmp.querySelector("[data-filename]").innerText = file.name;
+				return cmp;
+			}
+			
+			$("#edit-btn").click(() => {
+						
+			})
+			
+			doQuery();
+			
+		})
+		
+	</script>
+</head>
+
+<body layout:fragment="content">
+	
+	<div class="input-group my-4">
+		<div class="input-group-text">類別</div>
+		<input type="text" class="form-control" id="category" readonly />
+		<div class="input-group-text">
+			文件文檔名稱
+		</div>
+		<input type="text" class="form-control" id="subject" readonly />
+		<button id="edit-btn" type="button" class="btn btn-success">
+			編輯
+		</button>
+    </div>
+	
+	<div id="content" class="border p-2"></div>
+	
+	<div id="attachments" class="d-flex flex-wrap mt-3"></div>
+		
+</body>
+
+</html>

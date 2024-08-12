@@ -1,9 +1,12 @@
 package com.asiapeak.server.internal.css.functions.customers;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,8 +25,10 @@ import com.asiapeak.server.internal.css.functions.customers.dto.ContactDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.CustomerDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.DeploymentDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.DeploymentOutptuDto;
+import com.asiapeak.server.internal.css.functions.customers.dto.DocumentDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.ImportantRecordDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.ProductDto;
+import com.asiapeak.spring.downloader.dto.ResponseFile;
 
 @Controller
 @RequestMapping("customers")
@@ -459,7 +464,7 @@ public class CustomersController {
 		}
 		return view;
 	}
-	
+
 	@ResponseBody
 	@PostMapping("qryDocuments/{rowid}")
 	public ResponseBean<List<DeploymentOutptuDto>> qryDocuments(@PathVariable("rowid") Integer rowid) {
@@ -493,6 +498,31 @@ public class CustomersController {
 	public ResponseBean<Boolean> createDocument(@PathVariable("rowid") Integer rowid, @RequestParam("category") String category, @RequestParam("subject") String subject, @RequestParam("content") String content, @RequestPart(name = "files", required = false) List<MultipartFile> files) throws Exception {
 		customersService.createDocument(rowid, category, subject, content, files);
 		return ResponseBean.success(true);
+	}
+
+	@GetMapping("viewDocument/{rowid}")
+	public ModelAndView viewDocument(@PathVariable("rowid") Integer rowid) {
+		ModelAndView view = new ModelAndView("view/customers/dialogs/customer-document-view");
+		String subject = customersService.qryDocumentSubject(rowid);
+		view.addObject("subject", subject);
+		view.addObject("rowid", rowid);
+		return view;
+	}
+
+	@ResponseBody
+	@PostMapping("qryDocument/{rowid}")
+	public ResponseBean<DocumentDto> qryDocument(@PathVariable("rowid") Integer rowid) {
+		DocumentDto dto = customersService.qryDocument(rowid);
+		return ResponseBean.success(dto);
+	}
+
+	@ResponseBody
+	@GetMapping(value = "document/{parentRowid}/attachement/{rowid}/{filename}", consumes = MediaType.ALL_VALUE, produces = MediaType.ALL_VALUE)
+	public ResponseFile downloadAttachement(@PathVariable("parentRowid") Integer parentRowid, @PathVariable("rowid") Integer rowid, @PathVariable("filename") String filename) throws IOException {
+		File file = customersService.downloadAttachement(parentRowid, rowid, filename);
+		ResponseFile responseFile = new ResponseFile();
+		responseFile.setFile(file);
+		return responseFile;
 	}
 
 	////

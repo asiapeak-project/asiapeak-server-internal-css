@@ -1,6 +1,7 @@
 package com.asiapeak.server.internal.css.functions.customers;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -28,6 +29,8 @@ import com.asiapeak.server.internal.css.functions.customers.dto.ContactDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.CustomerDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.DeploymentDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.DeploymentOutptuDto;
+import com.asiapeak.server.internal.css.functions.customers.dto.DocumentAttachementDto;
+import com.asiapeak.server.internal.css.functions.customers.dto.DocumentDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.ImportantRecordDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.ProductDto;
 import com.asiapeak.server.internal.css.system.UserNameService;
@@ -644,6 +647,55 @@ public class CustomersService {
 
 		customerRepo.updateDetailTime(customer.getRowid(), user);
 
+	}
+
+	@Transactional
+	public DocumentDto qryDocument(Integer rowid) {
+
+		Document dao = documentRepo.findById(rowid).orElse(null);
+
+		if (dao == null) {
+			throw new RuntimeException("文件文檔不存在");
+		}
+
+		DocumentDto dto = new DocumentDto();
+		dto.setParentRowid(dao.getCustomer().getRowid());
+		dto.setRowid(dao.getRowid());
+		dto.setCategory(dao.getCategory());
+		dto.setSubject(dao.getSubject());
+		dto.setContent(dao.getContent());
+		dto.setUdate(dao.getUdate());
+		dto.setUuser(dao.getUuser());
+		dto.setCdate(dao.getCdate());
+		dto.setCuser(dao.getCuser());
+
+		dto.setFiles(new ArrayList<>());
+
+		List<File> files = documentFileService.listDocumentFiles(dao.getCustomer().getRowid(), rowid);
+
+		for (File file : files) {
+			DocumentAttachementDto attach = new DocumentAttachementDto();
+			attach.setName(file.getName());
+			attach.setSize(file.length());
+			attach.setUdate(new Date(file.lastModified()));
+			dto.getFiles().add(attach);
+		}
+
+		return dto;
+	}
+
+	public File downloadAttachement(Integer parentRowid, Integer rowid, String filename) throws IOException {
+		File folder = documentFileService.getDocumentFolder(parentRowid, rowid);
+		return new File(folder, filename);
+	}
+
+	@Transactional
+	public String qryDocumentSubject(Integer rowid) {
+		Document dao = documentRepo.findById(rowid).orElse(null);
+		if (dao == null) {
+			return "文件文檔不存在";
+		}
+		return dao.getSubject();
 	}
 
 }

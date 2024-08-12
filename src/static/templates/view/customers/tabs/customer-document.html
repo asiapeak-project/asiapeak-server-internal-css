@@ -8,6 +8,8 @@
 	<script th:inline="javascript">
 		
 		const rowid = /*[[${rowid}]]*/ "";
+		const dname = /*[[${dname}]]*/ "";
+		
 		
 		$(() => {
 			
@@ -47,13 +49,35 @@
 					thead: [
 						{html : "類別"},
 						{html : "名稱"},
-						{html : "附件數量"}
+						{html : "附件數量"},
+						{html : "更新日期"},
+						{html : "更新者"}
 					],
 					tbody: [
 						{html: "@{category}"},
-						{html: "@{subject}"},
-						{html: "@{attachments}"},
-					]
+						{html: "<a data-subject class='clickable text-decoration-underline'>@{subject}</a>"},
+						{html: "<a data-attachments>@{attachments}</a>"},
+						{html: "@{udate:date}"},
+						{html: "@{uuser}"},
+					],
+					treach: (item, $tr, index) => {
+						
+						$tr.querySelector("[data-subject]").addEventListener('mousedown', (e) => {
+							
+							if(e.button === 0){
+								DialogUtils.window({
+									title: dname + "-文件文檔",
+									url: "/customers/viewDocument/" + item.rowid,								
+								})
+							} else if(e.button === 1){
+								window.open("/customers/viewDocument/" + item.rowid, '_blank');
+							}
+						});
+						
+						$("[data-attachments]", $tr).click(() => {
+							
+						})
+					}
 				})
 				
 			}
