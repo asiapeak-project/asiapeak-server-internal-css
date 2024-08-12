@@ -29,6 +29,7 @@ import com.asiapeak.server.internal.css.functions.customers.dto.DocumentDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.ImportantRecordDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.ProductDto;
 import com.asiapeak.spring.downloader.dto.ResponseFile;
+import com.asiapeak.spring.downloader.dto.ResponseZip;
 
 @Controller
 @RequestMapping("customers")
@@ -523,6 +524,16 @@ public class CustomersController {
 		ResponseFile responseFile = new ResponseFile();
 		responseFile.setFile(file);
 		return responseFile;
+	}
+
+	@ResponseBody
+	@GetMapping(value = "document/{parentRowid}/attachements/{rowid}", consumes = MediaType.ALL_VALUE, produces = MediaType.ALL_VALUE)
+	public ResponseZip downloadAttachements(@PathVariable("parentRowid") Integer parentRowid, @PathVariable("rowid") Integer rowid) throws IOException {
+		File file = customersService.downloadAttachements(parentRowid, rowid);
+		String zipName = customersService.downloadAttachementsZipName(parentRowid, rowid);
+		ResponseZip responseZip = new ResponseZip(file);
+		responseZip.setZipName(zipName);
+		return responseZip;
 	}
 
 	////

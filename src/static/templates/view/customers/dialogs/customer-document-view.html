@@ -35,6 +35,18 @@
 						}
 						
 						renderUploadInputs(data.files);
+						
+						if(data.files.length > 1){
+							$("#download-all").off().show().click(() => {
+								HttpUtils.doDownload({
+									url: "/customers/document/" + parentRowid + "/attachements/" + rowid
+								})
+								PromptUtils.info("已執行全部下載，請稍號。")
+							})
+						} else {
+							$("#download-all").off().hide();
+						}
+						
 					}
 				})
 			}
@@ -114,7 +126,7 @@
 	<div id="content" class="border p-2"></div>
 	
 	<div id="attachments" class="d-flex flex-wrap mt-3"></div>
-		
+	<button id="download-all" type="button" class="btn btn-link">全部下載</button>
 </body>
 
 </html>

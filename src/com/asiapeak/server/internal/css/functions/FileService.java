@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
-public class DocumentFileService {
+public class FileService {
 
 	@Value("${com.asiapeak.server.internal.css.data-folder}")
 	String dataFolder;
@@ -28,12 +28,17 @@ public class DocumentFileService {
 			return new ArrayList<>();
 		}
 
-		File documentFilder = new File(customerFolder, documentRowid.toString());
-		if (!documentFilder.exists()) {
+		File documentParentFolder = new File(customerFolder, "document");
+		if (!documentParentFolder.exists()) {
 			return new ArrayList<>();
 		}
 
-		return Arrays.asList(documentFilder.listFiles());
+		File documentFolder = new File(documentParentFolder, documentRowid.toString());
+		if (!documentFolder.exists()) {
+			return new ArrayList<>();
+		}
+
+		return Arrays.asList(documentFolder.listFiles());
 	}
 
 	public File getDocumentFolder(Integer customerRowid, Integer documentRowid) throws IOException {
@@ -48,7 +53,12 @@ public class DocumentFileService {
 			customerFolder.mkdir();
 		}
 
-		File documentFilder = new File(customerFolder, documentRowid.toString());
+		File documentParentFolder = new File(customerFolder, "document");
+		if (!documentParentFolder.exists()) {
+			documentParentFolder.mkdir();
+		}
+
+		File documentFilder = new File(documentParentFolder, documentRowid.toString());
 		if (!documentFilder.exists()) {
 			documentFilder.mkdir();
 		}

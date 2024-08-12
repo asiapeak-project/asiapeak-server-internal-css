@@ -24,7 +24,7 @@ import com.asiapeak.server.internal.css.dao.repo.DeploymentRepo;
 import com.asiapeak.server.internal.css.dao.repo.DocumentRepo;
 import com.asiapeak.server.internal.css.dao.repo.ImportantRecordRepo;
 import com.asiapeak.server.internal.css.dao.repo.ProductRepo;
-import com.asiapeak.server.internal.css.functions.DocumentFileService;
+import com.asiapeak.server.internal.css.functions.FileService;
 import com.asiapeak.server.internal.css.functions.customers.dto.ContactDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.CustomerDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.DeploymentDto;
@@ -60,7 +60,7 @@ public class CustomersService {
 	DocumentRepo documentRepo;
 
 	@Autowired
-	DocumentFileService documentFileService;
+	FileService fileService;
 
 	@Transactional
 	public List<CustomerDto> qryCustomers() {
@@ -607,7 +607,7 @@ public class CustomersService {
 			dto.setUuser(dao.getUuser());
 			dto.setCdate(dao.getCdate());
 			dto.setCuser(dao.getCuser());
-			dto.setAttachments(documentFileService.listDocumentFiles(rowid, dao.getRowid()).size());
+			dto.setAttachments(fileService.listDocumentFiles(rowid, dao.getRowid()).size());
 			return dto;
 		}).collect(Collectors.toList());
 	}
@@ -636,7 +636,7 @@ public class CustomersService {
 		dao = documentRepo.save(dao);
 
 		if (files != null) {
-			File documentFilder = documentFileService.getDocumentFolder(rowid, dao.getRowid());
+			File documentFilder = fileService.getDocumentFolder(rowid, dao.getRowid());
 
 			for (MultipartFile file : files) {
 				String fileName = file.getOriginalFilename();
@@ -671,7 +671,7 @@ public class CustomersService {
 
 		dto.setFiles(new ArrayList<>());
 
-		List<File> files = documentFileService.listDocumentFiles(dao.getCustomer().getRowid(), rowid);
+		List<File> files = fileService.listDocumentFiles(dao.getCustomer().getRowid(), rowid);
 
 		for (File file : files) {
 			DocumentAttachementDto attach = new DocumentAttachementDto();
@@ -685,8 +685,64 @@ public class CustomersService {
 	}
 
 	public File downloadAttachement(Integer parentRowid, Integer rowid, String filename) throws IOException {
-		File folder = documentFileService.getDocumentFolder(parentRowid, rowid);
+
+		Customer customer = customerRepo.findById(parentRowid).orElse(null);
+		if (customer == null) {
+			throw new RuntimeException("客戶資訊不存在");
+		}
+
+		Document dao = documentRepo.findById(rowid).orElse(null);
+
+		if (dao == null) {
+			throw new RuntimeException("文件文檔不存在");
+		}
+
+		if (!dao.getCustomer().getRowid().equals(parentRowid)) {
+			throw new RuntimeException("客戶資訊與文件文檔不符合");
+		}
+
+		File folder = fileService.getDocumentFolder(parentRowid, rowid);
 		return new File(folder, filename);
+	}
+
+	public File downloadAttachements(Integer parentRowid, Integer rowid) throws IOException {
+
+		Customer customer = customerRepo.findById(parentRowid).orElse(null);
+		if (customer == null) {
+			throw new RuntimeException("客戶資訊不存在");
+		}
+
+		Document dao = documentRepo.findById(rowid).orElse(null);
+
+		if (dao == null) {
+			throw new RuntimeException("文件文檔不存在");
+		}
+
+		if (!dao.getCustomer().getRowid().equals(parentRowid)) {
+			throw new RuntimeException("客戶資訊與文件文檔不符合");
+		}
+
+		return fileService.getDocumentFolder(parentRowid, rowid);
+	}
+
+	public String downloadAttachementsZipName(Integer parentRowid, Integer rowid) {
+
+		Customer customer = customerRepo.findById(parentRowid).orElse(null);
+		if (customer == null) {
+			throw new RuntimeException("客戶資訊不存在");
+		}
+
+		Document dao = documentRepo.findById(rowid).orElse(null);
+
+		if (dao == null) {
+			throw new RuntimeException("文件文檔不存在");
+		}
+
+		if (!dao.getCustomer().getRowid().equals(parentRowid)) {
+			throw new RuntimeException("客戶資訊與文件文檔不符合");
+		}
+
+		return String.format("%s_%s", customer.getDname(), dao.getSubject());
 	}
 
 	@Transactional
