@@ -34,6 +34,11 @@ public class ResponseFileHandler extends AbstractDownloadHandler<ResponseFile> {
 	public Class<?> supportType() {
 		return ResponseFile.class;
 	}
+	
+	@Override
+	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
+		return true;
+	}
 
 	@Override
 	protected void write(ResponseFile responseFile, HttpServletRequest request, HttpServletResponse response) throws IOException {
