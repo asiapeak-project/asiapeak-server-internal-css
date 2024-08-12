@@ -154,6 +154,12 @@
 
 		<resources>
 			<resource>
+				<directory>src</directory>
+				<includes>
+					<include>logback-spring.xml</include>
+				</includes>
+			</resource>
+			<resource>
 				<directory>src/static</directory>
 				<targetPath>static</targetPath>
 				<includes>
