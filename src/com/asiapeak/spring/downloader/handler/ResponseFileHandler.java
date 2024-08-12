@@ -15,22 +15,14 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
-import org.springframework.stereotype.Component;
 
 import com.asiapeak.spring.downloader.abstracts.AbstractDownloadHandler;
 import com.asiapeak.spring.downloader.dto.ResponseFile;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
-@Component
-@Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class ResponseFileHandler extends AbstractDownloadHandler<ResponseFile> {
 
 	@Override
@@ -39,17 +31,7 @@ public class ResponseFileHandler extends AbstractDownloadHandler<ResponseFile> {
 	}
 
 	@Override
-	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
-		log.info(clazz.getCanonicalName());
-		log.info(mediaType == null ? "null" : mediaType.toString());
-		log.info(Boolean.toString(ResponseFile.class == clazz));
-		return ResponseFile.class == clazz;
-	}
-
-	@Override
 	protected void write(ResponseFile responseFile, HttpServletRequest request, HttpServletResponse response) throws IOException {
-
-		log.info("ResponseFileHandler.write");
 
 		File file = responseFile.getFile();
 

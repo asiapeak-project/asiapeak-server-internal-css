@@ -16,17 +16,12 @@ import java.util.zip.ZipOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
 
 import com.asiapeak.spring.downloader.abstracts.AbstractDownloadHandler;
 import com.asiapeak.spring.downloader.dto.ResponseZip;
 import com.asiapeak.spring.downloader.function.ZipFilterPredicate;
 
-@Component
-@Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class ResponseZipHandler extends AbstractDownloadHandler<ResponseZip> {
 
 	@Override

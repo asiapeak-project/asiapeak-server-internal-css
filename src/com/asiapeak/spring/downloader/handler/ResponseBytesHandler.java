@@ -10,19 +10,14 @@ import java.util.zip.GZIPOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
-import org.springframework.stereotype.Component;
 
 import com.asiapeak.spring.downloader.abstracts.AbstractDownloadHandler;
 import com.asiapeak.spring.downloader.dto.ResponseBytes;
 
-@Component
-@Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class ResponseBytesHandler extends AbstractDownloadHandler<ResponseBytes> {
 
 	@Override
