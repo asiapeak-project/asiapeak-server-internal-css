@@ -1,6 +1,6 @@
 <configuration>
-    <property name="LOG_DIR" value="${logging.file.path}"/>
-    <property name="LOG_FILE" value="${logging.file.name}"/>
+    <property name="LOG_DIR" value="C:/Users/DerrekTseng/Desktop/asiapeak-css-upload/logs"/>
+    <property name="LOG_FILE" value="app.log"/>
 
     <appender name="ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_DIR}/${LOG_FILE}</file>
