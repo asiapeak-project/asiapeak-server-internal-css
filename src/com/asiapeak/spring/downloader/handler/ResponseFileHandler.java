@@ -41,7 +41,7 @@ public class ResponseFileHandler extends AbstractDownloadHandler<ResponseFile> {
 	@Override
 	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
 		log.info(clazz.getCanonicalName());
-		log.info(mediaType.toString());
+		log.info(mediaType == null ? "null" : mediaType.toString());
 		return ResponseFile.class == clazz;
 	}
 
