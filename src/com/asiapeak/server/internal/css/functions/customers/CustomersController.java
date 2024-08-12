@@ -30,6 +30,9 @@ import com.asiapeak.server.internal.css.functions.customers.dto.ImportantRecordD
 import com.asiapeak.server.internal.css.functions.customers.dto.ProductDto;
 import com.asiapeak.spring.downloader.dto.ResponseFile;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Controller
 @RequestMapping("customers")
 public class CustomersController {
@@ -519,6 +522,9 @@ public class CustomersController {
 	@ResponseBody
 	@GetMapping(value = "document/{parentRowid}/attachement/{rowid}/{filename}", consumes = MediaType.ALL_VALUE, produces = MediaType.ALL_VALUE)
 	public ResponseFile downloadAttachement(@PathVariable("parentRowid") Integer parentRowid, @PathVariable("rowid") Integer rowid, @PathVariable("filename") String filename) throws IOException {
+
+		log.info(String.format("%s, %s, %s", parentRowid, rowid, filename));
+
 		File file = customersService.downloadAttachement(parentRowid, rowid, filename);
 		ResponseFile responseFile = new ResponseFile();
 		responseFile.setFile(file);
