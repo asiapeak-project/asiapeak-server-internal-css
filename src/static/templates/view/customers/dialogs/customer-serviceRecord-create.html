@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/clear.html}">
+
+<head>
+	<title>客戶服務系統-服務歷程-[[${dname}]]</title>
+	<script th:inline="javascript">
+		
+		const rowid = /*[[${rowid}]]*/ "";
+		
+		$(() => {
+			
+			const queryContacts = () => {
+				HttpUtils.doPost({
+					url : "/customers/qryContacts/" + rowid,
+					success: (response) => {
+						ElementUtils.createDropdownTextField({
+							div: document.getElementById("contactPerson-select"),
+							id: "contactPerson",
+							values: response.data.map(r => r.dname),
+							value: ""
+						})
+					}
+				})
+			}
+			
+			const queryServiceRecordTypes = () => {
+				HttpUtils.doPost({
+					url : "/customers/qryServiceRecordTypes",
+					success: (response) => {
+						ElementUtils.createDropdownTextField({
+							div: document.getElementById("serviceType-select"),
+							id: "serviceType",
+							values: response.data,
+							value: ""
+						})
+					}
+				})
+			}
+			
+			$("#serviceDate").datetimepicker();
+			$("#handleDate").datetimepicker();
+			queryContacts();
+			queryServiceRecordTypes();
+			
+			$("#save-btn").click(() => {
+				const subject = $('#serviceSubject').val()
+				const type = $('#serviceType').val()
+				const contactPerson = $("#contactPerson").val()
+				const serviceDate = $('#serviceDate').datetimepicker('getValue')
+				const handlePerson = $("#handlePerson").val()
+				const handleResult = $("#handleResult").val()
+				const handleDate =  $('#handleDate').datetimepicker('getValue')
+				const serviceContent = $("#serviceContent").val();
+				const handleContent = $("#handleContent").val();
+				
+				HttpUtils.doPost({
+					url: "/customers/createServiceRecord/" + rowid,
+					data: {
+						subject,
+						type,
+						contactPerson,
+						serviceDate,
+						handlePerson,
+						handleResult,
+						handleDate,
+						serviceContent,
+						handleContent
+					},
+					success: (response) => {
+						if(response.data){
+							PromptUtils.success("新增服務歷程成功")
+							DialogUtils.closeWindow(window, true)
+						}
+					}
+				})
+				
+				
+			})
+			
+		})
+		
+	</script>
+</head>
+
+<body layout:fragment="content">
+	<form id="myform" class="row g-3 py-3">
+		<div class="col-md-12">
+			<label for="serviceSubject" class="form-label">名稱</label>
+			<input type="text" class="form-control" id="serviceSubject" />
+		</div>
+		
+		<div class="col-md-4">
+			<label for="serviceType" class="form-label">服務類別</label>
+			<div id="serviceType-select"></div>
+		</div>
+		
+		<div class="col-md-4">
+			<label for="contactPerson" class="form-label">聯絡對象</label>
+			<div id="contactPerson-select"></div>
+		</div>		
+		
+		<div class="col-md-4">
+			<label for="serviceDate" class="form-label">事發時間</label>
+			<input type="text" class="form-control" id="serviceDate" style="width: 190px" />
+		</div>
+		
+		<div class="col-md-4">
+			<label for="handlePerson" class="form-label">處理人員</label>
+			<select class="form-select" id="handlePerson" style="width: 190px"></select>
+		</div>
+		
+		<div class="col-md-4">
+			<label for="handleResult" class="form-label">處理結果</label>
+			<select class="form-select" id="handleResult" style="width: 190px">
+				<option value="0">尚未處理</option>
+				<option value="1">無法解決</option>
+				<option value="2">已解決</option>
+			</select>
+		</div>
+		
+		<div class="col-md-4">
+			<label for="handleDate" class="form-label">處理時間</label>
+			<input type="text" class="form-control" id="handleDate" style="width: 190px" />
+		</div>
+		
+		<div class="col-md-12">
+			<label for="serviceContent" class="form-label">服務內容</label>
+			<textarea class="form-control" id="serviceContent" rows="3"></textarea>
+		</div>
+		
+		<div class="col-md-12">
+			<label for="handleContent" class="form-label">處理內容</label>
+			<textarea class="form-control" id="handleContent" rows="3"></textarea>
+		</div>
+		
+	</form>
+	
+	<div class="text-end">
+		<button id="save-btn" type="button" class="btn btn-success">新增</button>
+	</div>
+	
+	<br />
+</body>
+
+</html>

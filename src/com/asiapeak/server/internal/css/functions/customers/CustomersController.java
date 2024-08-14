@@ -28,6 +28,7 @@ import com.asiapeak.server.internal.css.functions.customers.dto.DeploymentOutptu
 import com.asiapeak.server.internal.css.functions.customers.dto.DocumentDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.ImportantRecordDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.ProductDto;
+import com.asiapeak.server.internal.css.functions.customers.dto.ServiceRecordDto;
 import com.asiapeak.spring.downloader.dto.ResponseFile;
 import com.asiapeak.spring.downloader.dto.ResponseZip;
 
@@ -565,14 +566,6 @@ public class CustomersController {
 		return ResponseBean.success(true);
 	}
 
-	////
-	////
-	////
-	////////
-	////////
-	////////
-	////
-
 	@GetMapping("serviceRecord/{rowid}")
 	public ModelAndView customerServiceRecord(@PathVariable("rowid") Integer rowid) {
 		ModelAndView view = new ModelAndView("view/customers/tabs/customer-serviceRecord");
@@ -586,6 +579,53 @@ public class CustomersController {
 		}
 		return view;
 	}
+
+	@ResponseBody
+	@PostMapping("qryServiceRecords/{rowid}")
+	public ResponseBean<List<ServiceRecordDto>> qryServiceRecords(@PathVariable("rowid") Integer rowid) {
+		List<ServiceRecordDto> list = customersService.qryServiceRecords(rowid);
+		return ResponseBean.success(list);
+	}
+
+	@GetMapping("createServiceRecord/{rowid}")
+	public ModelAndView createServiceRecord(@PathVariable("rowid") Integer rowid) {
+		ModelAndView view = new ModelAndView("view/customers/dialogs/customer-serviceRecord-create");
+		Customer customer = customersService.findCustomer(rowid);
+		if (customer == null) {
+			view.addObject("dname", "不存在");
+			view.addObject("rowid", "-1");
+		} else {
+			view.addObject("dname", customer.getDname());
+			view.addObject("rowid", customer.getRowid());
+		}
+		return view;
+	}
+
+	@ResponseBody
+	@PostMapping("qryServiceRecordTypes")
+	public ResponseBean<List<String>> qryServiceRecordTypes() {
+		List<String> list = customersService.qryServiceRecordTypes();
+		return ResponseBean.success(list);
+	}
+
+	@ResponseBody
+	@PostMapping("createServiceRecord/{rowid}")
+	public ResponseBean<Boolean> createServiceRecord(@PathVariable("rowid") Integer rowid, @RequestBody ServiceRecordDto dto) {
+		String msg = customersService.createServiceRecord(rowid, dto);
+		if (StringUtils.isBlank(msg)) {
+			return ResponseBean.success(true);
+		} else {
+			return ResponseBean.error(true).message(msg);
+		}
+	}
+
+	////
+	////
+	////
+	////////
+	////////
+	////////
+	////
 
 	@GetMapping("contactRecord/{rowid}")
 	public ModelAndView customerContactRecord(@PathVariable("rowid") Integer rowid) {

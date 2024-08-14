@@ -10,13 +10,110 @@
 		const rowid = /*[[${rowid}]]*/ "";
 		
 		$(() => {
+		
+			let list = [];
+			let sortKey = "";
+			let sortDir = "";
+			
+			const doQuery = () => {
+				HttpUtils.doPost({
+					url: "/customers/qryServiceRecords/" + rowid,
+					success: (response) => {
+						list = response.data;
+						renderTable();
+					}
+				})
+			}
+			
+			const getList = () => {
+				return list.map(item => {
+					return item;
+				}).sort((a, b) => {
+					if(sortKey && sortDir){
+						const aVal = a[sortKey] ? a[sortKey].toString() : "";
+						const bVal = b[sortKey] ? b[sortKey].toString() : "";
+						if(sortDir === "desc"){
+							return TextUtils.stringCompare(bVal, aVal)
+						}else{
+							return TextUtils.stringCompare(aVal, bVal)
+						}
+					}else{
+						return 0;
+					}
+				})
+			}
+			
+			const renderTable = (data) => {
+				ElementUtils.renderTable({
+					table: document.getElementById("myTable"),
+					data: getList(),
+					thead: ElementUtils.createSortableTableHeader({
+						thead: [
+							{html: "類別", sortKey: "type"},
+							{html: "名稱", sortKey: "subject"},
+							{html: "更新時間", sortKey: "udate", style: "width: 120px"},
+							{html: "更新者", sortKey: "uuser", style: "width: 120px"},
+						],
+						onEvent: (key, dir) => {
+							sortKey = key;
+							sortDir = dir;
+							renderTable();
+						},
+						sortKey: sortKey,
+						sortDir: sortDir
+					}),
+					tbody: [
+						{html: "@{type}"},
+						{html: "<a data-subject class='clickable text-decoration-underline'>@{subject}</a>"},
+						{html: "@{udate:date}"},
+						{html: "@{uuser}"},
+					],
+					treach: (item, $tr, index) => {
+						
+					}
+				})
+			}
+		
+			$("#create-btn").click(() => {
+				DialogUtils.window({
+					title: "新增服務歷程",
+					url: "/customers/createServiceRecord/" + rowid,
+					callback : (rtnVal) => {
+						if(rtnVal){
+							doQuery();
+						}
+					}					
+				})
+			})
+			
+			doQuery();
 			
 		})
+		
+		
 	</script>
 </head>
 
 <body layout:fragment="content">
-	customer-serviceRecord
+	<div class="d-flex justify-content-between mb-3">
+		
+		<div class="input-group" style="width: 300px">
+
+			
+			<div class="input-group-text"> 類別 </div>
+			
+			<select id="category" class="form-select">
+				<option selected value="">全部</option>
+			</select>
+			
+		</div>
+		
+		<button id="create-btn" class="btn btn-success" type="button">
+			<i class="bi bi-plus"></i>
+		</button>
+	</div>
+	
+	<table id="myTable" class="table table-striped table-hover table-bordered"></table>
 </body>
 
 </html>

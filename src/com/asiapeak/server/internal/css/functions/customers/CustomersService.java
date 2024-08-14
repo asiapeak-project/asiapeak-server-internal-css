@@ -18,12 +18,14 @@ import com.asiapeak.server.internal.css.dao.entity.Deployment;
 import com.asiapeak.server.internal.css.dao.entity.Document;
 import com.asiapeak.server.internal.css.dao.entity.ImportantRecord;
 import com.asiapeak.server.internal.css.dao.entity.Product;
+import com.asiapeak.server.internal.css.dao.entity.ServiceRecord;
 import com.asiapeak.server.internal.css.dao.repo.ContactRepo;
 import com.asiapeak.server.internal.css.dao.repo.CustomerRepo;
 import com.asiapeak.server.internal.css.dao.repo.DeploymentRepo;
 import com.asiapeak.server.internal.css.dao.repo.DocumentRepo;
 import com.asiapeak.server.internal.css.dao.repo.ImportantRecordRepo;
 import com.asiapeak.server.internal.css.dao.repo.ProductRepo;
+import com.asiapeak.server.internal.css.dao.repo.ServiceRecordRepo;
 import com.asiapeak.server.internal.css.functions.FileService;
 import com.asiapeak.server.internal.css.functions.customers.dto.ContactDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.CustomerDto;
@@ -33,6 +35,7 @@ import com.asiapeak.server.internal.css.functions.customers.dto.DocumentAttachem
 import com.asiapeak.server.internal.css.functions.customers.dto.DocumentDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.ImportantRecordDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.ProductDto;
+import com.asiapeak.server.internal.css.functions.customers.dto.ServiceRecordDto;
 import com.asiapeak.server.internal.css.system.UserNameService;
 
 @Service
@@ -61,6 +64,9 @@ public class CustomersService {
 
 	@Autowired
 	FileService fileService;
+
+	@Autowired
+	ServiceRecordRepo serviceRecordRepo;
 
 	@Transactional
 	public List<CustomerDto> qryCustomers() {
@@ -790,6 +796,76 @@ public class CustomersService {
 
 		documentRepo.save(dao);
 		customerRepo.updateDetailTime(dao.getCustomer().getRowid(), user);
+	}
+
+	@Transactional
+	public List<ServiceRecordDto> qryServiceRecords(Integer rowid) {
+		Customer customer = customerRepo.findById(rowid).orElse(null);
+		if (customer == null) {
+			return new ArrayList<>();
+		}
+
+		return customer.getServiceRecords().stream().map(dao -> {
+			ServiceRecordDto dto = new ServiceRecordDto();
+
+			dto.setRowid(dao.getRowid());
+			dto.setSubject(dao.getSubject());
+			dto.setType(dao.getType());
+			dto.setContactPerson(dao.getContactPerson());
+			// dto.setServiceContent(dao.getServiceContent());
+			dto.setHandleResult(dao.getHandleResult());
+			dto.setHandlePerson(dao.getHandlePerson());
+			// dto.setHandleContent(dao.getHandleContent());
+			dto.setServiceDate(dao.getServiceDate());
+			dto.setHandleDate(dao.getHandleDate());
+
+			dto.setUdate(dao.getUdate());
+			dto.setUuser(dao.getUuser());
+			dto.setCdate(dao.getCdate());
+			dto.setCuser(dao.getCuser());
+
+			return dto;
+		}).collect(Collectors.toList());
+	}
+
+	@Transactional
+	public List<String> qryServiceRecordTypes() {
+		return serviceRecordRepo.findDistinctServiceTypes();
+	}
+
+	@Transactional
+	public String createServiceRecord(Integer rowid, ServiceRecordDto dto) {
+
+		Customer customer = customerRepo.findById(rowid).orElse(null);
+		if (customer == null) {
+			throw new RuntimeException("客戶資訊不存在");
+		}
+
+		ServiceRecord dao = new ServiceRecord();
+		dao.setSubject(dto.getSubject());
+		dao.setType(dto.getType());
+		dao.setContactPerson(dto.getContactPerson());
+		dao.setServiceContent(dto.getServiceContent());
+		dao.setHandleResult(dto.getHandleResult());
+		dao.setHandlePerson(dto.getHandlePerson());
+		dao.setHandleContent(dto.getHandleContent());
+		dao.setServiceDate(dto.getServiceDate());
+		dao.setHandleDate(dto.getHandleDate());
+
+		dao.setCustomer(customer);
+
+		String user = userNameService.getCurrentUserName();
+		Date now = new Date();
+		dao.setUdate(now);
+		dao.setUuser(user);
+		dao.setCdate(now);
+		dao.setCuser(user);
+
+		serviceRecordRepo.save(dao);
+
+		customerRepo.updateDetailTime(rowid, user);
+
+		return null;
 	}
 
 }

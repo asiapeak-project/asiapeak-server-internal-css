@@ -8,12 +8,14 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link th:href="@{/resources/vendors/bootstrap@5.0.2/bootstrap.min.css}" rel="stylesheet" />
 	<link th:href="@{/resources/vendors/bootstrap-icons@1.9.0/bootstrap-icons.css}" rel="stylesheet" />
+	<link th:href="@{/resources/vendors/datetimepicker/jquery.datetimepicker.min.css}" rel="stylesheet" />
 	<link th:href="@{/resources/asiapeak/asiapeak.css(version=${RESOURCE_UUID})}" rel="stylesheet" />
 	<script th:src="@{/resources/vendors/jquery@3.7.1/jquery-3.7.1.min.js}"></script>
 </head>
 <body>
 	<div layout:fragment="base" />
 	<script th:src="@{/resources/vendors/bootstrap@5.0.2/bootstrap.bundle.min.js}"></script>
+	<script th:src="@{/resources/vendors/datetimepicker/jquery.datetimepicker.full.min.js}"></script>
 	<script th:src="@{/resources/asiapeak/asiapeak.js(version=${RESOURCE_UUID})}"></script>
 </body>
 </html>

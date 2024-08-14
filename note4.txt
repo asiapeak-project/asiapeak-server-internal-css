@@ -30,15 +30,15 @@
 		有 Category 的概念
 	
 	服務歷程				
-		主題				
-		類型 (安裝/升級/詢問/除錯/等等等)
-		服務對象
-		服務明細
-		處理結果(解決/未解決)
-		處理明細
-		處理人員		
-		附件	
-	
+		主題	 serviceSubject	
+		類型 (安裝/升級/詢問/除錯/等等等) serviceType
+		聯絡對象 contactPerson
+		服務內容 serviceContent 
+		處理結果(解決/未解決) handleResult 
+		處理人員 handlePerson
+		處理內容 handleContent
+		附件	(no table)
+		
 	通訊紀錄	
 	
 	

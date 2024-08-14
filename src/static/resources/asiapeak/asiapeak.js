@@ -933,7 +933,6 @@ var ElementUtils = top.ElementUtils || {
 		`)
 		
 		select.addEventListener('change', () => {
-			console.log("!!")
 			input.value = select.options[select.selectedIndex].text;
 		})
 		
