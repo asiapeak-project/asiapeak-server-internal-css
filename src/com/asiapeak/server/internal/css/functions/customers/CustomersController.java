@@ -619,6 +619,42 @@ public class CustomersController {
 		}
 	}
 
+	@GetMapping("editServiceRecord/{rowid}")
+	public ModelAndView editServiceRecord(@PathVariable("rowid") Integer rowid) {
+		ModelAndView view = new ModelAndView("view/customers/dialogs/customer-serviceRecord-edit");
+		view.addObject("rowid", rowid);
+		return view;
+	}
+
+	@ResponseBody
+	@PostMapping("qryServiceRecord/{rowid}")
+	public ResponseBean<ServiceRecordDto> qryServiceRecord(@PathVariable("rowid") Integer rowid) {
+		ServiceRecordDto dto = customersService.qryServiceRecord(rowid);
+		return ResponseBean.success(dto);
+	}
+
+	@ResponseBody
+	@PostMapping("editServiceRecord")
+	public ResponseBean<Boolean> editServiceRecord(@RequestBody ServiceRecordDto dto) {
+		String msg = customersService.editServiceRecord(dto);
+		if (StringUtils.isBlank(msg)) {
+			return ResponseBean.success(true);
+		} else {
+			return ResponseBean.error(true).message(msg);
+		}
+	}
+
+	@ResponseBody
+	@PostMapping("delServiceRecord/{rowid}")
+	public ResponseBean<Boolean> delServiceRecord(@PathVariable("rowid") Integer rowid) {
+		String msg = customersService.delServiceRecord(rowid);
+		if (StringUtils.isBlank(msg)) {
+			return ResponseBean.success(true);
+		} else {
+			return ResponseBean.error(true).message(msg);
+		}
+	}
+
 	////
 	////
 	////

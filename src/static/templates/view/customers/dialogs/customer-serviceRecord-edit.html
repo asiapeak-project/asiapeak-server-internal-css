@@ -4,14 +4,13 @@
 	layout:decorate="~{layouts/clear.html}">
 
 <head>
-	<title>客戶服務系統-服務歷程-[[${dname}]]</title>
 	<script th:inline="javascript">
 		
 		const rowid = /*[[${rowid}]]*/ "";
 		
 		$(() => {
 			
-			const queryContacts = () => {
+			const queryContacts = (value) => {
 				HttpUtils.doPost({
 					url : "/customers/qryContacts/" + rowid,
 					success: (response) => {
@@ -25,7 +24,7 @@
 				})
 			}
 			
-			const queryServiceRecordTypes = () => {
+			const queryServiceRecordTypes = (value) => {
 				HttpUtils.doPost({
 					url : "/customers/qryServiceRecordTypes",
 					success: (response) => {
@@ -39,11 +38,29 @@
 				})
 			}
 			
+			const doQuery = () => {
+				HttpUtils.doPost({
+					url : "/customers/qryServiceRecord/" + rowid,
+					success: (response) => {
+						$('#serviceSubject').val(response.data.subject)
+						$("#handlePerson").val(response.data.handlePerson)
+						$("#handleResult").val(response.data.handleResult)
+						$("#serviceContent").val(response.data.serviceContent);
+						$("#handleContent").val(response.data.handleContent);
+						
+						$('#serviceDate').val(response.data.serviceDate ? TextUtils.formatDate(new Date(response.data.serviceDate)).substr(0, 16): "")
+						$('#handleDate').val(response.data.handleDate ? TextUtils.formatDate(new Date(response.data.handleDate)).substr(0, 16): "")
+						
+						queryContacts(response.data.contactPerson);
+						queryServiceRecordTypes(response.data.serviceType);
+					}
+				})
+			}
+			
 			$("#serviceDate").datetimepicker({defaultDate: null});
 			$("#handleDate").datetimepicker({defaultDate: null});
 			
-			queryContacts();
-			queryServiceRecordTypes();
+			doQuery();
 			
 			$("#save-btn").click(() => {
 				const subject = $('#serviceSubject').val()
@@ -65,8 +82,9 @@
 				const handleContent = $("#handleContent").val();
 				
 				HttpUtils.doPost({
-					url: "/customers/createServiceRecord/" + rowid,
+					url: "/customers/editServiceRecord",
 					data: {
+						rowid,
 						subject,
 						type,
 						contactPerson,
@@ -79,13 +97,30 @@
 					},
 					success: (response) => {
 						if(response.data){
-							PromptUtils.success("新增服務歷程成功")
+							PromptUtils.success("更新服務歷程成功")
 							DialogUtils.closeWindow(window, true)
 						}
 					}
 				})
-				
-				
+			})
+			
+			
+			$("#delete-btn").click(() => {
+				DialogUtils.confirm({
+					title: "刪除確認",
+					text: "是否要刪除此服務歷程?",
+					onConfirm: () => {
+						HttpUtils.doPost({
+							url: "/customers/delServiceRecord/" + rowid,
+							success: (response) => {
+								if(response.data){
+									PromptUtils.success("刪除服務歷程成功")
+									DialogUtils.closeWindow(window, true)
+								}
+							}
+						})
+					}
+				})
 			})
 			
 		})
@@ -149,8 +184,9 @@
 		
 	</form>
 	
-	<div class="text-end">
-		<button id="save-btn" type="button" class="btn btn-success">新增</button>
+	<div class="d-flex justify-content-between">
+		<button id="delete-btn" type="button" class="btn btn-danger">刪除</button>
+		<button id="save-btn" type="button" class="btn btn-success">更新</button>
 	</div>
 	
 	<br />

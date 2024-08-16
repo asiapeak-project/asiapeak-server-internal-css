@@ -868,4 +868,70 @@ public class CustomersService {
 		return null;
 	}
 
+	@Transactional
+	public ServiceRecordDto qryServiceRecord(Integer rowid) {
+		ServiceRecord dao = serviceRecordRepo.findById(rowid).orElse(null);
+		if (dao == null) {
+			return null;
+		}
+
+		ServiceRecordDto dto = new ServiceRecordDto();
+		dto.setRowid(dao.getRowid());
+		dto.setSubject(dao.getSubject());
+		dto.setType(dao.getType());
+		dto.setContactPerson(dao.getContactPerson());
+		dto.setServiceContent(dao.getServiceContent());
+		dto.setHandleResult(dao.getHandleResult());
+		dto.setHandleContent(dao.getHandleContent());
+		dto.setServiceDate(dao.getServiceDate());
+		dto.setHandleDate(dao.getHandleDate());
+		dto.setCuser(dao.getCuser());
+		dto.setCdate(dao.getCdate());
+		dto.setUuser(dao.getUuser());
+		dto.setUdate(dao.getUdate());
+
+		return dto;
+	}
+
+	@Transactional
+	public String editServiceRecord(ServiceRecordDto dto) {
+		ServiceRecord dao = serviceRecordRepo.findById(dto.getRowid()).orElse(null);
+		if (dao == null) {
+			throw new RuntimeException("服務歷程不存在");
+		}
+
+		dao.setSubject(dto.getSubject());
+		dao.setType(dto.getType());
+		dao.setContactPerson(dto.getContactPerson());
+		dao.setServiceContent(dto.getServiceContent());
+		dao.setHandleResult(dto.getHandleResult());
+		dao.setHandleContent(dto.getHandleContent());
+		dao.setServiceDate(dto.getServiceDate());
+		dao.setHandleDate(dto.getHandleDate());
+
+		String user = userNameService.getCurrentUserName();
+		Date now = new Date();
+		dao.setUdate(now);
+		dao.setUuser(user);
+
+		serviceRecordRepo.save(dao);
+
+		customerRepo.updateDetailTime(dao.getCustomer().getRowid(), user);
+
+		return null;
+	}
+
+	@Transactional
+	public String delServiceRecord(Integer rowid) {
+		ServiceRecord dao = serviceRecordRepo.findById(rowid).orElse(null);
+		if (dao == null) {
+			throw new RuntimeException("服務歷程不存在");
+		}
+		String user = userNameService.getCurrentUserName();
+		customerRepo.updateDetailTime(dao.getCustomer().getRowid(), user);
+		serviceRecordRepo.delete(dao);
+
+		return null;
+	}
+
 }
