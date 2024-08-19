@@ -536,9 +536,9 @@ public class CustomersController {
 	@ResponseBody
 	@GetMapping(value = "document/{parentRowid}/attachements/{rowid}", consumes = MediaType.ALL_VALUE, produces = MediaType.ALL_VALUE)
 	public ResponseZip downloadAttachements(@PathVariable("parentRowid") Integer parentRowid, @PathVariable("rowid") Integer rowid) throws IOException {
-		File file = customersService.downloadAttachements(parentRowid, rowid);
+		List<File> files = customersService.downloadAttachements(parentRowid, rowid);
 		String zipName = customersService.downloadAttachementsZipName(parentRowid, rowid);
-		ResponseZip responseZip = new ResponseZip(file);
+		ResponseZip responseZip = new ResponseZip(files);
 		responseZip.setZipName(zipName);
 		return responseZip;
 	}
@@ -564,6 +564,17 @@ public class CustomersController {
 	) throws Exception {
 		customersService.editDocument(rowid, category, subject, content, delFiles, files);
 		return ResponseBean.success(true);
+	}
+
+	@ResponseBody
+	@PostMapping("delDocument/{rowid}")
+	public ResponseBean<Boolean> delDocument(@PathVariable("rowid") Integer rowid) throws IOException {
+		String msg = customersService.delDocument(rowid);
+		if (StringUtils.isBlank(msg)) {
+			return ResponseBean.success(true);
+		} else {
+			return ResponseBean.error(true).message(msg);
+		}
 	}
 
 	@GetMapping("serviceRecord/{rowid}")

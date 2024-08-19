@@ -103,7 +103,11 @@
 					height: "calc(100vh - 122px);",
 					callback : (rtnVal) => {
 						if(rtnVal){
-							doQuery();
+							if(rtnVal.action === 'delete'){
+								DialogUtils.closeWindow(window, true)
+							} else if(rtnVal.action === 'edit'){
+								doQuery();
+							}
 						}
 					}					
 				})

@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -711,7 +712,7 @@ public class CustomersService {
 		return new File(folder, filename);
 	}
 
-	public File downloadAttachements(Integer parentRowid, Integer rowid) throws IOException {
+	public List<File> downloadAttachements(Integer parentRowid, Integer rowid) throws IOException {
 
 		Customer customer = customerRepo.findById(parentRowid).orElse(null);
 		if (customer == null) {
@@ -728,7 +729,17 @@ public class CustomersService {
 			throw new RuntimeException("客戶資訊與文件文檔不符合");
 		}
 
-		return fileService.getDocumentFolder(parentRowid, rowid);
+		File folder = fileService.getDocumentFolder(parentRowid, rowid);
+
+		List<File> files = new ArrayList<>();
+
+		for (File file : folder.listFiles()) {
+			if (!file.isDirectory() && file.isFile()) {
+				files.add(file);
+			}
+		}
+
+		return files;
 	}
 
 	public String downloadAttachementsZipName(Integer parentRowid, Integer rowid) {
@@ -796,6 +807,23 @@ public class CustomersService {
 
 		documentRepo.save(dao);
 		customerRepo.updateDetailTime(dao.getCustomer().getRowid(), user);
+	}
+
+	@Transactional
+	public String delDocument(Integer rowid) throws IOException {
+		Document dao = documentRepo.findById(rowid).orElse(null);
+		if (dao == null) {
+			return "文件文檔不存在";
+		}
+
+		File documentFilder = fileService.getDocumentFolder(dao.getCustomer().getRowid(), rowid);
+		FileUtils.deleteQuietly(documentFilder);
+
+		String user = userNameService.getCurrentUserName();
+		customerRepo.updateDetailTime(dao.getCustomer().getRowid(), user);
+		documentRepo.delete(dao);
+
+		return null;
 	}
 
 	@Transactional

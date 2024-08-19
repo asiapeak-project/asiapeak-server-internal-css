@@ -27,8 +27,6 @@
 		
 		$(() => {
 			
-			
-			
 			const doQuery = () => {
 				HttpUtils.doPost({
 					url:"/customers/qryDocument/" + rowid,
@@ -73,8 +71,6 @@
 										ev2.data.preventDefault(true); 
 									});             
 								});
-								
-								$ev1 = ev1;
 							}	    
 						}
 					}
@@ -229,7 +225,7 @@
 							formData: formData,
 							success: () => {
 								PromptUtils.success("更新成功")
-								DialogUtils.closeWindow(window, true)
+								DialogUtils.closeWindow(window, {action: "edit"})
 							}
 						})
 					}
@@ -310,6 +306,27 @@
 				chooseFiles();
 			})
 			
+			$("#delete-btn").click(() => {
+				DialogUtils.confirm({
+					title: "刪除確認",
+					text: `
+						是否要刪除此文件文檔? <br />
+						<span class="text-danger">
+							將換刪除此文件文黨的所有內容，包含已上傳的附件檔案。							
+						</span>
+					`,
+					onConfirm: () => {
+						HttpUtils.doPost({
+							url: "/customers/delDocument/" + rowid,
+							success: () => {
+								PromptUtils.success("刪除成功")
+								DialogUtils.closeWindow(window, {action: "delete"})
+							}
+						})
+					}
+				})
+				
+			})
 			
 			createEditor();
 			doQuery();
@@ -357,6 +374,15 @@
 			選擇上傳附件
 		</button>
 	</div>	
+	
+	<hr />
+	
+	<div class="my-3 text-end">
+		<button id="delete-btn" class="btn btn-danger">
+			<i class="bi bi-trash"></i>
+			刪除文件
+		</button>
+	</div>
 	
 	
 </body>

@@ -9,6 +9,7 @@ CKEDITOR.editorConfig = function( config ) {
 	// config.uiColor = '#AADC6E';
 	config.removePlugins = 'exportpdf';	
 	config.extraPlugins = 'autogrow';
+	config.extraPlugins = 'pastebase64';
 	
 	let removeButtons = [];
 	removeButtons.push("");

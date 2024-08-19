@@ -123,6 +123,11 @@
 									width: "calc(100dvw - 20px)",
 									height: "calc(100vh - 122px);",
 									url: "/customers/viewDocument/" + item.rowid,
+									callback : (rtnVal) => {
+										if(rtnVal){
+											doQuery();
+										}
+									}	
 								})
 							} else if(e.button === 1){
 								window.open("/customers/viewDocument/" + item.rowid, '_blank');
