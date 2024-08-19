@@ -30,6 +30,7 @@ public class CustomerServiceApplication implements WebMvcConfigurer {
 	public static final String RESOURCE_UUID = UUID.randomUUID().toString();
 
 	public static void main(String[] args) {
+		System.setProperty("application.work.dir", System.getProperty("user.dir"));
 		SpringApplication.run(CustomerServiceApplication.class, args);
 	}
 
