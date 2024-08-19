@@ -5,6 +5,8 @@
 
 <head>
 	<title>客戶服務系統-服務歷程-[[${dname}]]</title>
+	<script th:src="@{/resources/vendors/ckeditor/ckeditor.js}"></script>
+	<script th:src="@{/resources/vendors/ckeditor/ckeditor-utils.js}"></script>
 	<script th:inline="javascript">
 		
 		const rowid = /*[[${rowid}]]*/ "";
@@ -39,14 +41,96 @@
 				})
 			}
 			
-			$("#serviceDate").datetimepicker({defaultDate: null});
-			$("#handleDate").datetimepicker({defaultDate: null});
+			$("#serviceDate").datetimepicker();
+			$("#serviceDate").val( TextUtils.formatDate(new Date()).substr(0, 16))
 			
 			queryContacts();
 			queryServiceRecordTypes();
 			
+			const createEditor = () => {
+				CKEDITOR_UTILS.create('editor');
+			}
+			
+			const getEditorContent = () => {
+				return CKEDITOR_UTILS.getContent('editor');
+			}
+			
+			const setEditorContent = (content) => {
+				CKEDITOR_UTILS.setContent('editor', content);
+			}
+			
+			
+			const toUploadFileInputs = [];
+			
+			const chooseFiles = (callback = () => {}) => {
+				let $input = document.createElement("input")
+				$input.setAttribute("type", "file");
+				$input.setAttribute("multiple", "multiple");
+				$input.addEventListener("change", () => {
+					if($input.files.length > 0){
+						toUploadFileInputs.push($input);
+						renderUploadInputs();
+					}
+				})
+				$input.click();
+			}
+			
+			const renderUploadInputs = () => {
+				const attachments = document.getElementById("attachments");
+				attachments.innerHTML = "";
+				toUploadFileInputs.forEach($input => {
+					for (let i = 0; i < $input.files.length; i++) {
+						const cmp = createUploadComponent($input, $input.files[i]);
+						attachments.appendChild(cmp);
+					}
+				})
+			}
+			
+			const createUploadComponent = ($input, file) => {
+				const fileName = file.name;
+				const cmp = ElementUtils.createElement(`
+					<div style="width: 300px; min-width: 220px; height: 54px; min-height: 54px;" class="border border-secondary rounded m-2 none-select">
+						<div data-btn-delete style="width: 24px; height: 24px;" class="attachment-delete position-relative top-0 start-100 translate-middle bg-light border border-danger rounded-circle clickable">
+						   <i class="bi bi-x text-danger" style="position: absolute; font-size: 18px; top: -1px; left: 2px;"></i> 
+						</div>
+						<span data-icon style="font-size: 34px; position: relative; left: 11px; top: -25px;"></span>
+						<div data-filename style="position: relative; width: 236px; top: -61px; left: 54px; overflow: hidden; text-overflow: ellipsis;  white-space: nowrap;"></div>
+					</div>
+				`)
+				cmp.querySelector("[data-btn-delete]").addEventListener("click",() => {
+					DialogUtils.confirm({
+						title: "取消上傳附件提醒",
+						text: "是否要取消上傳「" + fileName + "」檔案?",
+						onConfirm: () => {
+							removeFileListItem($input, file);
+						}
+					})
+				});
+				
+				cmp.querySelector("[data-icon]").appendChild(
+					ElementUtils.createFileIcon(fileName)
+				)
+				
+				cmp.title = file.name;
+				cmp.querySelector("[data-filename]").innerText = file.name;
+				return cmp;
+			}
+			
+			const removeFileListItem = ($input, file) => {
+				const dt = new DataTransfer();
+				for (let i = 0; i < $input.files.length; i++) {
+					if($input.files[i] === file){
+						continue;
+					} else {
+						dt.items.add($input.files[i]);
+					}
+			    }
+				$input.files = dt.files;
+				renderUploadInputs();
+			}
+			
 			$("#save-btn").click(() => {
-				const subject = $('#serviceSubject').val()
+				const subject = $('#subject').val()
 				
 				if(!subject){
 					PromptUtils.warning("名稱為必輸")
@@ -55,14 +139,11 @@
 				
 				const type = $('#serviceType').val()
 				const contactPerson = $("#contactPerson").val()
-				
 				const serviceDate = $('#serviceDate').val() ? new Date($('#serviceDate').val()) : null
-				const handleDate =  $('#handleDate').val() ? new Date($('#handleDate').val()) : null
-				
-				const handlePerson = $("#handlePerson").val()
 				const handleResult = $("#handleResult").val()
-				const serviceContent = $("#serviceContent").val();
-				const handleContent = $("#handleContent").val();
+				const serviceContent = getEditorContent();
+				
+				// TODO
 				
 				HttpUtils.doPost({
 					url: "/customers/createServiceRecord/" + rowid,
@@ -71,11 +152,8 @@
 						type,
 						contactPerson,
 						serviceDate,
-						handlePerson,
 						handleResult,
-						handleDate,
 						serviceContent,
-						handleContent
 					},
 					success: (response) => {
 						if(response.data){
@@ -88,6 +166,13 @@
 				
 			})
 			
+			
+			$("#upload-btn").click(() => {
+				chooseFiles();
+			})
+			
+			createEditor();
+			
 		})
 		
 	</script>
@@ -95,63 +180,56 @@
 
 <body layout:fragment="content">
 	<form id="myform" class="row g-3 py-3">
-		<div class="col-md-12">
-			<label for="serviceSubject" class="form-label">
-				名稱
+		<div class="input-group my-4">
+			<div class="input-group-text">
+				服務紀錄名稱
 				<span class="text-danger">*</span>
-			</label>
-			<input type="text" class="form-control" id="serviceSubject" />
-		</div>
+			</div>
+			<input type="text" class="form-control" id="subject">
+			<button id="save-btn" type="button" class="btn btn-success">
+				新增
+			</button>
+	    </div>
 		
-		<div class="col-md-4">
+		<div class="col-md-3">
 			<label for="serviceType" class="form-label">服務類別</label>
 			<div id="serviceType-select"></div>
 		</div>
 		
-		<div class="col-md-4">
+		<div class="col-md-3">
 			<label for="contactPerson" class="form-label">聯絡對象</label>
 			<div id="contactPerson-select"></div>
 		</div>		
 		
-		<div class="col-md-4">
+		<div class="col-md-3">
 			<label for="serviceDate" class="form-label">事發時間</label>
 			<input type="text" class="form-control" id="serviceDate" style="width: 190px" />
 		</div>
 		
-		<div class="col-md-4">
-			<label for="handlePerson" class="form-label">處理人員</label>
-			<select class="form-select" id="handlePerson" style="width: 190px"></select>
-		</div>
 		
-		<div class="col-md-4">
+		<div class="col-md-3">
 			<label for="handleResult" class="form-label">處理結果</label>
 			<select class="form-select" id="handleResult" style="width: 190px">
-				<option value="0">尚未處理</option>
-				<option value="1">無法解決</option>
-				<option value="2">已解決</option>
+				<option value="尚未處理">尚未處理</option>
+				<option value="處理中">處理中</option>
+				<option value="已解決">已解決</option>
 			</select>
 		</div>
 		
-		<div class="col-md-4">
-			<label for="handleDate" class="form-label">處理時間</label>
-			<input type="text" class="form-control" id="handleDate" style="width: 190px" />
-		</div>
-		
 		<div class="col-md-12">
-			<label for="serviceContent" class="form-label">服務內容</label>
-			<textarea class="form-control" id="serviceContent" rows="3"></textarea>
-		</div>
-		
-		<div class="col-md-12">
-			<label for="handleContent" class="form-label">處理內容</label>
-			<textarea class="form-control" id="handleContent" rows="3"></textarea>
+			<textarea id="editor"></textarea>
 		</div>
 		
 	</form>
 	
-	<div class="text-end">
-		<button id="save-btn" type="button" class="btn btn-success">新增</button>
-	</div>
+	<div id="attachments" class="d-flex flex-wrap mt-3"></div>
+	
+	<div class="my-3">
+		<button id="upload-btn" class="btn btn-primary">
+			<i class="bi bi-cloud-upload-fill"></i>
+			選擇上傳附件
+		</button>
+	</div>	
 	
 	<br />
 </body>

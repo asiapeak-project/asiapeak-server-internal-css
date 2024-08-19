@@ -17,20 +17,16 @@ public class ServiceRecordDto {
 
 	String serviceContent;
 
-	Integer handleResult;
-
-	String handlePerson;
-
-	String handleContent;
+	String handleResult;
 
 	Date serviceDate;
 
-	Date handleDate;
-
 	String cuser;
+
 	Date cdate;
 
 	String uuser;
+
 	Date udate;
 
 }

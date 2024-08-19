@@ -83,10 +83,4 @@ public class Customer {
 	@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
 	List<ServiceRecord> serviceRecords;
 
-	@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
-	List<ContactRecord> contactRecords;
-
-	@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
-	List<ImportantRecord> importantRecords;
-
 }

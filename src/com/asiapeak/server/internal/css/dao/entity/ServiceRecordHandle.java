@@ -18,27 +18,27 @@ import lombok.experimental.Accessors;
 @Table
 @Entity
 @Accessors(chain = true)
-public class ImportantRecord {
+public class ServiceRecordHandle {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	Integer rowid;
 
+	/**
+	 * 處理人員
+	 */
 	@Type(type = "text")
-	String record;
-	
-	Boolean marked;
-	
-	@Type(type = "text")
-	String cuser;
+	String handlePerson;
 
-	Date cdate;
-
+	/**
+	 * 處理內容
+	 */
 	@Type(type = "text")
-	String uuser;
-	
-	Date udate;
-	
+	String handleContent;
+
+	Date handleDate;
+
 	@ManyToOne
-	Customer customer;
+	ServiceRecord serviceRecord;
+
 }

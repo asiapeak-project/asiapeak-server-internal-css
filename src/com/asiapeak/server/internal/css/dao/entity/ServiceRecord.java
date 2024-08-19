@@ -1,12 +1,15 @@
 package com.asiapeak.server.internal.css.dao.entity;
 
 import java.util.Date;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Type;
@@ -28,7 +31,7 @@ public class ServiceRecord {
 	String subject;
 
 	/**
-	 * 服務類型(安裝/升級/詢問/除錯/等等等)
+	 * 服務類型(諮詢/安裝/升級/除錯/客製化/其他)
 	 */
 	@Type(type = "text")
 	String type;
@@ -46,25 +49,11 @@ public class ServiceRecord {
 	String serviceContent;
 
 	/**
-	 * 處理結果(0.尚未處理/1.無法解決/2.已解決)
+	 * 處理結果(尚未處理/處理中/已解決)
 	 */
-	Integer handleResult;
-
-	/**
-	 * 處理人員
-	 */
-	@Type(type = "text")
-	String handlePerson;
-
-	/**
-	 * 處理內容
-	 */
-	@Type(type = "text")
-	String handleContent;
+	String handleResult;
 
 	Date serviceDate;
-
-	Date handleDate;
 
 	@Type(type = "text")
 	String cuser;
@@ -78,5 +67,8 @@ public class ServiceRecord {
 
 	@ManyToOne
 	Customer customer;
+
+	@OneToMany(mappedBy = "serviceRecord", cascade = CascadeType.ALL)
+	List<ServiceRecordHandle> serviceRecordHandles;
 
 }

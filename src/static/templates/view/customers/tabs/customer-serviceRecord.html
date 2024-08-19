@@ -71,8 +71,8 @@
 					treach: (item, $tr, index) => {
 						$("[data-subject]", $tr).click(() => {
 							DialogUtils.window({
-								title: "編輯服務歷程",
-								url: "/customers/editServiceRecord/" + item.rowid,
+								title: "服務紀錄",
+								url: "/customers/viewServiceRecord/" + item.rowid,
 								callback : (rtnVal) => {
 									if(rtnVal){
 										doQuery();
@@ -86,7 +86,7 @@
 		
 			$("#create-btn").click(() => {
 				DialogUtils.window({
-					title: "新增服務歷程",
+					title: "新增服務紀錄",
 					url: "/customers/createServiceRecord/" + rowid,
 					callback : (rtnVal) => {
 						if(rtnVal){

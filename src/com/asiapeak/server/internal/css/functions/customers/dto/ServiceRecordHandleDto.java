@@ -5,14 +5,22 @@ import java.util.Date;
 import lombok.Data;
 
 @Data
-public class ImportantRecordDto {
+public class ServiceRecordHandleDto {
+
 	Integer rowid;
-	String record;
-	Boolean marked;
-	Date udate;
-	String uuser;
-	
-	Date cdate;
+
+	String handlePerson;
+
+	String handleContent;
+
+	Date handleDate;
+
 	String cuser;
-	
+
+	Date cdate;
+
+	String uuser;
+
+	Date udate;
+
 }

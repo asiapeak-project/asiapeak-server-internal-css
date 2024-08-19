@@ -17,14 +17,12 @@ import com.asiapeak.server.internal.css.dao.entity.Contact;
 import com.asiapeak.server.internal.css.dao.entity.Customer;
 import com.asiapeak.server.internal.css.dao.entity.Deployment;
 import com.asiapeak.server.internal.css.dao.entity.Document;
-import com.asiapeak.server.internal.css.dao.entity.ImportantRecord;
 import com.asiapeak.server.internal.css.dao.entity.Product;
 import com.asiapeak.server.internal.css.dao.entity.ServiceRecord;
 import com.asiapeak.server.internal.css.dao.repo.ContactRepo;
 import com.asiapeak.server.internal.css.dao.repo.CustomerRepo;
 import com.asiapeak.server.internal.css.dao.repo.DeploymentRepo;
 import com.asiapeak.server.internal.css.dao.repo.DocumentRepo;
-import com.asiapeak.server.internal.css.dao.repo.ImportantRecordRepo;
 import com.asiapeak.server.internal.css.dao.repo.ProductRepo;
 import com.asiapeak.server.internal.css.dao.repo.ServiceRecordRepo;
 import com.asiapeak.server.internal.css.functions.FileService;
@@ -34,7 +32,6 @@ import com.asiapeak.server.internal.css.functions.customers.dto.DeploymentDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.DeploymentOutptuDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.DocumentAttachementDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.DocumentDto;
-import com.asiapeak.server.internal.css.functions.customers.dto.ImportantRecordDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.ProductDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.ServiceRecordDto;
 import com.asiapeak.server.internal.css.system.UserNameService;
@@ -50,9 +47,6 @@ public class CustomersService {
 
 	@Autowired
 	ContactRepo contactRepo;
-
-	@Autowired
-	ImportantRecordRepo importantRecordRepo;
 
 	@Autowired
 	ProductRepo productRepo;
@@ -297,80 +291,6 @@ public class CustomersService {
 
 		contactRepo.save(dao);
 		customerRepo.updateDetailTime(dao.getCustomer().getRowid(), user);
-		return null;
-	}
-
-	@Transactional
-	public List<ImportantRecordDto> qryImportantRecords(Integer rowid) {
-		Customer customer = customerRepo.findById(rowid).orElse(null);
-		if (customer == null) {
-			return new ArrayList<>();
-		}
-
-		return customer.getImportantRecords().stream().map(dao -> {
-			ImportantRecordDto dto = new ImportantRecordDto();
-			dto.setRowid(dao.getRowid());
-			dto.setRecord(dao.getRecord());
-			dto.setMarked(dao.getMarked());
-			dto.setUdate(dao.getUdate());
-			dto.setUuser(dao.getUuser());
-			dto.setCdate(dao.getCdate());
-			dto.setCuser(dao.getCuser());
-			return dto;
-		}).collect(Collectors.toList());
-	}
-
-	@Transactional
-	public String createImportantRecord(Integer rowid, ImportantRecordDto dto) {
-
-		Customer customer = customerRepo.findById(rowid).orElse(null);
-		if (customer == null) {
-			return "客戶資訊不存在";
-		}
-
-		ImportantRecord dao = new ImportantRecord();
-		dao.setMarked(true);
-		dao.setRecord(dto.getRecord());
-		dao.setCustomer(customer);
-
-		String user = userNameService.getCurrentUserName();
-		Date now = new Date();
-
-		dao.setUdate(now);
-		dao.setUuser(user);
-		dao.setCdate(now);
-		dao.setCuser(user);
-
-		importantRecordRepo.save(dao);
-		customerRepo.updateDetailTime(rowid, user);
-		return null;
-	}
-
-	@Transactional
-	public String updateImportantRecord(Integer rowid, Boolean marked) {
-		ImportantRecord dao = importantRecordRepo.findById(rowid).orElse(null);
-		if (dao == null) {
-			return "重要事項不存在";
-		}
-		dao.setMarked(marked);
-
-		String user = userNameService.getCurrentUserName();
-		dao.setUdate(new Date());
-		dao.setUuser(user);
-
-		importantRecordRepo.save(dao);
-		customerRepo.updateDetailTime(rowid, user);
-		return null;
-	}
-
-	@Transactional
-	public String delImportantRecord(Integer rowid) {
-		ImportantRecord dao = importantRecordRepo.findById(rowid).orElse(null);
-		if (dao == null) {
-			return "重要事項不存在";
-		}
-		customerRepo.updateDetailTime(dao.getCustomer().getRowid(), userNameService.getCurrentUserName());
-		importantRecordRepo.delete(dao);
 		return null;
 	}
 
@@ -842,10 +762,7 @@ public class CustomersService {
 			dto.setContactPerson(dao.getContactPerson());
 			// dto.setServiceContent(dao.getServiceContent());
 			dto.setHandleResult(dao.getHandleResult());
-			dto.setHandlePerson(dao.getHandlePerson());
-			// dto.setHandleContent(dao.getHandleContent());
 			dto.setServiceDate(dao.getServiceDate());
-			dto.setHandleDate(dao.getHandleDate());
 
 			dto.setUdate(dao.getUdate());
 			dto.setUuser(dao.getUuser());
@@ -875,10 +792,7 @@ public class CustomersService {
 		dao.setContactPerson(dto.getContactPerson());
 		dao.setServiceContent(dto.getServiceContent());
 		dao.setHandleResult(dto.getHandleResult());
-		dao.setHandlePerson(dto.getHandlePerson());
-		dao.setHandleContent(dto.getHandleContent());
 		dao.setServiceDate(dto.getServiceDate());
-		dao.setHandleDate(dto.getHandleDate());
 
 		dao.setCustomer(customer);
 
@@ -910,9 +824,7 @@ public class CustomersService {
 		dto.setContactPerson(dao.getContactPerson());
 		dto.setServiceContent(dao.getServiceContent());
 		dto.setHandleResult(dao.getHandleResult());
-		dto.setHandleContent(dao.getHandleContent());
 		dto.setServiceDate(dao.getServiceDate());
-		dto.setHandleDate(dao.getHandleDate());
 		dto.setCuser(dao.getCuser());
 		dto.setCdate(dao.getCdate());
 		dto.setUuser(dao.getUuser());
@@ -933,9 +845,7 @@ public class CustomersService {
 		dao.setContactPerson(dto.getContactPerson());
 		dao.setServiceContent(dto.getServiceContent());
 		dao.setHandleResult(dto.getHandleResult());
-		dao.setHandleContent(dto.getHandleContent());
 		dao.setServiceDate(dto.getServiceDate());
-		dao.setHandleDate(dto.getHandleDate());
 
 		String user = userNameService.getCurrentUserName();
 		Date now = new Date();

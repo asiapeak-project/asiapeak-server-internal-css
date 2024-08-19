@@ -5,6 +5,7 @@
 <head>
 	<title>客戶服務系統-文件文檔-[[${subject}]]</title>
 	<script th:src="@{/resources/vendors/ckeditor/ckeditor.js}"></script>
+	<script th:src="@{/resources/vendors/ckeditor/ckeditor-utils.js}"></script>
 	<style>
 		.attachment-delete:hover {
 			background-color: #fde5ef !important;
@@ -24,6 +25,7 @@
 		
 		const rowid = /*[[${rowid}]]*/ "";
 		let parentRowid;
+		var myAdvanced;
 		
 		$(() => {
 			
@@ -57,32 +59,15 @@
 			}
 			
 			const createEditor = () => {
-				CKEDITOR.replace( 'editor', {
-					on: {
-							instanceReady: function( ev1 ) {	        	
-								ev1.editor.on('contentDom', function() {
-									ev1.editor.document.on('drop', function(ev2) {	                	
-										ev2.data.preventDefault(true); 
-									});
-									ev1.editor.document.on('dragover', function(ev2) {	                	
-										ev2.data.preventDefault(true); 
-									});
-									ev1.editor.document.on('dragenter', function(ev2) {						
-										ev2.data.preventDefault(true); 
-									});             
-								});
-							}	    
-						}
-					}
-				);
+				CKEDITOR_UTILS.create('editor');
 			}
 			
 			const getEditorContent = () => {
-				return CKEDITOR.instances['editor'].getData();
+				return CKEDITOR_UTILS.getContent('editor');
 			}
 			
 			const setEditorContent = (content) => {
-				CKEDITOR.instances['editor'].setData(content);	
+				CKEDITOR_UTILS.setContent('editor', content);
 			}
 									
 			const renderUploadedInputs = (files) => {
