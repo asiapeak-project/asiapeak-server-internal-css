@@ -143,26 +143,34 @@
 				const handleResult = $("#handleResult").val()
 				const serviceContent = getEditorContent();
 				
-				// TODO
+				if(!serviceDate){
+					PromptUtils.warning("事發時間為必輸")
+					return;
+				}
 				
-				HttpUtils.doPost({
-					url: "/customers/createServiceRecord/" + rowid,
-					data: {
-						subject,
-						type,
-						contactPerson,
-						serviceDate,
-						handleResult,
-						serviceContent,
-					},
-					success: (response) => {
-						if(response.data){
-							PromptUtils.success("新增服務歷程成功")
-							DialogUtils.closeWindow(window, true)
-						}
+				const formData = new FormData();
+				formData.append("subject", subject);
+				formData.append("type", type);
+				formData.append("contactPerson", contactPerson);
+				formData.append("serviceDate", serviceDate);
+				formData.append("handleResult", handleResult);
+				formData.append("serviceContent", serviceContent);
+				
+				toUploadFileInputs.forEach($input => {
+					for (let i = 0; i < $input.files.length; i++) {
+						formData.append("files", $input.files[i])					
 					}
 				})
 				
+				HttpUtils.upload({
+					url: "/customers/createServiceRecord/" + rowid,
+					formData: formData,
+					success: () => {
+						PromptUtils.success("新增成功")
+						DialogUtils.closeWindow(window, true)
+					}
+				})
+			
 				
 			})
 			

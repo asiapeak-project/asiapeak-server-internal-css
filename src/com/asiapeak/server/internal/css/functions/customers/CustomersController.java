@@ -2,6 +2,7 @@ package com.asiapeak.server.internal.css.functions.customers;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -565,9 +566,18 @@ public class CustomersController {
 	}
 
 	@ResponseBody
-	@PostMapping("createServiceRecord/{rowid}")
-	public ResponseBean<Boolean> createServiceRecord(@PathVariable("rowid") Integer rowid, @RequestBody ServiceRecordDto dto) {
-		String msg = customersService.createServiceRecord(rowid, dto);
+	@PostMapping(path = "createServiceRecord/{rowid}", consumes = "multipart/form-data")
+	public ResponseBean<Boolean> createServiceRecord( //
+			@PathVariable("rowid") Integer rowid, //
+			@RequestParam("subject") String subject, //
+			@RequestParam("type") String type, //
+			@RequestParam("contactPerson") String contactPerson, //
+			@RequestParam("serviceContent") String serviceContent, //
+			@RequestParam("handleResult") String handleResult, //
+			@RequestParam("serviceDate") Date serviceDate, //
+			@RequestPart(name = "files", required = false) List<MultipartFile> files //
+	) throws IOException {
+		String msg = customersService.createServiceRecord(rowid, subject, type, contactPerson, serviceContent, handleResult, serviceDate, files);
 		if (StringUtils.isBlank(msg)) {
 			return ResponseBean.success(true);
 		} else {

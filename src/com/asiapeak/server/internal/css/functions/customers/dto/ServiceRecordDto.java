@@ -20,7 +20,7 @@ public class ServiceRecordDto {
 	String handleResult;
 
 	Date serviceDate;
-
+	
 	String cuser;
 
 	Date cdate;

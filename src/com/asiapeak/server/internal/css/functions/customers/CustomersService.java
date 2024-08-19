@@ -811,6 +811,45 @@ public class CustomersService {
 	}
 
 	@Transactional
+	public String createServiceRecord(Integer rowid, String subject, String type, String contactPerson, String serviceContent, String handleResult, Date serviceDate, List<MultipartFile> files) throws IOException {
+		Customer customer = customerRepo.findById(rowid).orElse(null);
+		if (customer == null) {
+			throw new RuntimeException("客戶資訊不存在");
+		}
+		ServiceRecord dao = new ServiceRecord();
+		dao.setSubject(subject);
+		dao.setType(type);
+		dao.setContactPerson(contactPerson);
+		dao.setServiceContent(serviceContent);
+		dao.setHandleResult(handleResult);
+		dao.setServiceDate(serviceDate);
+		dao.setCustomer(customer);
+
+		dao = serviceRecordRepo.save(dao);
+
+		String user = userNameService.getCurrentUserName();
+		Date now = new Date();
+		dao.setUdate(now);
+		dao.setUuser(user);
+		dao.setCdate(now);
+		dao.setCuser(user);
+
+		if (files != null) {
+			File folder = fileService.getServiceRecordFolder(rowid, dao.getRowid());
+
+			for (MultipartFile file : files) {
+				String fileName = file.getOriginalFilename();
+				File saveFile = new File(folder, fileName);
+				file.transferTo(saveFile);
+			}
+		}
+
+		customerRepo.updateDetailTime(customer.getRowid(), user);
+
+		return null;
+	}
+
+	@Transactional
 	public ServiceRecordDto qryServiceRecord(Integer rowid) {
 		ServiceRecord dao = serviceRecordRepo.findById(rowid).orElse(null);
 		if (dao == null) {

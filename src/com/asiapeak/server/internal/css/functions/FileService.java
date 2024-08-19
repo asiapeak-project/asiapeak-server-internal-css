@@ -67,4 +67,55 @@ public class FileService {
 		return documentFilder;
 	}
 
+	public File getServiceRecordFolder(Integer customerRowid, Integer serviceRecordRowid) throws IOException {
+		File dataFolderFile = new File(dataFolder);
+
+		if (!dataFolderFile.exists() || !dataFolderFile.isDirectory()) {
+			throw new IOException("Configer " + dataFolder + "is not a directory.");
+		}
+
+		File customerFolder = new File(dataFolderFile, customerRowid.toString());
+		if (!customerFolder.exists()) {
+			customerFolder.mkdir();
+		}
+
+		File documentParentFolder = new File(customerFolder, "serviceRecord");
+		if (!documentParentFolder.exists()) {
+			documentParentFolder.mkdir();
+		}
+
+		File documentFilder = new File(documentParentFolder, serviceRecordRowid.toString());
+		if (!documentFilder.exists()) {
+			documentFilder.mkdir();
+		}
+
+		return documentFilder;
+	}
+
+	public List<File> listServiceRecordFiles(Integer customerRowid, Integer serviceRecordRowid) {
+
+		File dataFolderFile = new File(dataFolder);
+
+		if (!dataFolderFile.exists() || !dataFolderFile.isDirectory()) {
+			return new ArrayList<>();
+		}
+
+		File customerFolder = new File(dataFolderFile, customerRowid.toString());
+		if (!customerFolder.exists()) {
+			return new ArrayList<>();
+		}
+
+		File documentParentFolder = new File(customerFolder, "serviceRecord");
+		if (!documentParentFolder.exists()) {
+			return new ArrayList<>();
+		}
+
+		File documentFolder = new File(documentParentFolder, serviceRecordRowid.toString());
+		if (!documentFolder.exists()) {
+			return new ArrayList<>();
+		}
+
+		return Arrays.asList(documentFolder.listFiles()).stream().filter(f -> f.isFile()).collect(Collectors.toList());
+	}
+
 }
