@@ -968,11 +968,27 @@ public class CustomersService {
 	}
 
 	@Transactional
-	public String delServiceRecord(Integer rowid) {
+	public String delServiceRecord(Integer rowid) throws IOException {
 		ServiceRecord dao = serviceRecordRepo.findById(rowid).orElse(null);
 		if (dao == null) {
 			throw new RuntimeException("服務歷程不存在");
 		}
+
+		List<File> folders = new ArrayList<>();
+		folders.add(fileService.getServiceRecordFolder(dao.getCustomer().getRowid(), rowid));
+
+		List<ServiceRecordHandle> handles = dao.getServiceRecordHandles();
+
+		for (ServiceRecordHandle handle : handles) {
+			folders.add(fileService.getServiceRecordHandleFolder(dao.getCustomer().getRowid(), handle.getRowid()));
+		}
+
+		serviceRecordHandleRepo.deleteAll(handles);
+
+		folders.forEach(folder -> {
+			FileUtils.deleteQuietly(folder);
+		});
+
 		String user = userNameService.getCurrentUserName();
 		customerRepo.updateDetailTime(dao.getCustomer().getRowid(), user);
 		serviceRecordRepo.delete(dao);

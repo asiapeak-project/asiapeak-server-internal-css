@@ -239,7 +239,7 @@
 							formData: formData,
 							success: () => {
 								PromptUtils.success("更新成功")
-								DialogUtils.closeWindow(window, true)
+								DialogUtils.closeWindow(window, {action: "edit"})
 							}
 						})
 					}
@@ -324,9 +324,9 @@
 				DialogUtils.confirm({
 					title: "刪除確認",
 					text: `
-						是否要刪除此文件文檔? <br />
+						是否要刪除此服務紀錄? <br />
 						<span class="text-danger">
-							將換刪除此文件文黨的所有內容，包含已上傳的附件檔案。							
+							將換刪除此服務紀錄的所有內容，包含已上傳的附件檔案與所有處理結果。							
 						</span>
 					`,
 					onConfirm: () => {

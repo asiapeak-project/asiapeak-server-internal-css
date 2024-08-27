@@ -611,7 +611,7 @@ public class CustomersController {
 
 	@ResponseBody
 	@PostMapping("delServiceRecord/{rowid}")
-	public ResponseBean<Boolean> delServiceRecord(@PathVariable("rowid") Integer rowid) {
+	public ResponseBean<Boolean> delServiceRecord(@PathVariable("rowid") Integer rowid) throws IOException {
 		String msg = customersService.delServiceRecord(rowid);
 		if (StringUtils.isBlank(msg)) {
 			return ResponseBean.success(true);
