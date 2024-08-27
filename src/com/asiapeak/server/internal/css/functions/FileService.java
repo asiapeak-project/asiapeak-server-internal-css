@@ -4,11 +4,14 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import com.asiapeak.server.internal.css.functions.customers.dto.AttachementDto;
 
 @Service
 public class FileService {
@@ -16,8 +19,42 @@ public class FileService {
 	@Value("${com.asiapeak.server.internal.css.data-folder}")
 	String dataFolder;
 
-	public List<File> listDocumentFiles(Integer customerRowid, Integer documentRowid) {
+	public List<AttachementDto> toAttachementDtos(List<File> files) {
+		return files.stream().map(file -> {
+			AttachementDto attach = new AttachementDto();
+			attach.setName(file.getName());
+			attach.setSize(file.length());
+			attach.setUdate(new Date(file.lastModified()));
+			return attach;
+		}).collect(Collectors.toList());
+	}
 
+	private File getFolder(String name, Integer customerRowid, Integer targetRowid) throws IOException {
+		File dataFolderFile = new File(dataFolder);
+
+		if (!dataFolderFile.exists() || !dataFolderFile.isDirectory()) {
+			throw new IOException("Configer " + dataFolder + "is not a directory.");
+		}
+
+		File customerFolder = new File(dataFolderFile, customerRowid.toString());
+		if (!customerFolder.exists()) {
+			customerFolder.mkdir();
+		}
+
+		File parentFolder = new File(customerFolder, name);
+		if (!parentFolder.exists()) {
+			parentFolder.mkdir();
+		}
+
+		File contentFolder = new File(parentFolder, targetRowid.toString());
+		if (!contentFolder.exists()) {
+			contentFolder.mkdir();
+		}
+
+		return contentFolder;
+	}
+
+	private List<File> listFiles(String name, Integer customerRowid, Integer targetRowid) {
 		File dataFolderFile = new File(dataFolder);
 
 		if (!dataFolderFile.exists() || !dataFolderFile.isDirectory()) {
@@ -29,93 +66,41 @@ public class FileService {
 			return new ArrayList<>();
 		}
 
-		File documentParentFolder = new File(customerFolder, "document");
-		if (!documentParentFolder.exists()) {
+		File parentFolder = new File(customerFolder, name);
+		if (!parentFolder.exists()) {
 			return new ArrayList<>();
 		}
 
-		File documentFolder = new File(documentParentFolder, documentRowid.toString());
+		File documentFolder = new File(parentFolder, targetRowid.toString());
 		if (!documentFolder.exists()) {
 			return new ArrayList<>();
 		}
 
 		return Arrays.asList(documentFolder.listFiles()).stream().filter(f -> f.isFile()).collect(Collectors.toList());
+	}
+
+	public List<File> listDocumentFiles(Integer customerRowid, Integer documentRowid) {
+		return listFiles("document", customerRowid, documentRowid);
 	}
 
 	public File getDocumentFolder(Integer customerRowid, Integer documentRowid) throws IOException {
-		File dataFolderFile = new File(dataFolder);
-
-		if (!dataFolderFile.exists() || !dataFolderFile.isDirectory()) {
-			throw new IOException("Configer " + dataFolder + "is not a directory.");
-		}
-
-		File customerFolder = new File(dataFolderFile, customerRowid.toString());
-		if (!customerFolder.exists()) {
-			customerFolder.mkdir();
-		}
-
-		File documentParentFolder = new File(customerFolder, "document");
-		if (!documentParentFolder.exists()) {
-			documentParentFolder.mkdir();
-		}
-
-		File documentFilder = new File(documentParentFolder, documentRowid.toString());
-		if (!documentFilder.exists()) {
-			documentFilder.mkdir();
-		}
-
-		return documentFilder;
+		return getFolder("document", customerRowid, documentRowid);
 	}
 
 	public File getServiceRecordFolder(Integer customerRowid, Integer serviceRecordRowid) throws IOException {
-		File dataFolderFile = new File(dataFolder);
-
-		if (!dataFolderFile.exists() || !dataFolderFile.isDirectory()) {
-			throw new IOException("Configer " + dataFolder + "is not a directory.");
-		}
-
-		File customerFolder = new File(dataFolderFile, customerRowid.toString());
-		if (!customerFolder.exists()) {
-			customerFolder.mkdir();
-		}
-
-		File documentParentFolder = new File(customerFolder, "serviceRecord");
-		if (!documentParentFolder.exists()) {
-			documentParentFolder.mkdir();
-		}
-
-		File documentFilder = new File(documentParentFolder, serviceRecordRowid.toString());
-		if (!documentFilder.exists()) {
-			documentFilder.mkdir();
-		}
-
-		return documentFilder;
+		return getFolder("serviceRecord", customerRowid, serviceRecordRowid);
 	}
 
 	public List<File> listServiceRecordFiles(Integer customerRowid, Integer serviceRecordRowid) {
+		return listFiles("serviceRecord", customerRowid, serviceRecordRowid);
+	}
 
-		File dataFolderFile = new File(dataFolder);
+	public File getServiceRecordHandleFolder(Integer customerRowid, Integer serviceRecordHandleRowid) throws IOException {
+		return getFolder("serviceRecordHandle", customerRowid, serviceRecordHandleRowid);
+	}
 
-		if (!dataFolderFile.exists() || !dataFolderFile.isDirectory()) {
-			return new ArrayList<>();
-		}
-
-		File customerFolder = new File(dataFolderFile, customerRowid.toString());
-		if (!customerFolder.exists()) {
-			return new ArrayList<>();
-		}
-
-		File documentParentFolder = new File(customerFolder, "serviceRecord");
-		if (!documentParentFolder.exists()) {
-			return new ArrayList<>();
-		}
-
-		File documentFolder = new File(documentParentFolder, serviceRecordRowid.toString());
-		if (!documentFolder.exists()) {
-			return new ArrayList<>();
-		}
-
-		return Arrays.asList(documentFolder.listFiles()).stream().filter(f -> f.isFile()).collect(Collectors.toList());
+	public List<File> listServiceRecordHandleFiles(Integer customerRowid, Integer serviceRecordHandleRowid) {
+		return listFiles("serviceRecordHandle", customerRowid, serviceRecordHandleRowid);
 	}
 
 }

@@ -7,6 +7,11 @@
 	<title>客戶服務系統-服務歷程-[[${dname}]]</title>
 	<script th:src="@{/resources/vendors/ckeditor/ckeditor.js}"></script>
 	<script th:src="@{/resources/vendors/ckeditor/ckeditor-utils.js}"></script>
+	<style>
+		.attachment-delete:hover {
+			background-color: #fde5ef !important;
+		}
+	</style>
 	<script th:inline="javascript">
 		
 		const rowid = /*[[${rowid}]]*/ "";
@@ -211,12 +216,12 @@
 		
 		<div class="col-md-3">
 			<label for="serviceDate" class="form-label">事發時間</label>
-			<input type="text" class="form-control" id="serviceDate" style="width: 190px" />
+			<input type="text" class="form-control" id="serviceDate" readonly style="width: 190px" />
 		</div>
 		
 		
 		<div class="col-md-3">
-			<label for="handleResult" class="form-label">處理結果</label>
+			<label for="handleResult" class="form-label">處理狀態</label>
 			<select class="form-select" id="handleResult" style="width: 190px">
 				<option value="尚未處理">尚未處理</option>
 				<option value="處理中">處理中</option>

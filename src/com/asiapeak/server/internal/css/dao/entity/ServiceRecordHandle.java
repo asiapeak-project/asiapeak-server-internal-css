@@ -38,6 +38,16 @@ public class ServiceRecordHandle {
 
 	Date handleDate;
 
+	@Type(type = "text")
+	String cuser;
+
+	Date cdate;
+
+	@Type(type = "text")
+	String uuser;
+
+	Date udate;
+
 	@ManyToOne
 	ServiceRecord serviceRecord;
 

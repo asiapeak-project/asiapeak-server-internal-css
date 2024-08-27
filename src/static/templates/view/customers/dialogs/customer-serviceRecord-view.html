@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/clear.html}">
+
+<head>
+	<script th:inline="javascript">
+		
+		const rowid = /*[[${rowid}]]*/ "";
+		var customerRowid;
+		
+		
+		$(() => {
+			
+			const doQuery = () => {
+				doQueryServiceRecord(doQueryHandles)
+			}
+			
+			const doQueryServiceRecord = (callback) => {
+				HttpUtils.doPost({
+					url: "/customers/qryServiceRecord/" + rowid,
+					success: (response) => {
+						$("#type").val(response.data.type);
+						$("#handleResult").val(response.data.handleResult);
+						$("#subject").val(response.data.subject);
+						$("#service-content").html(response.data.serviceContent)
+						
+						$("#serviceDate").text(TextUtils.formatDate(new Date(response.data.serviceDate)))
+						$("#contactPerson").text(response.data.contactPerson)
+						$("#udate").text(TextUtils.formatDate(new Date(response.data.udate)))
+						$("#uuser").text(response.data.uuser)
+						customerRowid = response.data.customerRowid;
+						renderAttachements(response.data.files);
+						callback()
+					}
+				})
+			}
+			
+			const doQueryHandles = () => {
+				HttpUtils.doPost({
+					url: "/customers/qryServiceRecordHandles/" + rowid,
+					success: (response) => {
+						renderHandles(response.data)
+					}
+				})
+			}
+			
+			const renderAttachements = (files) => {
+				const div = document.getElementById("service-attachments");
+				div.innerHTML = "";
+				if(files.length === 0){
+					$(div).hide()
+				} else {
+					$(div).show()
+					files.forEach(file => {
+						div.appendChild(
+							generateAttachementElement(file)
+						)
+					})
+				}
+				
+			}
+			
+			const generateAttachementElement = (file) => {
+				const title = `檔案大小:${TextUtils.formatFileSizeNum(file.size)}\n檔案日期:${TextUtils.formatDate(new Date(file.udate))}`
+				const href = `/customers/serviceRecord/${customerRowid}/attachement/${rowid}/${decodeURI(file.name)}`
+				return ElementUtils.createElement(`
+					<a target="_blank" class="text-decoration-none mx-2" title="${title}" href="${href}">
+						${ElementUtils.createFileIcon(file.name).outerHTML}
+						${file.name}
+					</a>
+				`)
+			}
+			
+			const renderHandles = (items) => {
+				const handles = document.getElementById("handles");
+				items.forEach(item => {
+					div.appendChild(
+						generateHandleElement(item)
+					)
+				})
+			}
+			
+			const openEditHandle = (handleRowid) => {
+				
+			}
+			
+			const generateHandleElement = (item) => {
+				const handle = ElementUtils.createElement(`
+					<div class="my-2">
+						<div data-content class="border p-2" style="min-height: 300px;"></div>
+						<div data-attachements class="d-flex justify-content-start border-start border-end py-2"></div>
+						<div class="text-secondary d-flex justify-content-between border-start border-end border-bottom px-2">
+							<span>
+								<span>處理日期:</span>
+								<span data-handle-date></span>
+							</span>
+							<span>
+								<span>更新日期:</span>
+								<span data-udate></span>
+							</span>
+							<span>
+								<span>處理人員:</span>
+								<span data-handlePerson></span>
+							</span>
+							<a data-edit class="clickable underline text-primary">
+								<i class="bi bi-pencil-fill"></i>
+								編輯處理紀錄
+							</a>
+						</div>
+					</div>
+				`)
+				
+				const content = handle.querySelector("[data-content]")
+				const attachements = handle.querySelector("[data-attachements]")
+				const handleDate = handle.querySelector("[data-handle-date]")
+				const udate = handle.querySelector("[data-udate]")
+				const handlePerson = handle.querySelector("[data-handlePerson]")
+				
+				content.innerHTML = item.handleContent;
+				
+				attachements.innerHTML = "";
+				if(item.files.length === 0){
+					$(attachements).hide()
+				} else {
+					$(attachements).show()
+					item.files.forEach(file => {
+						attachements.appendChild(
+							generateAttachementElement(file)
+						)
+					})
+				}
+				
+				handleDate.innerText = TextUtils.formatDate(new Date(item.handleDate))
+				udate.innerText =  TextUtils.formatDate(new Date(item.udate))
+				handlePerson.innerText =  item.handlePerson
+				
+				const edit = handle.querySelector("[data-edit]")
+				
+				edit.addEventListener("click", () => {
+					openEditHandle(item.rowid);
+				})
+				
+			}
+			
+			const openEditServiceRecord = () => {
+				DialogUtils.window({
+					title: "編輯服務紀錄",
+					url: "/customers/editServiceRecord/" + rowid,
+					width: "calc(100dvw - 20px)",
+					height: "calc(100vh - 122px);",
+					callback : (rtnVal) => {
+						if(rtnVal){
+							doQuery();
+						}
+					}					
+				})
+			}
+			
+			const openAddHandle = () => {
+				
+			}
+			
+			$("#edit-service-record-btn").click(() => {
+				openEditServiceRecord()
+			})
+			
+			doQuery();
+			
+			$("#add-handle-btn").click(() => {
+				openAddHandle()
+			})
+			
+		})
+		
+	</script>
+</head>
+
+<body layout:fragment="content">
+	
+	<div class="input-group mb-1">
+		<div class="input-group-text">類別</div>
+		<input type="text" class="form-control" id="type" readonly style="max-width: 170px;" />
+		<div class="input-group-text">處理狀態</div>
+		<input type="text" class="form-control" id="handleResult" readonly style="max-width: 170px;" />
+		<div class="input-group-text">名稱</div>
+		<input type="text" class="form-control" id="subject" readonly />
+    </div>
+	
+	<div id="service-content" class="border p-2" style="min-height: 300px;"></div>
+	<div id="service-attachments" class="d-flex justify-content-start border-start border-end py-2"></div>
+	<div class="text-secondary d-flex justify-content-between border-start border-end border-bottom px-2">
+		<span>
+			<span>事發日期:</span>
+			<span id="serviceDate"></span>
+		</span>
+		<span>
+			<span>聯絡人員:</span>
+			<span id="contactPerson"></span>
+		</span>
+		<span>
+			<span>更新日期:</span>
+			<span id="udate"></span>
+		</span>
+		<span>
+			<span>更新人員:</span>
+			<span id="uuser"></span>
+		</span>
+		<a id="edit-service-record-btn" class="clickable underline text-primary">
+			<i class="bi bi-pencil-fill"></i>
+			編輯服務紀錄
+		</a>
+	</div>
+	
+	<div class="text-end my-4">
+		<button id="add-handle-btn" class="btn btn-success" type="button">新增處理結果</button>
+	</div>
+	
+	<div id="handles"></div>
+	
+	<br />
+</body>
+
+</html>

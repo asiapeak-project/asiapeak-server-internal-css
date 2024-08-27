@@ -6,14 +6,14 @@ import java.util.List;
 import lombok.Data;
 
 @Data
-public class DocumentDto {
+public class DocumentOutputDto {
 
 	Integer parentRowid;
 	Integer rowid;
 	String category;
 	String subject;
 	String content;
-	List<DocumentAttachementDto> files;
+	List<AttachementDto> files;
 
 	String cuser;
 	Date cdate;

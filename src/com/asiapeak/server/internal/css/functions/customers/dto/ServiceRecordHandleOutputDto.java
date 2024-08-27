@@ -1,11 +1,12 @@
 package com.asiapeak.server.internal.css.functions.customers.dto;
 
 import java.util.Date;
+import java.util.List;
 
 import lombok.Data;
 
 @Data
-public class ServiceRecordHandleDto {
+public class ServiceRecordHandleOutputDto {
 
 	Integer rowid;
 
@@ -22,5 +23,7 @@ public class ServiceRecordHandleDto {
 	String uuser;
 
 	Date udate;
+	
+	List<AttachementDto> files;
 
 }

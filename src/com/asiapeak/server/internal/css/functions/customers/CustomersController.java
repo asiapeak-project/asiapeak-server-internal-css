@@ -2,7 +2,6 @@ package com.asiapeak.server.internal.css.functions.customers;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -10,14 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.asiapeak.server.internal.css.core.dto.ResponseBean;
@@ -26,9 +23,12 @@ import com.asiapeak.server.internal.css.functions.customers.dto.ContactDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.CustomerDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.DeploymentDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.DeploymentOutptuDto;
-import com.asiapeak.server.internal.css.functions.customers.dto.DocumentDto;
+import com.asiapeak.server.internal.css.functions.customers.dto.DocumentInputDto;
+import com.asiapeak.server.internal.css.functions.customers.dto.DocumentOutputDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.ProductDto;
-import com.asiapeak.server.internal.css.functions.customers.dto.ServiceRecordDto;
+import com.asiapeak.server.internal.css.functions.customers.dto.ServiceRecordHandleOutputDto;
+import com.asiapeak.server.internal.css.functions.customers.dto.ServiceRecordInputDto;
+import com.asiapeak.server.internal.css.functions.customers.dto.ServiceRecordOutputDto;
 import com.asiapeak.spring.downloader.dto.ResponseFile;
 import com.asiapeak.spring.downloader.dto.ResponseZip;
 
@@ -443,14 +443,8 @@ public class CustomersController {
 
 	@ResponseBody
 	@PostMapping(path = "createDocument/{rowid}", consumes = "multipart/form-data")
-	public ResponseBean<Boolean> createDocument( //
-			@PathVariable("rowid") Integer rowid, //
-			@RequestParam("category") String category, //
-			@RequestParam("subject") String subject, //
-			@RequestParam("content") String content, //
-			@RequestPart(name = "files", required = false) List<MultipartFile> files //
-	) throws Exception {
-		customersService.createDocument(rowid, category, subject, content, files);
+	public ResponseBean<Boolean> createDocument(@PathVariable("rowid") Integer rowid, @ModelAttribute DocumentInputDto dto) throws Exception {
+		customersService.createDocument(rowid, dto);
 		return ResponseBean.success(true);
 	}
 
@@ -465,8 +459,8 @@ public class CustomersController {
 
 	@ResponseBody
 	@PostMapping("qryDocument/{rowid}")
-	public ResponseBean<DocumentDto> qryDocument(@PathVariable("rowid") Integer rowid) {
-		DocumentDto dto = customersService.qryDocument(rowid);
+	public ResponseBean<DocumentOutputDto> qryDocument(@PathVariable("rowid") Integer rowid) {
+		DocumentOutputDto dto = customersService.qryDocument(rowid);
 		return ResponseBean.success(dto);
 	}
 
@@ -500,15 +494,8 @@ public class CustomersController {
 
 	@ResponseBody
 	@PostMapping(path = "editDocument/{rowid}", consumes = "multipart/form-data")
-	public ResponseBean<Boolean> editDocument( //
-			@PathVariable("rowid") Integer rowid, //
-			@RequestParam("category") String category, //
-			@RequestParam("subject") String subject, //
-			@RequestParam("content") String content, //
-			@RequestParam(name = "delFiles", required = false) List<String> delFiles, //
-			@RequestPart(name = "files", required = false) List<MultipartFile> files //
-	) throws Exception {
-		customersService.editDocument(rowid, category, subject, content, delFiles, files);
+	public ResponseBean<Boolean> editDocument(@PathVariable("rowid") Integer rowid, @ModelAttribute DocumentInputDto dto) throws Exception {
+		customersService.editDocument(rowid, dto);
 		return ResponseBean.success(true);
 	}
 
@@ -539,8 +526,8 @@ public class CustomersController {
 
 	@ResponseBody
 	@PostMapping("qryServiceRecords/{rowid}")
-	public ResponseBean<List<ServiceRecordDto>> qryServiceRecords(@PathVariable("rowid") Integer rowid) {
-		List<ServiceRecordDto> list = customersService.qryServiceRecords(rowid);
+	public ResponseBean<List<ServiceRecordOutputDto>> qryServiceRecords(@PathVariable("rowid") Integer rowid) {
+		List<ServiceRecordOutputDto> list = customersService.qryServiceRecords(rowid);
 		return ResponseBean.success(list);
 	}
 
@@ -567,17 +554,8 @@ public class CustomersController {
 
 	@ResponseBody
 	@PostMapping(path = "createServiceRecord/{rowid}", consumes = "multipart/form-data")
-	public ResponseBean<Boolean> createServiceRecord( //
-			@PathVariable("rowid") Integer rowid, //
-			@RequestParam("subject") String subject, //
-			@RequestParam("type") String type, //
-			@RequestParam("contactPerson") String contactPerson, //
-			@RequestParam("serviceContent") String serviceContent, //
-			@RequestParam("handleResult") String handleResult, //
-			@RequestParam("serviceDate") Date serviceDate, //
-			@RequestPart(name = "files", required = false) List<MultipartFile> files //
-	) throws IOException {
-		String msg = customersService.createServiceRecord(rowid, subject, type, contactPerson, serviceContent, handleResult, serviceDate, files);
+	public ResponseBean<Boolean> createServiceRecord(@PathVariable("rowid") Integer rowid, @ModelAttribute ServiceRecordInputDto dto) throws IOException {
+		String msg = customersService.createServiceRecord(rowid, dto);
 		if (StringUtils.isBlank(msg)) {
 			return ResponseBean.success(true);
 		} else {
@@ -592,17 +570,38 @@ public class CustomersController {
 		return view;
 	}
 
+	@GetMapping("viewServiceRecord/{rowid}")
+	public ModelAndView viewServiceRecord(@PathVariable("rowid") Integer rowid) {
+		ModelAndView view = new ModelAndView("view/customers/dialogs/customer-serviceRecord-view");
+		view.addObject("rowid", rowid);
+		return view;
+	}
+
 	@ResponseBody
 	@PostMapping("qryServiceRecord/{rowid}")
-	public ResponseBean<ServiceRecordDto> qryServiceRecord(@PathVariable("rowid") Integer rowid) {
-		ServiceRecordDto dto = customersService.qryServiceRecord(rowid);
+	public ResponseBean<ServiceRecordOutputDto> qryServiceRecord(@PathVariable("rowid") Integer rowid) {
+		ServiceRecordOutputDto dto = customersService.qryServiceRecord(rowid);
 		return ResponseBean.success(dto);
 	}
 
 	@ResponseBody
-	@PostMapping("editServiceRecord")
-	public ResponseBean<Boolean> editServiceRecord(@RequestBody ServiceRecordDto dto) {
-		String msg = customersService.editServiceRecord(dto);
+	@PostMapping("qryServiceRecordHandles/{rowid}")
+	public ResponseBean<List<ServiceRecordHandleOutputDto>> qryServiceRecordHandles(@PathVariable("rowid") Integer rowid) {
+		List<ServiceRecordHandleOutputDto> list = customersService.qryServiceRecordHandles(rowid);
+		return ResponseBean.success(list);
+	}
+
+	@ResponseBody
+	@PostMapping("qryServiceRecordHandle/{rowid}")
+	public ResponseBean<ServiceRecordHandleOutputDto> qryServiceRecordHandle(@PathVariable("rowid") Integer rowid) {
+		ServiceRecordHandleOutputDto dto = customersService.qryServiceRecordHandle(rowid);
+		return ResponseBean.success(dto);
+	}
+
+	@ResponseBody
+	@PostMapping("editServiceRecord/{rowid}")
+	public ResponseBean<Boolean> editServiceRecord(@PathVariable("rowid") Integer rowid, @ModelAttribute ServiceRecordInputDto dto) throws IOException {
+		String msg = customersService.editServiceRecord(rowid, dto);
 		if (StringUtils.isBlank(msg)) {
 			return ResponseBean.success(true);
 		} else {

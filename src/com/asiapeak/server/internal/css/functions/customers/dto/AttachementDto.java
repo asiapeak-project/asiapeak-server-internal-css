@@ -5,7 +5,7 @@ import java.util.Date;
 import lombok.Data;
 
 @Data
-public class DocumentAttachementDto {
+public class AttachementDto {
 	String name;
 	long size;
 	Date udate;

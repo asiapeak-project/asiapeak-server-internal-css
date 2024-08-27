@@ -5,9 +5,9 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.asiapeak.server.internal.css.dao.DBConfig;
-import com.asiapeak.server.internal.css.dao.entity.User;
+import com.asiapeak.server.internal.css.dao.entity.Users;
 
 @Transactional(transactionManager = DBConfig.TransactionManager)
-public interface UserRepo extends JpaRepository<User, Integer>, JpaSpecificationExecutor<User> {
+public interface UsersRepo extends JpaRepository<Users, Integer>, JpaSpecificationExecutor<Users> {
 
 }

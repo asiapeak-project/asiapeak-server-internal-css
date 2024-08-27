@@ -15,18 +15,12 @@ import lombok.experimental.Accessors;
 @Table
 @Entity
 @Accessors(chain = true)
-public class User {
+public class UsersAuth {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	Integer rowid;
 
 	@Type(type = "text")
-	String account;
-
-	@Type(type = "text")
-	String password;
-
-	@Type(type = "text")
-	String secret;
+	String authName;
 }

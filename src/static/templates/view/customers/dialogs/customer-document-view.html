@@ -27,11 +27,6 @@
 						$("#subject").val(data.subject)
 						
 						$("#content").html(data.content)
-						if(data.content){
-							$("#content").show();			
-						} else {
-							$("#content").hide();
-						}
 						
 						renderUploadInputs(data.files);
 						
@@ -134,7 +129,7 @@
 		</button>
     </div>
 	
-	<div id="content" class="border p-2"></div>
+	<div id="content" class="border p-2" style="min-height: 300px;"></div>
 	
 	<div id="attachments" class="d-flex flex-wrap mt-3"></div>
 	<button id="download-all" type="button" class="btn btn-link">全部下載</button>

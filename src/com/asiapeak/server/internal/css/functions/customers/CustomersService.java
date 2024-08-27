@@ -19,21 +19,25 @@ import com.asiapeak.server.internal.css.dao.entity.Deployment;
 import com.asiapeak.server.internal.css.dao.entity.Document;
 import com.asiapeak.server.internal.css.dao.entity.Product;
 import com.asiapeak.server.internal.css.dao.entity.ServiceRecord;
+import com.asiapeak.server.internal.css.dao.entity.ServiceRecordHandle;
 import com.asiapeak.server.internal.css.dao.repo.ContactRepo;
 import com.asiapeak.server.internal.css.dao.repo.CustomerRepo;
 import com.asiapeak.server.internal.css.dao.repo.DeploymentRepo;
 import com.asiapeak.server.internal.css.dao.repo.DocumentRepo;
 import com.asiapeak.server.internal.css.dao.repo.ProductRepo;
+import com.asiapeak.server.internal.css.dao.repo.ServiceRecordHandleRepo;
 import com.asiapeak.server.internal.css.dao.repo.ServiceRecordRepo;
 import com.asiapeak.server.internal.css.functions.FileService;
 import com.asiapeak.server.internal.css.functions.customers.dto.ContactDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.CustomerDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.DeploymentDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.DeploymentOutptuDto;
-import com.asiapeak.server.internal.css.functions.customers.dto.DocumentAttachementDto;
-import com.asiapeak.server.internal.css.functions.customers.dto.DocumentDto;
+import com.asiapeak.server.internal.css.functions.customers.dto.DocumentInputDto;
+import com.asiapeak.server.internal.css.functions.customers.dto.DocumentOutputDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.ProductDto;
-import com.asiapeak.server.internal.css.functions.customers.dto.ServiceRecordDto;
+import com.asiapeak.server.internal.css.functions.customers.dto.ServiceRecordHandleOutputDto;
+import com.asiapeak.server.internal.css.functions.customers.dto.ServiceRecordInputDto;
+import com.asiapeak.server.internal.css.functions.customers.dto.ServiceRecordOutputDto;
 import com.asiapeak.server.internal.css.system.UserNameService;
 
 @Service
@@ -62,6 +66,9 @@ public class CustomersService {
 
 	@Autowired
 	ServiceRecordRepo serviceRecordRepo;
+
+	@Autowired
+	ServiceRecordHandleRepo serviceRecordHandleRepo;
 
 	@Transactional
 	public List<CustomerDto> qryCustomers() {
@@ -540,7 +547,7 @@ public class CustomersService {
 	}
 
 	@Transactional
-	public void createDocument(Integer rowid, String category, String subject, String content, List<MultipartFile> files) throws Exception {
+	public void createDocument(Integer rowid, DocumentInputDto dto) throws Exception {
 
 		Customer customer = customerRepo.findById(rowid).orElse(null);
 		if (customer == null) {
@@ -548,9 +555,9 @@ public class CustomersService {
 		}
 
 		Document dao = new Document();
-		dao.setCategory(category);
-		dao.setSubject(subject);
-		dao.setContent(content);
+		dao.setCategory(dto.getCategory());
+		dao.setSubject(dto.getSubject());
+		dao.setContent(dto.getContent());
 		dao.setCustomer(customer);
 
 		String user = userNameService.getCurrentUserName();
@@ -562,10 +569,10 @@ public class CustomersService {
 
 		dao = documentRepo.save(dao);
 
-		if (files != null) {
+		if (dto.getFiles() != null) {
 			File documentFilder = fileService.getDocumentFolder(rowid, dao.getRowid());
 
-			for (MultipartFile file : files) {
+			for (MultipartFile file : dto.getFiles()) {
 				String fileName = file.getOriginalFilename();
 				File saveFile = new File(documentFilder, fileName);
 				file.transferTo(saveFile);
@@ -577,7 +584,7 @@ public class CustomersService {
 	}
 
 	@Transactional
-	public DocumentDto qryDocument(Integer rowid) {
+	public DocumentOutputDto qryDocument(Integer rowid) {
 
 		Document dao = documentRepo.findById(rowid).orElse(null);
 
@@ -585,7 +592,7 @@ public class CustomersService {
 			throw new RuntimeException("文件文檔不存在");
 		}
 
-		DocumentDto dto = new DocumentDto();
+		DocumentOutputDto dto = new DocumentOutputDto();
 		dto.setParentRowid(dao.getCustomer().getRowid());
 		dto.setRowid(dao.getRowid());
 		dto.setCategory(dao.getCategory());
@@ -596,17 +603,9 @@ public class CustomersService {
 		dto.setCdate(dao.getCdate());
 		dto.setCuser(dao.getCuser());
 
-		dto.setFiles(new ArrayList<>());
-
 		List<File> files = fileService.listDocumentFiles(dao.getCustomer().getRowid(), rowid);
 
-		for (File file : files) {
-			DocumentAttachementDto attach = new DocumentAttachementDto();
-			attach.setName(file.getName());
-			attach.setSize(file.length());
-			attach.setUdate(new Date(file.lastModified()));
-			dto.getFiles().add(attach);
-		}
+		dto.setFiles(fileService.toAttachementDtos(files));
 
 		return dto;
 	}
@@ -692,14 +691,14 @@ public class CustomersService {
 	}
 
 	@Transactional
-	public void editDocument(Integer rowid, String category, String subject, String content, List<String> delFiles, List<MultipartFile> files) throws IOException {
+	public void editDocument(Integer rowid, DocumentInputDto dto) throws IOException {
 		Document dao = documentRepo.findById(rowid).orElse(null);
 		if (dao == null) {
 			throw new RuntimeException("文件文檔不存在");
 		}
-		dao.setCategory(category);
-		dao.setSubject(subject);
-		dao.setContent(content);
+		dao.setCategory(dto.getCategory());
+		dao.setSubject(dto.getSubject());
+		dao.setContent(dto.getContent());
 
 		String user = userNameService.getCurrentUserName();
 		Date now = new Date();
@@ -708,8 +707,8 @@ public class CustomersService {
 
 		File documentFilder = fileService.getDocumentFolder(dao.getCustomer().getRowid(), rowid);
 
-		if (delFiles != null) {
-			for (String delFile : delFiles) {
+		if (dto.getDelFiles() != null) {
+			for (String delFile : dto.getDelFiles()) {
 				File f = new File(documentFilder, delFile);
 				if (f.exists()) {
 					f.delete();
@@ -717,8 +716,8 @@ public class CustomersService {
 			}
 		}
 
-		if (files != null) {
-			for (MultipartFile file : files) {
+		if (dto.getFiles() != null) {
+			for (MultipartFile file : dto.getFiles()) {
 				String fileName = file.getOriginalFilename();
 				File saveFile = new File(documentFilder, fileName);
 				file.transferTo(saveFile);
@@ -747,14 +746,14 @@ public class CustomersService {
 	}
 
 	@Transactional
-	public List<ServiceRecordDto> qryServiceRecords(Integer rowid) {
+	public List<ServiceRecordOutputDto> qryServiceRecords(Integer rowid) {
 		Customer customer = customerRepo.findById(rowid).orElse(null);
 		if (customer == null) {
 			return new ArrayList<>();
 		}
 
 		return customer.getServiceRecords().stream().map(dao -> {
-			ServiceRecordDto dto = new ServiceRecordDto();
+			ServiceRecordOutputDto dto = new ServiceRecordOutputDto();
 
 			dto.setRowid(dao.getRowid());
 			dto.setSubject(dao.getSubject());
@@ -779,7 +778,7 @@ public class CustomersService {
 	}
 
 	@Transactional
-	public String createServiceRecord(Integer rowid, ServiceRecordDto dto) {
+	public String createServiceRecord(Integer rowid, ServiceRecordOutputDto dto) {
 
 		Customer customer = customerRepo.findById(rowid).orElse(null);
 		if (customer == null) {
@@ -811,18 +810,18 @@ public class CustomersService {
 	}
 
 	@Transactional
-	public String createServiceRecord(Integer rowid, String subject, String type, String contactPerson, String serviceContent, String handleResult, Date serviceDate, List<MultipartFile> files) throws IOException {
+	public String createServiceRecord(Integer rowid, ServiceRecordInputDto dto) throws IOException {
 		Customer customer = customerRepo.findById(rowid).orElse(null);
 		if (customer == null) {
 			throw new RuntimeException("客戶資訊不存在");
 		}
 		ServiceRecord dao = new ServiceRecord();
-		dao.setSubject(subject);
-		dao.setType(type);
-		dao.setContactPerson(contactPerson);
-		dao.setServiceContent(serviceContent);
-		dao.setHandleResult(handleResult);
-		dao.setServiceDate(serviceDate);
+		dao.setSubject(dto.getSubject());
+		dao.setType(dto.getType());
+		dao.setContactPerson(dto.getContactPerson());
+		dao.setServiceContent(dto.getServiceContent());
+		dao.setHandleResult(dto.getHandleResult());
+		dao.setServiceDate(dto.getServiceDate());
 		dao.setCustomer(customer);
 
 		dao = serviceRecordRepo.save(dao);
@@ -834,10 +833,10 @@ public class CustomersService {
 		dao.setCdate(now);
 		dao.setCuser(user);
 
-		if (files != null) {
+		if (dto.getFiles() != null) {
 			File folder = fileService.getServiceRecordFolder(rowid, dao.getRowid());
 
-			for (MultipartFile file : files) {
+			for (MultipartFile file : dto.getFiles()) {
 				String fileName = file.getOriginalFilename();
 				File saveFile = new File(folder, fileName);
 				file.transferTo(saveFile);
@@ -850,14 +849,15 @@ public class CustomersService {
 	}
 
 	@Transactional
-	public ServiceRecordDto qryServiceRecord(Integer rowid) {
+	public ServiceRecordOutputDto qryServiceRecord(Integer rowid) {
 		ServiceRecord dao = serviceRecordRepo.findById(rowid).orElse(null);
 		if (dao == null) {
 			return null;
 		}
 
-		ServiceRecordDto dto = new ServiceRecordDto();
+		ServiceRecordOutputDto dto = new ServiceRecordOutputDto();
 		dto.setRowid(dao.getRowid());
+		dto.setCustomerRowid(dao.getCustomer().getRowid());
 		dto.setSubject(dao.getSubject());
 		dto.setType(dao.getType());
 		dto.setContactPerson(dao.getContactPerson());
@@ -869,12 +869,62 @@ public class CustomersService {
 		dto.setUuser(dao.getUuser());
 		dto.setUdate(dao.getUdate());
 
+		List<File> files = fileService.listServiceRecordFiles(dao.getCustomer().getRowid(), rowid);
+
+		dto.setFiles(fileService.toAttachementDtos(files));
+
 		return dto;
 	}
 
 	@Transactional
-	public String editServiceRecord(ServiceRecordDto dto) {
-		ServiceRecord dao = serviceRecordRepo.findById(dto.getRowid()).orElse(null);
+	public List<ServiceRecordHandleOutputDto> qryServiceRecordHandles(Integer rowid) {
+
+		ServiceRecord serviceRecord = serviceRecordRepo.findById(rowid).orElse(null);
+		if (serviceRecord == null) {
+			return new ArrayList<>();
+		}
+
+		return serviceRecord.getServiceRecordHandles().stream().map(dao -> {
+			ServiceRecordHandleOutputDto dto = new ServiceRecordHandleOutputDto();
+			dto.setRowid(dao.getRowid());
+			dto.setHandlePerson(dao.getHandlePerson());
+			dto.setHandleContent(dao.getHandleContent());
+			dto.setHandleDate(dao.getHandleDate());
+			dto.setCuser(dao.getCuser());
+			dto.setCdate(dao.getCdate());
+			dto.setUuser(dao.getUuser());
+			dto.setUdate(dao.getUdate());
+
+			List<File> files = fileService.listServiceRecordHandleFiles(serviceRecord.getCustomer().getRowid(), dao.getRowid());
+			dto.setFiles(fileService.toAttachementDtos(files));
+
+			return dto;
+		}).collect(Collectors.toList());
+	}
+
+	@Transactional
+	public ServiceRecordHandleOutputDto qryServiceRecordHandle(Integer rowid) {
+
+		ServiceRecordHandle dao = serviceRecordHandleRepo.findById(rowid).orElseThrow(() -> {
+			return new RuntimeException("服務歷程不存在");
+		});
+
+		ServiceRecordHandleOutputDto dto = new ServiceRecordHandleOutputDto();
+		dto.setRowid(dao.getRowid());
+		dto.setHandlePerson(dao.getHandlePerson());
+		dto.setHandleContent(dao.getHandleContent());
+		dto.setHandleDate(dao.getHandleDate());
+		dto.setCuser(dao.getCuser());
+		dto.setCdate(dao.getCdate());
+		dto.setUuser(dao.getUuser());
+		dto.setUdate(dao.getUdate());
+
+		return dto;
+	}
+
+	@Transactional
+	public String editServiceRecord(Integer rowid, ServiceRecordInputDto dto) throws IOException {
+		ServiceRecord dao = serviceRecordRepo.findById(rowid).orElse(null);
 		if (dao == null) {
 			throw new RuntimeException("服務歷程不存在");
 		}
@@ -890,6 +940,25 @@ public class CustomersService {
 		Date now = new Date();
 		dao.setUdate(now);
 		dao.setUuser(user);
+
+		File folder = fileService.getServiceRecordFolder(dao.getCustomer().getRowid(), rowid);
+
+		if (dto.getDelFiles() != null) {
+			for (String delFile : dto.getDelFiles()) {
+				File f = new File(folder, delFile);
+				if (f.exists()) {
+					f.delete();
+				}
+			}
+		}
+
+		if (dto.getFiles() != null) {
+			for (MultipartFile file : dto.getFiles()) {
+				String fileName = file.getOriginalFilename();
+				File saveFile = new File(folder, fileName);
+				file.transferTo(saveFile);
+			}
+		}
 
 		serviceRecordRepo.save(dao);
 
