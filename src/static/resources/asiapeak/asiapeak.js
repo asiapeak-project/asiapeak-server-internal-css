@@ -126,52 +126,59 @@ var DialogUtils = top.DialogUtils || {
 	 *            範例: callback: (rtnVal) => {} 或 callback: function(rtnVal){}
 	 * width = 視窗寬度，非必填，設定指定大小 "100px" or "100vw"
 	 * height = 視窗高度，非必填，設定指定大小 "100px" or "100vh"
+	 * beforeShown = ( callback ) => { callback() }
 	 */
 	window: (options = {}) => {
-		let title = options.title || "";
-		let data = options.data || {};
-		let url = options.url || "";
-		let callback = options.callback || (() => { });
 		
-		let width = options.width;
-		let height = options.height;
+		const beforeShown = options.beforeShown || ( ( callback ) => { callback() } )
 		
-		url = url += TextUtils.objectToQuerystring(data);
-		let id = TextUtils.randonString(16);
-
-		let html = `
-			<div id="modal-${id}" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-			  <div class="modal-dialog modal-lg modal-dialog-centered modal-window" style="${ width ? 'max-width: ' + width : ''}">
-			    <div class="modal-content">
-			      <div class="modal-header">
-			        <h5 class="modal-title">${title}</h5>
-			        <button data-title-close type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-			      </div>
-			      <div class="modal-body modal-body-window" style="${height ? 'min-height: ' + height : ''}">
-			      	<iframe id="${id}" class="modal-window-iframe" src="${url}"></iframe>
-			      </div>
-			    </div>
-			  </div>
-			</div>
-		`;
-
-		let e = ElementUtils.createElement(html);
-
-		e.addEventListener('hidden.bs.modal', function() {
-			DocumentUtils.removeFromTop(e);
-			dialogWindowCallbacks.delete(id);
-		});
-
-		e.querySelector("[data-title-close]").addEventListener('click', () => {
-			callback();
-		});
-
-		DocumentUtils.appendToTop(e);
-
-		let windowModal = new DocumentUtils.bootstrap.Modal(e);
-		windowModal.show();
-
-		dialogWindowCallbacks.set(id, callback);
+		beforeShown(() => {
+			let title = options.title || "";
+			let data = options.data || {};
+			let url = options.url || "";
+			let callback = options.callback || (() => { });
+			
+			let width = options.width;
+			let height = options.height;
+			
+			url = url += TextUtils.objectToQuerystring(data);
+			let id = TextUtils.randonString(16);
+	
+			let html = `
+				<div id="modal-${id}" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+				  <div class="modal-dialog modal-lg modal-dialog-centered modal-window" style="${ width ? 'max-width: ' + width : ''}">
+				    <div class="modal-content">
+				      <div class="modal-header">
+				        <h5 class="modal-title">${title}</h5>
+				        <button data-title-close type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				      </div>
+				      <div class="modal-body modal-body-window" style="${height ? 'min-height: ' + height : ''}">
+				      	<iframe id="${id}" class="modal-window-iframe" src="${url}"></iframe>
+				      </div>
+				    </div>
+				  </div>
+				</div>
+			`;
+	
+			let e = ElementUtils.createElement(html);
+	
+			e.addEventListener('hidden.bs.modal', function() {
+				DocumentUtils.removeFromTop(e);
+				dialogWindowCallbacks.delete(id);
+			});
+	
+			e.querySelector("[data-title-close]").addEventListener('click', () => {
+				callback();
+			});
+	
+			DocumentUtils.appendToTop(e);
+	
+			let windowModal = new DocumentUtils.bootstrap.Modal(e);
+			windowModal.show();
+	
+			dialogWindowCallbacks.set(id, callback);
+			
+		})
 
 	},
 	/**
@@ -803,7 +810,7 @@ var ElementUtils = top.ElementUtils || {
 	 * 				{label: "", url: ""},
 	 * 				{label: "", url: ""}
 	 * 			]
-	 * on
+	 * beforeShown = ( callback ) => { }
 	 */
 	createTabs: (options = []) => {
 		const div = options.div || ElementUtils.createElement("<div></div>");
@@ -816,8 +823,8 @@ var ElementUtils = top.ElementUtils || {
 		
 		const tabLabels = [];
 		const tabPanes = [];
-
-		const paneLoaded = [];
+		
+		const beforeShown = options.beforeShown || ( (callback) => { callback() } )
 		
 		tabs.forEach((item, index) => {
 			const labelClasses = ["nav-link", "none-select", "clickable", "ap-tab-label"];
@@ -826,9 +833,6 @@ var ElementUtils = top.ElementUtils || {
 			if(index === 0){
 				labelClasses.push("active");
 				paneClasses.push("active");
-				paneLoaded.push(true)
-			}else{
-				paneLoaded.push(false)
 			}
 			
 			tabLabels.push(ElementUtils.createElement(`
@@ -846,6 +850,7 @@ var ElementUtils = top.ElementUtils || {
 				tabPanes[0].appendChild(ElementUtils.createElement(`
 					<iframe class="ap-tab-iframe" src="${item.url}"></iframe>
 				`))
+				tabLabels[0].classList.remove('clickable')
 			}
 			
 		})
@@ -853,16 +858,20 @@ var ElementUtils = top.ElementUtils || {
 		tabLabels.forEach((item, index) => {
 			tabUL.appendChild(item);
 			item.addEventListener('click', () =>  {
-				tabLabels.forEach(_item => { _item.classList.remove('active')})
-				tabPanes.forEach(_item => { _item.classList.remove('active')})
-				tabLabels[index].classList.add('active');
-				tabPanes[index].classList.add('active');
-				if(!paneLoaded[index]){
-					tabPanes[index].appendChild(ElementUtils.createElement(`
-						<iframe class="ap-tab-iframe" src="${tabs[index].url}"></iframe>
-					`))
+				if(!tabLabels[index].classList.contains("active") && !tabPanes[index].classList.contains("active")){
+					beforeShown(() => {
+						tabLabels.forEach(_item => { _item.classList.remove('active')})
+						tabLabels.forEach(_item => { _item.classList.add('clickable')})
+						tabPanes.forEach(_item => { _item.classList.remove('active')})
+						tabLabels[index].classList.add('active');
+						tabLabels[index].classList.remove('clickable');
+						tabPanes[index].classList.add('active');
+						tabPanes[index].innerHTML = "";
+						tabPanes[index].appendChild(ElementUtils.createElement(`
+							<iframe class="ap-tab-iframe" src="${tabs[index].url}"></iframe>
+						`))
+					})
 				}
-				paneLoaded[index] = true;
 			})
 		})
 		
@@ -1187,108 +1196,124 @@ var TextUtils = top.TextUtils || {
 /** HTTP Request 套件 */
 var HttpUtils = top.HttpUtils || {
 	doPost: (options = {}) => {
-		let url = options.url || "";
-		let data = options.data || {};
-		let success = options.success || function() { };
-		const defaultError = function() { }
-		let error = options.error || defaultError;
-		let exception = options.exception || function() { };
+		const beforeReqeust = options.beforeReqeust || ( (callback) => { callback() } )
 		
-		ElementUtils.showScreenMask();
-
-		fetch(url, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				"Accept": "application/json"
-			},
-			body: JSON.stringify(data)
-		}).then((response) => {
-			if (response.ok) {
-				response.json().then((responseData) => {
-					if (responseData?.succeeded == true) {
-						success(responseData);
-					} else if (responseData?.succeeded == false) {
-						if(defaultError === error){
-							PromptUtils.error(responseData.message);							
+		beforeReqeust(() => {
+			
+			let url = options.url || "";
+			let data = options.data || {};
+			let success = options.success || function() { };
+			const defaultError = function() { }
+			let error = options.error || defaultError;
+			let exception = options.exception || function() { };
+			
+			ElementUtils.showScreenMask();
+			fetch(url, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					"Accept": "application/json"
+				},
+				body: JSON.stringify(data)
+			}).then((response) => {
+				if (response.ok) {
+					response.json().then((responseData) => {
+						if (responseData?.succeeded == true) {
+							success(responseData);
+						} else if (responseData?.succeeded == false) {
+							if(defaultError === error){
+								PromptUtils.error(responseData.message);							
+							}
+							error(responseData);
 						}
-						error(responseData);
-					}
-
-				});
-			} else {
-				response.json().then((responseData) => {
-					PromptUtils.error(responseData.message);
-					error(responseData, response);
-				});
-			}
-		}).catch((e, status) => {
-			PromptUtils.error(`
-				<span>Message：</span><br>
-				<span class="ms-3">${e.message}</span><br>
-				<span>Stack：</span><br>
-				<p class="ms-3">${e.stack.replace("\n", "<br>")}</p>
-				
-			`);
-			exception(e, status);
-		}).finally(() => {
-			ElementUtils.closeScreenMask();
+	
+					});
+				} else {
+					response.json().then((responseData) => {
+						PromptUtils.error(responseData.message);
+						error(responseData, response);
+					});
+				}
+			}).catch((e, status) => {
+				PromptUtils.error(`
+					<span>Message：</span><br>
+					<span class="ms-3">${e.message}</span><br>
+					<span>Stack：</span><br>
+					<p class="ms-3">${e.stack.replace("\n", "<br>")}</p>
+					
+				`);
+				exception(e, status);
+			}).finally(() => {
+				ElementUtils.closeScreenMask();
+			})
 		})
+		
 	},
 	doDownload: (options = {}) => {
-		let url = options.url || "";
-		let data = options.data || {};
-		let urlQueryString = url + TextUtils.objectToQuerystring(data);
-		let $a = document.createElement("a");
-		$a.setAttribute("href", urlQueryString);
-		$a.setAttribute("download", "");
-		$a.click();
-	},
-	upload: (options = {}) => {
-		const url = options.url || "";
-		const formData = options.formData || new FormData();
-		const success = options.success || (() => {})
-		const error = options.error || (() => {})
+		const beforeDownload = options.beforeDownload || ( (callback) => { callback() } )
 		
-		ElementUtils.setUploading({
-			show: true,
-			percent: 0
+		beforeDownload(() => {
+			let url = options.url || "";
+			let data = options.data || {};
+			let urlQueryString = url + TextUtils.objectToQuerystring(data);
+			let $a = document.createElement("a");
+			$a.setAttribute("href", urlQueryString);
+			$a.setAttribute("download", "");
+			$a.click();
 		})
 		
-		const ajax = new XMLHttpRequest();
+	},
+	upload: (options = {}) => {
 		
-		ajax.addEventListener("load", (event) => {
+		const beforeUpload = options.beforeUpload || ( (callback) => { callback() } )
+		
+		beforeUpload(() => {
+			const url = options.url || "";
+			const formData = options.formData || new FormData();
+			const success = options.success || (() => {})
+			const error = options.error || (() => {})
+			
 			ElementUtils.setUploading({
-				show: false,
+				show: true,
+				percent: 0
 			})
-			success(event);
-		}, false);
-		
-		ajax.upload.addEventListener("progress", (event) => {
-			if (event.total == 0) {
+			
+			const ajax = new XMLHttpRequest();
+			
+			ajax.addEventListener("load", (event) => {
 				ElementUtils.setUploading({
-					percent: 100
+					show: false,
 				})
-			} else {
-				let percent = Math.round((event.loaded / event.total) * 100);
-				ElementUtils.setUploading({
-					percent: percent
+				success(event);
+			}, false);
+			
+			ajax.upload.addEventListener("progress", (event) => {
+				if (event.total == 0) {
+					ElementUtils.setUploading({
+						percent: 100
+					})
+				} else {
+					let percent = Math.round((event.loaded / event.total) * 100);
+					ElementUtils.setUploading({
+						percent: percent
+					})
+				}
+			}, false);
+			
+			ajax.addEventListener("error", (event) => {
+				const xhr = event.target;
+			    const errorMessage = xhr.statusText || "An error occurred";
+			    PromptUtils.error(`Error ${xhr.status}: ${errorMessage}`)
+			    ElementUtils.setUploading({
+					show: false,
 				})
-			}
-		}, false);
+			    error(event);
+			}, false);
+			
+			ajax.open("POST", url, true);
+			ajax.send(formData);
+		})
 		
-		ajax.addEventListener("error", (event) => {
-			const xhr = event.target;
-		    const errorMessage = xhr.statusText || "An error occurred";
-		    PromptUtils.error(`Error ${xhr.status}: ${errorMessage}`)
-		    ElementUtils.setUploading({
-				show: false,
-			})
-		    error(event);
-		}, false);
-		
-		ajax.open("POST", url, true);
-		ajax.send(formData);
 	}
 }
 

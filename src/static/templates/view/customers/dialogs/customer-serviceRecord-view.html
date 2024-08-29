@@ -162,7 +162,15 @@
 			}
 			
 			const openAddHandle = () => {
-				
+				DialogUtils.window({
+					title: "新增處理結果",
+					url: "/customers/createServiceRecordHandle/" + rowid,
+					callback : (rtnVal) => {
+						if(rtnVal){
+							doQuery();
+						}
+					}					
+				})
 			}
 			
 			$("#edit-service-record-btn").click(() => {
@@ -184,11 +192,11 @@
 	
 	<div class="input-group mb-1">
 		<div class="input-group-text">類別</div>
-		<input type="text" class="form-control" id="type" readonly style="max-width: 170px;" />
+		<input type="text" class="form-control" id="type" readonly style="max-width: 170px;; background: white;" />
 		<div class="input-group-text">處理狀態</div>
-		<input type="text" class="form-control" id="handleResult" readonly style="max-width: 170px;" />
+		<input type="text" class="form-control" id="handleResult" readonly style="max-width: 170px;; background: white;" />
 		<div class="input-group-text">名稱</div>
-		<input type="text" class="form-control" id="subject" readonly />
+		<input type="text" class="form-control" id="subject" readonly style="background: white;" />
     </div>
 	
 	<div id="service-content" class="border p-2" style="min-height: 300px;"></div>

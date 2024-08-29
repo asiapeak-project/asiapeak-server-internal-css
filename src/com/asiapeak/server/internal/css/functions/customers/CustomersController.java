@@ -2,6 +2,7 @@ package com.asiapeak.server.internal.css.functions.customers;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -26,6 +27,7 @@ import com.asiapeak.server.internal.css.functions.customers.dto.DeploymentOutptu
 import com.asiapeak.server.internal.css.functions.customers.dto.DocumentInputDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.DocumentOutputDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.ProductDto;
+import com.asiapeak.server.internal.css.functions.customers.dto.ServiceRecordHandleInputDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.ServiceRecordHandleOutputDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.ServiceRecordInputDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.ServiceRecordOutputDto;
@@ -613,6 +615,37 @@ public class CustomersController {
 	@PostMapping("delServiceRecord/{rowid}")
 	public ResponseBean<Boolean> delServiceRecord(@PathVariable("rowid") Integer rowid) throws IOException {
 		String msg = customersService.delServiceRecord(rowid);
+		if (StringUtils.isBlank(msg)) {
+			return ResponseBean.success(true);
+		} else {
+			return ResponseBean.error(true).message(msg);
+		}
+	}
+
+	@GetMapping("createServiceRecordHandle/{rowid}")
+	public ModelAndView createServiceRecordHandle(@PathVariable("rowid") Integer rowid) {
+		ModelAndView view = new ModelAndView("view/customers/dialogs/customer-serviceHandle-create");
+		view.addObject("rowid", rowid);
+		return view;
+	}
+
+	@ResponseBody
+	@PostMapping("qryCurrentServiceRecordHandleResult/{rowid}")
+	public ResponseBean<String> qryCurrentServiceRecordHandleResult(@PathVariable("rowid") Integer rowid) {
+		String result = customersService.qryCurrentServiceRecordHandleResult(rowid);
+		return ResponseBean.success(result);
+	}
+
+	@ResponseBody
+	@PostMapping("qryHandlePeople")
+	public ResponseBean<List<String>> qryHandlePeople() {
+		return ResponseBean.success(new ArrayList<>()); // TODO
+	}
+
+	@ResponseBody
+	@PostMapping("createServiceRecordHandle/{rowid}")
+	public ResponseBean<Boolean> createServiceRecordHandle(@PathVariable("rowid") Integer rowid, @ModelAttribute ServiceRecordHandleInputDto dto) throws IOException {
+		String msg = customersService.createServiceRecordHandle(rowid, dto);
 		if (StringUtils.isBlank(msg)) {
 			return ResponseBean.success(true);
 		} else {

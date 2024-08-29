@@ -4,16 +4,206 @@
 	layout:decorate="~{layouts/clear.html}">
 
 <head>
-	<title>Example</title>
+	<title></title>
+	<script th:src="@{/resources/vendors/ckeditor/ckeditor.js}"></script>
+	<script th:src="@{/resources/vendors/ckeditor/ckeditor-utils.js}"></script>
 	<script th:inline="javascript">
+		
+		const rowid = /*[[${rowid}]]*/ "";
+		
 		$(() => {
 			
+			const queryHandlePeople = () => {
+				HttpUtils.doPost({
+					url : "/customers/qryHandlePeople",
+					success: (response) => {
+						ElementUtils.createDropdownTextField({
+							div: document.getElementById("handlePerson-select"),
+							id: "handlePerson",
+							values: response.data,
+							value: ""
+						})
+					}
+				})
+			}
+			
+			const createEditor = () => {
+				CKEDITOR_UTILS.create('editor');
+			}
+			
+			const getEditorContent = () => {
+				return CKEDITOR_UTILS.getContent('editor');
+			}
+			
+			const setEditorContent = (content) => {
+				CKEDITOR_UTILS.setContent('editor', content);
+			}
+			
+			$("#handleDate").datetimepicker();
+			$("#handleDate").val( TextUtils.formatDate(new Date()).substr(0, 16))
+			
+			createEditor();
+			
+			const toUploadFileInputs = [];
+			
+			const chooseFiles = (callback = () => {}) => {
+				let $input = document.createElement("input")
+				$input.setAttribute("type", "file");
+				$input.setAttribute("multiple", "multiple");
+				$input.addEventListener("change", () => {
+					if($input.files.length > 0){
+						toUploadFileInputs.push($input);
+						renderUploadInputs();
+					}
+				})
+				$input.click();
+			}
+			
+			const renderUploadInputs = () => {
+				const attachments = document.getElementById("attachments");
+				attachments.innerHTML = "";
+				toUploadFileInputs.forEach($input => {
+					for (let i = 0; i < $input.files.length; i++) {
+						const cmp = createUploadComponent($input, $input.files[i]);
+						attachments.appendChild(cmp);
+					}
+				})
+			}
+			
+			const createUploadComponent = ($input, file) => {
+				const fileName = file.name;
+				const cmp = ElementUtils.createElement(`
+					<div style="width: 300px; min-width: 220px; height: 54px; min-height: 54px;" class="border border-secondary rounded m-2 none-select">
+						<div data-btn-delete style="width: 24px; height: 24px;" class="attachment-delete position-relative top-0 start-100 translate-middle bg-light border border-danger rounded-circle clickable">
+						   <i class="bi bi-x text-danger" style="position: absolute; font-size: 18px; top: -1px; left: 2px;"></i> 
+						</div>
+						<span data-icon style="font-size: 34px; position: relative; left: 11px; top: -25px;"></span>
+						<div data-filename style="position: relative; width: 236px; top: -61px; left: 54px; overflow: hidden; text-overflow: ellipsis;  white-space: nowrap;"></div>
+					</div>
+				`)
+				cmp.querySelector("[data-btn-delete]").addEventListener("click",() => {
+					DialogUtils.confirm({
+						title: "取消上傳附件提醒",
+						text: "是否要取消上傳「" + fileName + "」檔案?",
+						onConfirm: () => {
+							removeFileListItem($input, file);
+						}
+					})
+				});
+				
+				cmp.querySelector("[data-icon]").appendChild(
+					ElementUtils.createFileIcon(fileName)
+				)
+				
+				cmp.title = file.name;
+				cmp.querySelector("[data-filename]").innerText = file.name;
+				return cmp;
+			}
+			
+			const removeFileListItem = ($input, file) => {
+				const dt = new DataTransfer();
+				for (let i = 0; i < $input.files.length; i++) {
+					if($input.files[i] === file){
+						continue;
+					} else {
+						dt.items.add($input.files[i]);
+					}
+			    }
+				$input.files = dt.files;
+				renderUploadInputs();
+			}
+			
+			$("#save-btn").click(() => {
+				const handlePerson = $('#handlePerson').val()
+				
+				if(!handlePerson){
+					PromptUtils.warning("處理人員為必輸")
+					return;
+				}
+				
+				const handleDate = $('#handleDate').val() ? new Date($('#handleDate').val()) : null
+				const handleResult = $("#handleResult").val()
+				const handleContent = getEditorContent();
+				
+				if(!handleDate){
+					PromptUtils.warning("事發時間為必輸")
+					return;
+				}
+				
+				const formData = new FormData();
+				formData.append("handlePerson", handlePerson);
+				formData.append("handleDate", handleDate);
+				formData.append("handleResult", handleResult);
+				formData.append("handleContent", handleContent);
+				
+				toUploadFileInputs.forEach($input => {
+					for (let i = 0; i < $input.files.length; i++) {
+						formData.append("files", $input.files[i])					
+					}
+				})
+				
+				HttpUtils.upload({
+					url: "/customers/createServiceRecordHandle/" + rowid,
+					formData: formData,
+					success: () => {
+						PromptUtils.success("新增成功")
+						DialogUtils.closeWindow(window, true)
+					}
+				})
+			
+				
+			})
+			
+			
+			$("#upload-btn").click(() => {
+				chooseFiles();
+			})			
+			
+			queryHandlePeople();
 		})
+		
+		
 	</script>
 </head>
 
 <body layout:fragment="content">
-	Hello World
+	
+	<div class="input-group my-4">
+		<div class="input-group-text">
+			處理人員
+		</div>
+		<div id="handlePerson-select"></div>
+		<div class="input-group-text">
+			處理時間
+		</div>
+		<input type="text" class="form-control" id="handleDate" readonly style="width: 190px; background: white;" />
+		<div class="input-group-text">
+			服務處理狀態
+		</div>
+		<select class="form-select" id="handleResult" style="width: 190px">
+			<option value="尚未處理">尚未處理</option>
+			<option value="處理中">處理中</option>
+			<option value="已解決">已解決</option>
+		</select>
+		<button id="save-btn" type="button" class="btn btn-success">
+			新增
+		</button>
+	</div>
+	
+	<div class="py-3">
+		<textarea id="editor"></textarea>
+	</div>
+	
+	<div id="attachments" class="d-flex flex-wrap mt-3"></div>
+	
+	<div class="my-3">
+		<button id="upload-btn" class="btn btn-primary">
+			<i class="bi bi-cloud-upload-fill"></i>
+			選擇上傳附件
+		</button>
+	</div>	
+	
+	<br />
 </body>
 
 </html>

@@ -35,6 +35,7 @@ import com.asiapeak.server.internal.css.functions.customers.dto.DeploymentOutptu
 import com.asiapeak.server.internal.css.functions.customers.dto.DocumentInputDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.DocumentOutputDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.ProductDto;
+import com.asiapeak.server.internal.css.functions.customers.dto.ServiceRecordHandleInputDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.ServiceRecordHandleOutputDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.ServiceRecordInputDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.ServiceRecordOutputDto;
@@ -992,6 +993,55 @@ public class CustomersService {
 		String user = userNameService.getCurrentUserName();
 		customerRepo.updateDetailTime(dao.getCustomer().getRowid(), user);
 		serviceRecordRepo.delete(dao);
+
+		return null;
+	}
+
+	@Transactional
+	public String qryCurrentServiceRecordHandleResult(Integer rowid) {
+		ServiceRecord dao = serviceRecordRepo.findById(rowid).orElse(null);
+		if (dao == null) {
+			return "";
+		} else {
+			return dao.getHandleResult();
+		}
+	}
+
+	@Transactional
+	public String createServiceRecordHandle(Integer rowid, ServiceRecordHandleInputDto dto) throws IOException {
+
+		ServiceRecord dao = serviceRecordRepo.findById(rowid).orElse(null);
+		if (dao == null) {
+			return "服務歷程不存在";
+		}
+		dao.setHandleResult(dto.getHandleResult());
+
+		ServiceRecordHandle handle = new ServiceRecordHandle();
+		handle.setHandleContent(dto.getHandleContent());
+		handle.setHandleDate(dto.getHandleDate());
+		handle.setHandlePerson(dto.getHandlePerson());
+
+		String user = userNameService.getCurrentUserName();
+		Date now = new Date();
+		handle.setUdate(now);
+		handle.setUuser(user);
+		handle.setCdate(now);
+		handle.setCuser(user);
+
+		handle = serviceRecordHandleRepo.save(handle);
+
+		dao.getServiceRecordHandles().add(handle);
+		serviceRecordRepo.save(dao);
+
+		File folder = fileService.getServiceRecordHandleFolder(dao.getCustomer().getRowid(), handle.getRowid());
+
+		if (dto.getFiles() != null) {
+			for (MultipartFile file : dto.getFiles()) {
+				String fileName = file.getOriginalFilename();
+				File saveFile = new File(folder, fileName);
+				file.transferTo(saveFile);
+			}
+		}
 
 		return null;
 	}
