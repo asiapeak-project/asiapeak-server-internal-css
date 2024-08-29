@@ -1020,6 +1020,7 @@ public class CustomersService {
 		handle.setHandleContent(dto.getHandleContent());
 		handle.setHandleDate(dto.getHandleDate());
 		handle.setHandlePerson(dto.getHandlePerson());
+		handle.setServiceRecord(dao);
 
 		String user = userNameService.getCurrentUserName();
 		Date now = new Date();

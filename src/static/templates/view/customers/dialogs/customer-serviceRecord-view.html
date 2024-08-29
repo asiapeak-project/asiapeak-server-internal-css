@@ -49,9 +49,9 @@
 				const div = document.getElementById("service-attachments");
 				div.innerHTML = "";
 				if(files.length === 0){
-					$(div).hide()
+					div.classList.add("d-none")
 				} else {
-					$(div).show()
+					div.classList.remove("d-none")
 					files.forEach(file => {
 						div.appendChild(
 							generateAttachementElement(file)
@@ -74,8 +74,9 @@
 			
 			const renderHandles = (items) => {
 				const handles = document.getElementById("handles");
+				handles.innerHTML = "";
 				items.forEach(item => {
-					div.appendChild(
+					handles.appendChild(
 						generateHandleElement(item)
 					)
 				})
@@ -87,10 +88,8 @@
 			
 			const generateHandleElement = (item) => {
 				const handle = ElementUtils.createElement(`
-					<div class="my-2">
-						<div data-content class="border p-2" style="min-height: 300px;"></div>
-						<div data-attachements class="d-flex justify-content-start border-start border-end py-2"></div>
-						<div class="text-secondary d-flex justify-content-between border-start border-end border-bottom px-2">
+					<div class="my-4" style="background: white;">
+						<div class="text-secondary d-flex justify-content-between border-start border-top border-end p-2">
 							<span>
 								<span>處理日期:</span>
 								<span data-handle-date></span>
@@ -108,6 +107,8 @@
 								編輯處理紀錄
 							</a>
 						</div>
+						<div data-content class="border p-2" style="min-height: 300px;"></div>
+						<div data-attachements class="d-flex justify-content-start border-start  border-bottom border-end py-2"></div>
 					</div>
 				`)
 				
@@ -119,11 +120,9 @@
 				
 				content.innerHTML = item.handleContent;
 				
-				attachements.innerHTML = "";
 				if(item.files.length === 0){
-					$(attachements).hide()
+					$(attachements).remove();
 				} else {
-					$(attachements).show()
 					item.files.forEach(file => {
 						attachements.appendChild(
 							generateAttachementElement(file)
@@ -140,6 +139,8 @@
 				edit.addEventListener("click", () => {
 					openEditHandle(item.rowid);
 				})
+				
+				return handle;
 				
 			}
 			
@@ -188,40 +189,41 @@
 	</script>
 </head>
 
-<body layout:fragment="content">
+<body layout:fragment="content" style="background: #F9F9F9;">
 	
-	<div class="input-group mb-1">
-		<div class="input-group-text">類別</div>
-		<input type="text" class="form-control" id="type" readonly style="max-width: 170px;; background: white;" />
-		<div class="input-group-text">處理狀態</div>
-		<input type="text" class="form-control" id="handleResult" readonly style="max-width: 170px;; background: white;" />
-		<div class="input-group-text">名稱</div>
-		<input type="text" class="form-control" id="subject" readonly style="background: white;" />
-    </div>
-	
-	<div id="service-content" class="border p-2" style="min-height: 300px;"></div>
-	<div id="service-attachments" class="d-flex justify-content-start border-start border-end py-2"></div>
-	<div class="text-secondary d-flex justify-content-between border-start border-end border-bottom px-2">
-		<span>
-			<span>事發日期:</span>
-			<span id="serviceDate"></span>
-		</span>
-		<span>
-			<span>聯絡人員:</span>
-			<span id="contactPerson"></span>
-		</span>
-		<span>
-			<span>更新日期:</span>
-			<span id="udate"></span>
-		</span>
-		<span>
-			<span>更新人員:</span>
-			<span id="uuser"></span>
-		</span>
-		<a id="edit-service-record-btn" class="clickable underline text-primary">
-			<i class="bi bi-pencil-fill"></i>
-			編輯服務紀錄
-		</a>
+	<div style="background: white;">
+		<div class="input-group mb-1">
+			<div class="input-group-text">類別</div>
+			<input type="text" class="form-control" id="type" readonly style="max-width: 170px;; background: white;" />
+			<div class="input-group-text">處理狀態</div>
+			<input type="text" class="form-control" id="handleResult" readonly style="max-width: 170px;; background: white;" />
+			<div class="input-group-text">名稱</div>
+			<input type="text" class="form-control" id="subject" readonly style="background: white;" />
+	    </div>
+		<div class="text-secondary d-flex justify-content-between border-start border-end border-top p-2">
+			<span>
+				<span>事發日期:</span>
+				<span id="serviceDate"></span>
+			</span>
+			<span>
+				<span>聯絡人員:</span>
+				<span id="contactPerson"></span>
+			</span>
+			<span>
+				<span>更新日期:</span>
+				<span id="udate"></span>
+			</span>
+			<span>
+				<span>更新人員:</span>
+				<span id="uuser"></span>
+			</span>
+			<a id="edit-service-record-btn" class="clickable underline text-primary">
+				<i class="bi bi-pencil-fill"></i>
+				編輯服務紀錄
+			</a>
+		</div>
+		<div id="service-content" class="border p-2" style="min-height: 300px;"></div>
+		<div id="service-attachments" class="d-flex justify-content-start border-start border-bottom border-end py-2"></div>
 	</div>
 	
 	<div class="text-end my-4">

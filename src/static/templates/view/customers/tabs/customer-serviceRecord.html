@@ -49,8 +49,9 @@
 					data: getList(),
 					thead: ElementUtils.createSortableTableHeader({
 						thead: [
-							{html: "類別", sortKey: "type"},
+							{html: "類別", sortKey: "type", style: "width: 120px"},
 							{html: "名稱", sortKey: "subject"},
+							{html: "處理狀態", sortKey: "handleResult", style: "width: 106px"},
 							{html: "更新時間", sortKey: "udate", style: "width: 120px"},
 							{html: "更新者", sortKey: "uuser", style: "width: 120px"},
 						],
@@ -65,6 +66,7 @@
 					tbody: [
 						{html: "@{type}"},
 						{html: "<a data-subject class='clickable text-decoration-underline'>@{subject}</a>"},
+						{html: "@{handleResult}"},
 						{html: "@{udate:date}"},
 						{html: "@{uuser}"},
 					],

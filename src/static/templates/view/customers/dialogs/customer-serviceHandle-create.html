@@ -27,6 +27,15 @@
 				})
 			}
 			
+			const queryCurrentHandleResult = () => {
+				HttpUtils.doPost({
+					url : "/customers/qryCurrentServiceRecordHandleResult/" + rowid,
+					success: (response) => {
+						$("#handleResult").val(response.data)
+					}
+				})
+			}
+			
 			const createEditor = () => {
 				CKEDITOR_UTILS.create('editor');
 			}
