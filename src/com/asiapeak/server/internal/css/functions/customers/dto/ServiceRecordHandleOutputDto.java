@@ -10,6 +10,8 @@ public class ServiceRecordHandleOutputDto {
 
 	Integer rowid;
 
+	Integer parentRowid;
+	
 	String handlePerson;
 
 	String handleContent;

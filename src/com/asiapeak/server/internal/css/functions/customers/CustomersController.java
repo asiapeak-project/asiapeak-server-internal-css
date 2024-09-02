@@ -594,13 +594,6 @@ public class CustomersController {
 	}
 
 	@ResponseBody
-	@PostMapping("qryServiceRecordHandle/{rowid}")
-	public ResponseBean<ServiceRecordHandleOutputDto> qryServiceRecordHandle(@PathVariable("rowid") Integer rowid) {
-		ServiceRecordHandleOutputDto dto = customersService.qryServiceRecordHandle(rowid);
-		return ResponseBean.success(dto);
-	}
-
-	@ResponseBody
 	@PostMapping("editServiceRecord/{rowid}")
 	public ResponseBean<Boolean> editServiceRecord(@PathVariable("rowid") Integer rowid, @ModelAttribute ServiceRecordInputDto dto) throws IOException {
 		String msg = customersService.editServiceRecord(rowid, dto);
@@ -651,6 +644,20 @@ public class CustomersController {
 		} else {
 			return ResponseBean.error(true).message(msg);
 		}
+	}
+
+	@GetMapping("editServiceRecordHandle/{rowid}")
+	public ModelAndView editServiceRecordHandle(@PathVariable("rowid") Integer rowid) {
+		ModelAndView view = new ModelAndView("view/customers/dialogs/customer-serviceHandle-edit");
+		view.addObject("rowid", rowid);
+		return view;
+	}
+
+	@ResponseBody
+	@PostMapping("qryServiceRecordHandle/{rowid}")
+	public ResponseBean<ServiceRecordHandleOutputDto> qryServiceRecordHandle(@PathVariable("rowid") Integer rowid) {
+		ServiceRecordHandleOutputDto dto = customersService.qryServiceRecordHandle(rowid);
+		return ResponseBean.success(dto);
 	}
 
 }

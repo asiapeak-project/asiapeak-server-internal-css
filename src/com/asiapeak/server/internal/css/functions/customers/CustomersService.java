@@ -904,26 +904,6 @@ public class CustomersService {
 	}
 
 	@Transactional
-	public ServiceRecordHandleOutputDto qryServiceRecordHandle(Integer rowid) {
-
-		ServiceRecordHandle dao = serviceRecordHandleRepo.findById(rowid).orElseThrow(() -> {
-			return new RuntimeException("服務歷程不存在");
-		});
-
-		ServiceRecordHandleOutputDto dto = new ServiceRecordHandleOutputDto();
-		dto.setRowid(dao.getRowid());
-		dto.setHandlePerson(dao.getHandlePerson());
-		dto.setHandleContent(dao.getHandleContent());
-		dto.setHandleDate(dao.getHandleDate());
-		dto.setCuser(dao.getCuser());
-		dto.setCdate(dao.getCdate());
-		dto.setUuser(dao.getUuser());
-		dto.setUdate(dao.getUdate());
-
-		return dto;
-	}
-
-	@Transactional
 	public String editServiceRecord(Integer rowid, ServiceRecordInputDto dto) throws IOException {
 		ServiceRecord dao = serviceRecordRepo.findById(rowid).orElse(null);
 		if (dao == null) {
@@ -1045,6 +1025,30 @@ public class CustomersService {
 		}
 
 		return null;
+	}
+
+	@Transactional
+	public ServiceRecordHandleOutputDto qryServiceRecordHandle(Integer rowid) {
+
+		ServiceRecordHandle dao = serviceRecordHandleRepo.findById(rowid).orElseThrow(() -> {
+			return new RuntimeException("服務歷程不存在");
+		});
+
+		ServiceRecordHandleOutputDto dto = new ServiceRecordHandleOutputDto();
+		dto.setRowid(dao.getRowid());
+		dto.setParentRowid(dao.getServiceRecord().getRowid());
+		dto.setHandlePerson(dao.getHandlePerson());
+		dto.setHandleContent(dao.getHandleContent());
+		dto.setHandleDate(dao.getHandleDate());
+		dto.setCuser(dao.getCuser());
+		dto.setCdate(dao.getCdate());
+		dto.setUuser(dao.getUuser());
+		dto.setUdate(dao.getUdate());
+
+		List<File> files = fileService.listServiceRecordHandleFiles(dao.getServiceRecord().getCustomer().getRowid(), dao.getRowid());
+		dto.setFiles(fileService.toAttachementDtos(files));
+
+		return dto;
 	}
 
 }

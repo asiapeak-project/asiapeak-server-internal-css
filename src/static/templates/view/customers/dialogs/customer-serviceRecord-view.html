@@ -83,7 +83,15 @@
 			}
 			
 			const openEditHandle = (handleRowid) => {
-				
+				DialogUtils.window({
+					title: "編輯服務處理結果",
+					url: "/customers/editServiceRecordHandle/" + handleRowid,
+					callback : (rtnVal) => {
+						if(rtnVal){
+							doQuery();
+						}
+					}					
+				})
 			}
 			
 			const generateHandleElement = (item) => {
