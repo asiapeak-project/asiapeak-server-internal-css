@@ -170,14 +170,25 @@
 				HttpUtils.upload({
 					url: "/customers/createServiceRecord/" + rowid,
 					formData: formData,
-					success: () => {
+					success: (response) => {
 						PromptUtils.success("新增成功")
-						DialogUtils.closeWindow(window, true)
+						const newRowid = response.data;
+						openAddHandle(newRowid);
 					}
 				})
 			
 				
 			})
+			
+			const openAddHandle = (newRowid) => {
+				DialogUtils.window({
+					title: "新增處理結果",
+					url: "/customers/createServiceRecordHandle/" + newRowid,
+					callback : (rtnVal) => {
+						DialogUtils.closeWindow(window, true)
+					}					
+				})
+			}
 			
 			
 			$("#upload-btn").click(() => {

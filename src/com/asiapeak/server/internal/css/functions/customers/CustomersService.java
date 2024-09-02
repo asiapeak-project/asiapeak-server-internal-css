@@ -571,11 +571,11 @@ public class CustomersService {
 		dao = documentRepo.save(dao);
 
 		if (dto.getFiles() != null) {
-			File documentFilder = fileService.getDocumentFolder(rowid, dao.getRowid());
+			File folder = fileService.getDocumentFolder(rowid, dao.getRowid());
 
 			for (MultipartFile file : dto.getFiles()) {
 				String fileName = file.getOriginalFilename();
-				File saveFile = new File(documentFilder, fileName);
+				File saveFile = new File(folder, fileName);
 				file.transferTo(saveFile);
 			}
 		}
@@ -706,11 +706,11 @@ public class CustomersService {
 		dao.setUdate(now);
 		dao.setUuser(user);
 
-		File documentFilder = fileService.getDocumentFolder(dao.getCustomer().getRowid(), rowid);
+		File folder = fileService.getDocumentFolder(dao.getCustomer().getRowid(), rowid);
 
 		if (dto.getDelFiles() != null) {
 			for (String delFile : dto.getDelFiles()) {
-				File f = new File(documentFilder, delFile);
+				File f = new File(folder, delFile);
 				if (f.exists()) {
 					f.delete();
 				}
@@ -720,7 +720,7 @@ public class CustomersService {
 		if (dto.getFiles() != null) {
 			for (MultipartFile file : dto.getFiles()) {
 				String fileName = file.getOriginalFilename();
-				File saveFile = new File(documentFilder, fileName);
+				File saveFile = new File(folder, fileName);
 				file.transferTo(saveFile);
 			}
 		}
@@ -736,8 +736,8 @@ public class CustomersService {
 			return "文件文檔不存在";
 		}
 
-		File documentFilder = fileService.getDocumentFolder(dao.getCustomer().getRowid(), rowid);
-		FileUtils.deleteQuietly(documentFilder);
+		File folder = fileService.getDocumentFolder(dao.getCustomer().getRowid(), rowid);
+		FileUtils.deleteQuietly(folder);
 
 		String user = userNameService.getCurrentUserName();
 		customerRepo.updateDetailTime(dao.getCustomer().getRowid(), user);
@@ -811,7 +811,7 @@ public class CustomersService {
 	}
 
 	@Transactional
-	public String createServiceRecord(Integer rowid, ServiceRecordInputDto dto) throws IOException {
+	public Integer createServiceRecord(Integer rowid, ServiceRecordInputDto dto) throws IOException {
 		Customer customer = customerRepo.findById(rowid).orElse(null);
 		if (customer == null) {
 			throw new RuntimeException("客戶資訊不存在");
@@ -825,14 +825,14 @@ public class CustomersService {
 		dao.setServiceDate(dto.getServiceDate());
 		dao.setCustomer(customer);
 
-		dao = serviceRecordRepo.save(dao);
-
 		String user = userNameService.getCurrentUserName();
 		Date now = new Date();
 		dao.setUdate(now);
 		dao.setUuser(user);
 		dao.setCdate(now);
 		dao.setCuser(user);
+
+		dao = serviceRecordRepo.save(dao);
 
 		if (dto.getFiles() != null) {
 			File folder = fileService.getServiceRecordFolder(rowid, dao.getRowid());
@@ -846,7 +846,7 @@ public class CustomersService {
 
 		customerRepo.updateDetailTime(customer.getRowid(), user);
 
-		return null;
+		return dao.getRowid();
 	}
 
 	@Transactional
@@ -1049,6 +1049,72 @@ public class CustomersService {
 		dto.setFiles(fileService.toAttachementDtos(files));
 
 		return dto;
+	}
+
+	@Transactional
+	public String editServiceRecordHandle(Integer rowid, ServiceRecordHandleInputDto dto) throws IOException {
+
+		ServiceRecordHandle dao = serviceRecordHandleRepo.findById(rowid).orElseThrow(() -> {
+			return new RuntimeException("服務歷程不存在");
+		});
+
+		ServiceRecord recordDao = dao.getServiceRecord();
+
+		dao.setHandlePerson(dto.getHandlePerson());
+		dao.setHandleContent(dto.getHandleContent());
+		dao.setHandleDate(dto.getHandleDate());
+		recordDao.setHandleResult(dto.getHandleResult());
+
+		String user = userNameService.getCurrentUserName();
+		Date now = new Date();
+		dao.setUdate(now);
+		dao.setUuser(user);
+
+		File folder = fileService.getServiceRecordHandleFolder(recordDao.getCustomer().getRowid(), rowid);
+
+		if (dto.getDelFiles() != null) {
+			for (String delFile : dto.getDelFiles()) {
+				File f = new File(folder, delFile);
+				if (f.exists()) {
+					f.delete();
+				}
+			}
+		}
+
+		if (dto.getFiles() != null) {
+			for (MultipartFile file : dto.getFiles()) {
+				String fileName = file.getOriginalFilename();
+				File saveFile = new File(folder, fileName);
+				file.transferTo(saveFile);
+			}
+		}
+
+		serviceRecordHandleRepo.save(dao);
+		serviceRecordRepo.save(recordDao);
+
+		customerRepo.updateDetailTime(recordDao.getCustomer().getRowid(), user);
+		return "";
+	}
+
+	@Transactional
+	public String delServiceRecordHandle(Integer rowid) throws IOException {
+		ServiceRecordHandle dao = serviceRecordHandleRepo.findById(rowid).orElseThrow(() -> {
+			return new RuntimeException("服務歷程不存在");
+		});
+
+		ServiceRecord recordDao = dao.getServiceRecord();
+
+		Integer customerRowid = recordDao.getCustomer().getRowid();
+
+		serviceRecordHandleRepo.delete(dao);
+
+		String user = userNameService.getCurrentUserName();
+		customerRepo.updateDetailTime(customerRowid, user);
+
+		File folder = fileService.getServiceRecordHandleFolder(customerRowid, rowid);
+		FileUtils.deleteQuietly(folder);
+
+		return null;
 	}
 
 }

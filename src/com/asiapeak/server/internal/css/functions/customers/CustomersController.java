@@ -556,13 +556,9 @@ public class CustomersController {
 
 	@ResponseBody
 	@PostMapping(path = "createServiceRecord/{rowid}", consumes = "multipart/form-data")
-	public ResponseBean<Boolean> createServiceRecord(@PathVariable("rowid") Integer rowid, @ModelAttribute ServiceRecordInputDto dto) throws IOException {
-		String msg = customersService.createServiceRecord(rowid, dto);
-		if (StringUtils.isBlank(msg)) {
-			return ResponseBean.success(true);
-		} else {
-			return ResponseBean.error(true).message(msg);
-		}
+	public ResponseBean<Integer> createServiceRecord(@PathVariable("rowid") Integer rowid, @ModelAttribute ServiceRecordInputDto dto) throws IOException {
+		Integer recordRowid = customersService.createServiceRecord(rowid, dto);
+		return ResponseBean.success(recordRowid);
 	}
 
 	@GetMapping("editServiceRecord/{rowid}")
@@ -658,6 +654,28 @@ public class CustomersController {
 	public ResponseBean<ServiceRecordHandleOutputDto> qryServiceRecordHandle(@PathVariable("rowid") Integer rowid) {
 		ServiceRecordHandleOutputDto dto = customersService.qryServiceRecordHandle(rowid);
 		return ResponseBean.success(dto);
+	}
+
+	@ResponseBody
+	@PostMapping("editServiceRecordHandle/{rowid}")
+	public ResponseBean<Boolean> editServiceRecordHandle(@PathVariable("rowid") Integer rowid, @ModelAttribute ServiceRecordHandleInputDto dto) throws IOException {
+		String msg = customersService.editServiceRecordHandle(rowid, dto);
+		if (StringUtils.isBlank(msg)) {
+			return ResponseBean.success(true);
+		} else {
+			return ResponseBean.error(true).message(msg);
+		}
+	}
+
+	@ResponseBody
+	@PostMapping("delServiceRecordHandle/{rowid}")
+	public ResponseBean<Boolean> delServiceRecordHandle(@PathVariable("rowid") Integer rowid) throws IOException {
+		String msg = customersService.delServiceRecordHandle(rowid);
+		if (StringUtils.isBlank(msg)) {
+			return ResponseBean.success(true);
+		} else {
+			return ResponseBean.error(true).message(msg);
+		}
 	}
 
 }

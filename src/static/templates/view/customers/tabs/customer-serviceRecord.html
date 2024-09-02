@@ -15,12 +15,15 @@
 			let sortKey = "";
 			let sortDir = "";
 			
-			const doQuery = () => {
+			const doQuery = (show) => {
 				HttpUtils.doPost({
 					url: "/customers/qryServiceRecords/" + rowid,
 					success: (response) => {
 						list = response.data;
 						renderTable();
+						if(show){
+							PromptUtils.success("重新整理成功！")
+						}
 					}
 				})
 			}
@@ -98,6 +101,10 @@
 				})
 			})
 			
+			$("#reload-btn").click(() => {
+				doQuery(true);
+			})
+			
 			doQuery();
 			
 		})
@@ -107,7 +114,10 @@
 </head>
 
 <body layout:fragment="content">
-	<div class="text-end mb-3">
+	<div class="d-flex justify-content-between mb-3">
+		<button id="reload-btn" title="重新整理" class="btn btn-secondary" type="button">
+			<i class="bi bi-arrow-clockwise"></i>
+		</button>
 		<button id="create-btn" class="btn btn-success" type="button">
 			<i class="bi bi-plus"></i>
 		</button>

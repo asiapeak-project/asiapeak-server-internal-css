@@ -1,12 +1,32 @@
 <ul th:fragment="sidebar" class="nav nav-pills flex-column mb-auto">
 	<li class="nav-item">
 		<a data-id="customers" href="/customers" class="nav-link text-white" tabindex="-1">
+			<i class="bi bi-person-badge"></i>
 			客戶資訊
+		</a>
+	</li>
+	<li class="nav-item">
+		<a data-id="unsolved" href="/unsolved" class="nav-link text-white" tabindex="-1">
+			<i class="bi bi-exclamation-circle-fill"></i>
+			未解決案件
+		</a>
+	</li>
+	<li class="nav-item">
+		<a data-id="knowledge" href="/knowledge" class="nav-link text-white" tabindex="-1">
+			<i class="bi bi-chat-square-text-fill"></i>
+			知識庫
 		</a>
 	</li>
 	<li>
 		<a data-id="search" href="/search" class="nav-link text-white" tabindex="-1">
+			<i class="bi bi-search"></i>
 			進階搜尋
+		</a>
+	</li>
+	<li class="nav-item">
+		<a data-id="userMgr" href="/userMgr" class="nav-link text-white" tabindex="-1">
+			<i class="bi bi-people-fill"></i>
+			使用者管理
 		</a>
 	</li>
 </ul>

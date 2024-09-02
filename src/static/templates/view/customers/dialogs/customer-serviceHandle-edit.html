@@ -162,16 +162,19 @@
 			});
 			
 			$("#save-btn").click(() => {
-				const category = document.getElementById("category").value;
-				const subject = document.getElementById("subject").value;
-				const content = getEditorContent();
-
-				if(!category){
-					PromptUtils.warning("類別為必填")
+				const handlePerson = $('#handlePerson').val()
+				
+				if(!handlePerson){
+					PromptUtils.warning("處理人員為必輸")
 					return;
-				}				
-				if(!subject){
-					PromptUtils.warning("文件文檔名稱為必填")
+				}
+				
+				const handleDate = $('#handleDate').val() ? new Date($('#handleDate').val()) : null
+				const handleResult = $("#handleResult").val()
+				const handleContent = getEditorContent();
+				
+				if(!handleDate){
+					PromptUtils.warning("處理時間為必輸")
 					return;
 				}
 				
@@ -203,9 +206,10 @@
 					`,
 					onConfirm: () => {
 						const formData = new FormData();
-						formData.append("category", category);
-						formData.append("subject", subject);
-						formData.append("content", content);
+						formData.append("handlePerson", handlePerson);
+						formData.append("handleDate", handleDate);
+						formData.append("handleResult", handleResult);
+						formData.append("handleContent", handleContent);
 										
 						toDeleteUploadedFiles.forEach(item => {
 							formData.append("delFiles", item)

@@ -1284,7 +1284,8 @@ var HttpUtils = top.HttpUtils || {
 				ElementUtils.setUploading({
 					show: false,
 				})
-				success(event);
+				const responseData = event.target.responseText;
+   				success(JSON.parse(responseData));
 			}, false);
 			
 			ajax.upload.addEventListener("progress", (event) => {
