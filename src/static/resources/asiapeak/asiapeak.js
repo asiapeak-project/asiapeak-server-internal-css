@@ -769,7 +769,7 @@ var ElementUtils = top.ElementUtils || {
 		let $button = ElementUtils.createElement(`
 			<button cron-exp-btn class="btn btn-outline-secondary" type="button">
 			  	<i class="bi bi-calendar3"></i>
-			  </button>
+			</button>
 		`);
 
 		$input.value = value;

@@ -4,38 +4,32 @@
 	layout:decorate="~{layouts/clear.html}">
 
 <head>
-	<title>客戶服務系統-客戶資訊-[[${dname}]]</title>
+	<title>Example</title>
 	<script th:inline="javascript">
-		
-		const rowid = /*[[${rowid}]]*/ "";
-		
 		$(() => {
 			
 			const rows = [];
-								
+			
 			$("#save-btn").click(() => {
 				
-				const subject = document.getElementById("subject").value;
+				const name = document.getElementById("name").value;
 				
-				if(!subject){
-					PromptUtils.warning("環境佈署名稱不能為空");
+				if(!name){
+					PromptUtils.warning("範本名稱不能為空");
 					return;
 				}
 				
 				const infoColumns = []
-				const infoValues = []
 	
 				rows.forEach(row => {
 					infoColumns.push(row.label)
-					infoValues.push(row.value)
 				})
 				
 				HttpUtils.doPost({
-					url: "/customers/createDeployment/" + rowid,
+					url: "/templates/create/",
 					data: {
-						subject: subject,
+						name: name,
 						infoColumns: JSON.stringify(infoColumns),
-						infoValues: JSON.stringify(infoValues)
 					},
 					success: (response) => {
 						if(response.data){
@@ -45,7 +39,8 @@
 				})
 				
 			});
-
+			
+			
 			const renderRows = () => {
 				const myrows = document.getElementById("myrows");
 				myrows.innerHTML = "";
@@ -72,9 +67,6 @@
 							<input data-label type="text" class="form-control"/>
 						</td>
 						<td>
-							<input data-value type="text" class="form-control"/>
-						</td>
-						<td>
 							<button data-delete class="btn btn-danger">
 								<i class="bi bi-trash3"></i>
 							</button>
@@ -91,15 +83,11 @@
 				}
 				
 				tr.querySelector("[data-label]").value = item.label;
-				tr.querySelector("[data-value]").value = item.value;
 				
 				$("[data-label]", tr).on("input", () => {
 					item.label = tr.querySelector("[data-label]").value
 				})
-				
-				$("[data-value]", tr).on("input", () => {
-					item.value = tr.querySelector("[data-value]").value
-				})
+			
 				
 				if(index >= rows.length - 1){
 					tr.querySelector("[data-down]").remove()
@@ -119,8 +107,7 @@
 			
 			const addRow = () => {
 				rows.push({
-					label: "",
-					value: ""
+					label: ""
 				})
 				renderRows();
 			}
@@ -162,8 +149,7 @@
 						if(rtnVal?.column){
 							rtnVal.column.forEach((item) => {
 								rows.push({
-									label: item,
-									value: ""
+									label: item
 								})
 								renderRows();
 							})
@@ -172,24 +158,22 @@
 				})
 			})
 			
-		});
-		
+		})
 	</script>
 </head>
 
 <body layout:fragment="content">
-	
 	<div class="d-flex justify-content-between">
 		<button id="template-btn" type="button" class="btn btn-primary">加入範本</button>
-		<button id="save-btn" type="button" class="btn btn-success">新增環境佈署</button>
+		<button id="save-btn" type="button" class="btn btn-success">新增範本</button>
 	</div>
 	
 	<div class="input-group my-4">
 		<div class="input-group-text">
-			環境佈署名稱
+			範本名稱
 			<span class="text-danger">*</span>
 		</div>
-		<input type="text" class="form-control" id="subject">
+		<input type="text" class="form-control" id="name">
     </div>
 	
 	<table class="table my-2">
@@ -198,7 +182,6 @@
 				<th style="width: 58px;">上移</th>
 				<th style="width: 58px;">下移</th>
 				<th>名稱</th>
-				<th>數值</th>
 				<th style="width: 58px;">刪除</th>
 			</tr>
 		</thead>

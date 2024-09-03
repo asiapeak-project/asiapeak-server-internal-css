@@ -154,6 +154,24 @@
 				addRow();
 			})
 			
+			document.getElementById("template-btn").addEventListener("click", ()=>{
+				DialogUtils.window({
+					title: "選擇範本",
+					url: "/templates",
+					callback: (rtnVal) => {
+						if(rtnVal?.column){
+							rtnVal.column.forEach((item) => {
+								rows.push({
+									label: item,
+									value: ""
+								})
+								renderRows();
+							})
+						}
+					}
+				})
+			})
+			
 		});
 		
 	</script>
