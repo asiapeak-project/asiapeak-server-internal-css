@@ -1,8 +1,5 @@
 package com.asiapeak.server.internal.css.system;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -14,7 +11,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.asiapeak.server.internal.css.core.dto.ResponseBean;
-import com.asiapeak.server.internal.css.core.security.SecurityService;
+import com.asiapeak.server.internal.css.core.user.UserAuthService;
 import com.asiapeak.server.internal.css.system.dto.LoginInputDto;
 
 @Controller
@@ -22,41 +19,62 @@ import com.asiapeak.server.internal.css.system.dto.LoginInputDto;
 public class SystemController {
 
 	@Autowired
-	SecurityService securityService;
-
-	@Autowired
-	HttpServletRequest request;
-
-	@Autowired
-	HttpServletResponse response;
+	UserAuthService userAuthService;
 
 	@GetMapping
 	public ModelAndView index() {
-		ModelAndView view;
-
-		if (StringUtils.isBlank(securityService.getCurrentUserName())) {
-			view = new ModelAndView("view/login");
+		if (!userAuthService.isAdminCreated()) {
+			return new ModelAndView("view/createAdmin");
+		} else if (StringUtils.isBlank(userAuthService.getCurrentUserName())) {
+			return new ModelAndView("view/login");
 		} else {
-			view = new ModelAndView("redirect:customers");
+			return new ModelAndView("redirect:customers");
 		}
-		return view;
 	}
 
 	@PostMapping("login")
 	@ResponseBody
 	public ResponseBean<Boolean> login(@RequestBody LoginInputDto dto) throws Exception {
 
-		securityService.setCurrentUserName(dto.getName());
+		boolean result = userAuthService.doLogin(dto.getName(), dto.getPassword());
 
-		// return ResponseBean.success(false).message("登入失敗");
-		return ResponseBean.success(true);
+		if (result) {
+			return ResponseBean.success(true);
+		} else {
+			return ResponseBean.success(false).message("登入失敗");
+		}
+
+	}
+
+	@PostMapping("createAdmin")
+	@ResponseBody
+	public ResponseBean<Boolean> createAdmin(@RequestBody LoginInputDto dto) throws Exception {
+
+		if (userAuthService.isAdminCreated()) {
+			return ResponseBean.success(false).message("管理者已存在");
+		}
+
+		boolean result = userAuthService.createAdmin(dto.getName(), dto.getPassword());
+
+		if (result) {
+			return ResponseBean.success(true);
+		} else {
+			return ResponseBean.success(false).message("建立管理者失敗");
+		}
+
 	}
 
 	@PostMapping("logout")
 	@ResponseBody
 	public ResponseBean<Boolean> logout() {
-		securityService.setCurrentUserName(null);
+		userAuthService.doLogout();
 		return ResponseBean.success(true);
 	}
+	
+	@GetMapping("accessDenied")
+	public ModelAndView accessDenied() {
+		return new ModelAndView("view/accessDenied");
+	}
 
+	
 }

@@ -1,55 +1,46 @@
 package com.asiapeak.server.internal.css.core.security;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.asiapeak.server.internal.css.core.security.exceptions.TokenNotValidException;
+import com.asiapeak.server.internal.css.core.user.UserAuthService;
 
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
-public class SecurityConfig extends OncePerRequestFilter implements AuthenticationEntryPoint, AccessDeniedHandler {
-
-	public static final String USER_SESSION_KEY = "MY_USER_SESSION_KEY";
+public class SecurityConfig implements AuthenticationEntryPoint, AccessDeniedHandler {
 
 	final static ThreadLocal<Throwable> errorException = new ThreadLocal<Throwable>();
 
 	public static final List<String> securityUrlPermits = Collections.unmodifiableList(Arrays.asList(new String[] { //
 			"/", //
+			"/createAdmin",
 			"/login", //
 			"/logout", //
 			"/resources/**",//
 	}));
 
 	@Autowired
-	SecurityService securityService;
+	UserAuthService userAuthService;
 
 	@Bean
 	SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -69,40 +60,12 @@ public class SecurityConfig extends OncePerRequestFilter implements Authenticati
 					});
 					authorize.anyRequest().authenticated();
 				}) //
-				.addFilterBefore(this, UsernamePasswordAuthenticationFilter.class) //
 				.build();
 	}
 
 	@Override
-	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-		errorException.remove();
-
-		try {
-			String queryPath = request.getServletPath();
-
-			String userName = securityService.getCurrentUserName();
-
-			if (StringUtils.isEmpty(userName)) {
-				throw new TokenNotValidException("Token Not Valid, path=" + queryPath);
-			}
-
-			List<GrantedAuthority> roles = new ArrayList<>();
-
-			UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userName, null, roles);
-
-			SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-
-		} catch (Exception e) {
-			errorException.set(e);
-		} finally {
-			filterChain.doFilter(request, response);
-		}
-
-	}
-
-	@Override
 	public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
-		response.sendRedirect("/");
+		response.sendRedirect("/accessDenied");
 	}
 
 	@Override

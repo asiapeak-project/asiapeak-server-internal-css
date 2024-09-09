@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -34,8 +35,10 @@ import com.asiapeak.server.internal.css.functions.customers.dto.ServiceRecordOut
 import com.asiapeak.spring.downloader.dto.ResponseFile;
 import com.asiapeak.spring.downloader.dto.ResponseZip;
 
+
 @Controller
 @RequestMapping("customers")
+@Secured("ROLE_CUSTOMER_VIEW")
 public class CustomersController {
 
 	@Autowired

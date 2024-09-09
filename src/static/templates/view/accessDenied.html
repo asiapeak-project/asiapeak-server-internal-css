@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/base.html}">
+
+<head>
+	<title>玉山科技-客戶服務系統-拒絕訪問</title>
+	<style>
+		html, body {
+			height: 100%;
+		}
+
+		body {
+			display: flex;
+			align-items: center;
+			padding-top: 0px;
+			padding-bottom: 40px;
+			background-color: #f5f5f5;
+		}
+	</style>
+</head>
+
+<body layout:fragment="base" class="text-center">
+	<main class="w-100 d-flex justify-content-center">
+		<h1>對不起，您沒有訪問此頁面的權限。</h1>
+	</main>
+</body>
+
+</html>

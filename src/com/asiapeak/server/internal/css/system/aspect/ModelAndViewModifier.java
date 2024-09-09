@@ -9,21 +9,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.asiapeak.server.internal.css.CustomerServiceApplication;
-import com.asiapeak.server.internal.css.system.UserNameService;
+import com.asiapeak.server.internal.css.core.security.ViewAuth;
+import com.asiapeak.server.internal.css.core.user.UserAuthService;
 
 @Aspect
 @Component
 public class ModelAndViewModifier {
 
 	@Autowired
-	UserNameService userNameService;
+	UserAuthService userAuthService;
+
+	@Autowired
+	ViewAuth viewAuth;
 
 	@AfterReturning(pointcut = "execution(org.springframework.web.servlet.ModelAndView com.asiapeak.server.internal.css.functions.*.*.*(..))", returning = "modelAndView")
 	public void afterReturningControllerMethod(ModelAndView modelAndView) {
 		if (modelAndView != null) {
 
-			String userName = userNameService.getCurrentUserName();
+			String userName = userAuthService.getCurrentUserName();
 
 			if (StringUtils.isNoneBlank(userName)) {
 				userName = userName.substring(0, 1).toUpperCase() + userName.substring(1);
@@ -32,6 +35,7 @@ public class ModelAndViewModifier {
 			// modelAndView.addObject("RESOURCE_UUID",
 			// CustomerServiceApplication.RESOURCE_UUID); // TODO
 			modelAndView.addObject("RESOURCE_UUID", UUID.randomUUID().toString());
+			modelAndView.addObject("viewAuth", viewAuth);
 		}
 	}
 

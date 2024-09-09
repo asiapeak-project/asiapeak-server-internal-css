@@ -8,11 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.asiapeak.server.internal.css.core.user.UserAuthService;
 import com.asiapeak.server.internal.css.dao.entity.Templates;
 import com.asiapeak.server.internal.css.dao.repo.TemplatesRepo;
 import com.asiapeak.server.internal.css.functions.templates.dto.TemplatesInputDto;
 import com.asiapeak.server.internal.css.functions.templates.dto.TemplatesOutputDto;
-import com.asiapeak.server.internal.css.system.UserNameService;
 
 @Service
 public class TemplatesService {
@@ -21,7 +21,7 @@ public class TemplatesService {
 	TemplatesRepo templatesRepo;
 
 	@Autowired
-	UserNameService userNameService;
+	UserAuthService userAuthService;
 
 	@Transactional
 	public List<TemplatesOutputDto> list() {
@@ -42,7 +42,7 @@ public class TemplatesService {
 		dao.setName(dto.getName());
 		dao.setInfoColumns(dto.getInfoColumns());
 
-		String user = userNameService.getCurrentUserName();
+		String user = userAuthService.getCurrentUserName();
 		Date now = new Date();
 
 		dao.setUdate(now);
@@ -64,7 +64,7 @@ public class TemplatesService {
 		dao.setName(dto.getName());
 		dao.setInfoColumns(dto.getInfoColumns());
 
-		String user = userNameService.getCurrentUserName();
+		String user = userAuthService.getCurrentUserName();
 		Date now = new Date();
 
 		dao.setUdate(now);

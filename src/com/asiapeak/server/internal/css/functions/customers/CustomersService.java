@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.asiapeak.server.internal.css.core.user.UserAuthService;
 import com.asiapeak.server.internal.css.dao.entity.Contact;
 import com.asiapeak.server.internal.css.dao.entity.Customer;
 import com.asiapeak.server.internal.css.dao.entity.Deployment;
@@ -39,13 +40,12 @@ import com.asiapeak.server.internal.css.functions.customers.dto.ServiceRecordHan
 import com.asiapeak.server.internal.css.functions.customers.dto.ServiceRecordHandleOutputDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.ServiceRecordInputDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.ServiceRecordOutputDto;
-import com.asiapeak.server.internal.css.system.UserNameService;
 
 @Service
 public class CustomersService {
 
 	@Autowired
-	UserNameService userNameService;
+	UserAuthService userAuthService;
 
 	@Autowired
 	CustomerRepo customerRepo;
@@ -99,7 +99,7 @@ public class CustomersService {
 		customer.setWebsite(dto.getWebsite());
 		customer.setAddress(dto.getAddress());
 
-		String user = userNameService.getCurrentUserName();
+		String user = userAuthService.getCurrentUserName();
 		Date now = new Date();
 
 		customer.setUdate(now);
@@ -194,7 +194,7 @@ public class CustomersService {
 		dao.setMemo(dto.getMemo());
 		dao.setCustomer(customer);
 
-		String user = userNameService.getCurrentUserName();
+		String user = userAuthService.getCurrentUserName();
 		Date now = new Date();
 
 		dao.setUdate(now);
@@ -216,7 +216,7 @@ public class CustomersService {
 			return "聯絡人不存在";
 		}
 
-		customerRepo.updateDetailTime(contact.getCustomer().getRowid(), userNameService.getCurrentUserName());
+		customerRepo.updateDetailTime(contact.getCustomer().getRowid(), userAuthService.getCurrentUserName());
 		contactRepo.delete(contact);
 
 		return null;
@@ -240,7 +240,7 @@ public class CustomersService {
 		dao.setWebsite(dto.getWebsite());
 		dao.setAddress(dto.getAddress());
 
-		String user = userNameService.getCurrentUserName();
+		String user = userAuthService.getCurrentUserName();
 		Date now = new Date();
 		dao.setUdate(now);
 		dao.setUuser(user);
@@ -292,7 +292,7 @@ public class CustomersService {
 		dao.setPosition(dto.getPosition());
 		dao.setMemo(dto.getMemo());
 
-		String user = userNameService.getCurrentUserName();
+		String user = userAuthService.getCurrentUserName();
 
 		dao.setUdate(new Date());
 		dao.setUuser(user);
@@ -336,7 +336,7 @@ public class CustomersService {
 		dao.setInfoValues(dto.getInfoValues());
 		dao.setCustomer(customer);
 
-		String user = userNameService.getCurrentUserName();
+		String user = userAuthService.getCurrentUserName();
 		Date now = new Date();
 		dao.setUdate(now);
 		dao.setUuser(user);
@@ -357,7 +357,7 @@ public class CustomersService {
 		if (dao == null) {
 			return "產品資訊不存在";
 		}
-		String user = userNameService.getCurrentUserName();
+		String user = userAuthService.getCurrentUserName();
 		customerRepo.updateDetailTime(dao.getCustomer().getRowid(), user);
 
 		productRepo.delete(dao);
@@ -398,7 +398,7 @@ public class CustomersService {
 		dao.setInfoColumns(dto.getInfoColumns());
 		dao.setInfoValues(dto.getInfoValues());
 
-		String user = userNameService.getCurrentUserName();
+		String user = userAuthService.getCurrentUserName();
 		Date now = new Date();
 		dao.setUdate(now);
 		dao.setUuser(user);
@@ -446,7 +446,7 @@ public class CustomersService {
 		dao.setInfoValues(dto.getInfoValues());
 		dao.setCustomer(customer);
 
-		String user = userNameService.getCurrentUserName();
+		String user = userAuthService.getCurrentUserName();
 		Date now = new Date();
 		dao.setUdate(now);
 		dao.setUuser(user);
@@ -467,7 +467,7 @@ public class CustomersService {
 		if (dao == null) {
 			return "佈署環境不存在";
 		}
-		String user = userNameService.getCurrentUserName();
+		String user = userAuthService.getCurrentUserName();
 		customerRepo.updateDetailTime(dao.getCustomer().getRowid(), user);
 
 		deploymentRepo.delete(dao);
@@ -507,7 +507,7 @@ public class CustomersService {
 		dao.setInfoColumns(dto.getInfoColumns());
 		dao.setInfoValues(dto.getInfoValues());
 
-		String user = userNameService.getCurrentUserName();
+		String user = userAuthService.getCurrentUserName();
 		Date now = new Date();
 		dao.setUdate(now);
 		dao.setUuser(user);
@@ -561,7 +561,7 @@ public class CustomersService {
 		dao.setContent(dto.getContent());
 		dao.setCustomer(customer);
 
-		String user = userNameService.getCurrentUserName();
+		String user = userAuthService.getCurrentUserName();
 		Date now = new Date();
 		dao.setUdate(now);
 		dao.setUuser(user);
@@ -701,7 +701,7 @@ public class CustomersService {
 		dao.setSubject(dto.getSubject());
 		dao.setContent(dto.getContent());
 
-		String user = userNameService.getCurrentUserName();
+		String user = userAuthService.getCurrentUserName();
 		Date now = new Date();
 		dao.setUdate(now);
 		dao.setUuser(user);
@@ -739,7 +739,7 @@ public class CustomersService {
 		File folder = fileService.getDocumentFolder(dao.getCustomer().getRowid(), rowid);
 		FileUtils.deleteQuietly(folder);
 
-		String user = userNameService.getCurrentUserName();
+		String user = userAuthService.getCurrentUserName();
 		customerRepo.updateDetailTime(dao.getCustomer().getRowid(), user);
 		documentRepo.delete(dao);
 
@@ -796,7 +796,7 @@ public class CustomersService {
 
 		dao.setCustomer(customer);
 
-		String user = userNameService.getCurrentUserName();
+		String user = userAuthService.getCurrentUserName();
 		Date now = new Date();
 		dao.setUdate(now);
 		dao.setUuser(user);
@@ -825,7 +825,7 @@ public class CustomersService {
 		dao.setServiceDate(dto.getServiceDate());
 		dao.setCustomer(customer);
 
-		String user = userNameService.getCurrentUserName();
+		String user = userAuthService.getCurrentUserName();
 		Date now = new Date();
 		dao.setUdate(now);
 		dao.setUuser(user);
@@ -917,7 +917,7 @@ public class CustomersService {
 		dao.setHandleResult(dto.getHandleResult());
 		dao.setServiceDate(dto.getServiceDate());
 
-		String user = userNameService.getCurrentUserName();
+		String user = userAuthService.getCurrentUserName();
 		Date now = new Date();
 		dao.setUdate(now);
 		dao.setUuser(user);
@@ -970,7 +970,7 @@ public class CustomersService {
 			FileUtils.deleteQuietly(folder);
 		});
 
-		String user = userNameService.getCurrentUserName();
+		String user = userAuthService.getCurrentUserName();
 		customerRepo.updateDetailTime(dao.getCustomer().getRowid(), user);
 		serviceRecordRepo.delete(dao);
 
@@ -1002,7 +1002,7 @@ public class CustomersService {
 		handle.setHandlePerson(dto.getHandlePerson());
 		handle.setServiceRecord(dao);
 
-		String user = userNameService.getCurrentUserName();
+		String user = userAuthService.getCurrentUserName();
 		Date now = new Date();
 		handle.setUdate(now);
 		handle.setUuser(user);
@@ -1065,7 +1065,7 @@ public class CustomersService {
 		dao.setHandleDate(dto.getHandleDate());
 		recordDao.setHandleResult(dto.getHandleResult());
 
-		String user = userNameService.getCurrentUserName();
+		String user = userAuthService.getCurrentUserName();
 		Date now = new Date();
 		dao.setUdate(now);
 		dao.setUuser(user);
@@ -1108,7 +1108,7 @@ public class CustomersService {
 
 		serviceRecordHandleRepo.delete(dao);
 
-		String user = userNameService.getCurrentUserName();
+		String user = userAuthService.getCurrentUserName();
 		customerRepo.updateDetailTime(customerRowid, user);
 
 		File folder = fileService.getServiceRecordHandleFolder(customerRowid, rowid);
