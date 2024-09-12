@@ -38,7 +38,7 @@ import com.asiapeak.spring.downloader.dto.ResponseZip;
 
 @Controller
 @RequestMapping("customers")
-@Secured("ROLE_CUSTOMER_VIEW")
+@Secured("ROLE_CUSTOMER_FUNCTION")
 public class CustomersController {
 
 	@Autowired

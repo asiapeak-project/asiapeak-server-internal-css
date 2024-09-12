@@ -58,7 +58,7 @@ public class UserAuthService {
 
 		String hashed = OneWayHash.SHA512(password);
 
-		Optional<Users> oUser = usersRepo.findByAccountAndPassword(account, hashed);
+		Optional<Users> oUser = usersRepo.findByAccountAndPassword(account.toLowerCase(), hashed);
 
 		if (!oUser.isPresent()) {
 			return false;
@@ -98,7 +98,7 @@ public class UserAuthService {
 
 		Users users = new Users();
 
-		users.setAccount(account);
+		users.setAccount(account.toLowerCase());
 		users.setPassword(hashed);
 		users.setRole(UserRole.ADMIN);
 

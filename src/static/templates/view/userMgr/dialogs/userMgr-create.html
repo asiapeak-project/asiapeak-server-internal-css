@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/clear.html}">
+
+<head>
+	<script th:inline="javascript">
+		$(() => {
+			
+			$("#save-btn").click(() => {
+				
+				const account = $("#account").val();
+				const password = $("#password").val();
+				
+				HttpUtils.doPost({
+					url: "/userMgr/createUser",
+					data: {account, password},
+					success: (response) => {
+						if(response.data){
+							DialogUtils.closeWindow(window, {changed: true})
+						}
+					}
+				})
+				
+				
+			})
+			
+			
+		})
+	</script>
+</head>
+
+<body layout:fragment="content">
+	
+	<form id="myform" class="row g-3 py-3">
+		<div class="col-md-12">
+			<label for="account" class="form-label">登入帳號</label>
+			<input type="text" class="form-control" id="account" name="account" />
+		</div>
+		
+		<div class="col-md-12">
+			<label for="password" class="form-label">密碼</label>
+			<input type="text" class="form-control" id="password" name="password" />
+		</div>
+		
+	</form>
+	
+	<div class="text-end">
+		<button id="save-btn" type="button" class="btn btn-success">新增使用者</button>
+	</div>
+	
+	<br />
+	
+	
+</body>
+
+</html>

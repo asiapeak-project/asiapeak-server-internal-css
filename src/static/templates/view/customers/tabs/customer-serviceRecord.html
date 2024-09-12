@@ -118,7 +118,7 @@
 		<button id="reload-btn" title="重新整理" class="btn btn-secondary" type="button">
 			<i class="bi bi-arrow-clockwise"></i>
 		</button>
-		<button id="create-btn" class="btn btn-success" type="button">
+		<button id="create-btn" class="btn btn-success" type="button" th:if='${@viewAuth.allowed("ROLE_CUSTOMER_SERVICERECORD_CREATE")}'>
 			<i class="bi bi-plus"></i>
 		</button>
 	</div>

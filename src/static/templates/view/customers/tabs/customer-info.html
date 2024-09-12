@@ -46,6 +46,10 @@
 				})
 			})
 			
+			$("#delete-btn").click(() => {
+				
+			})
+			
 			doQuery();
 		})
 		
@@ -101,8 +105,13 @@
 			<textarea class="form-control" id="memo" readonly rows="3"></textarea>
 		</div>
 		
-		<div class="col-md-12 text-end">
-			<button id="edit-btn" class="btn btn-success" type="button">
+		<div class="col-md-12 d-flex justify-content-between">
+			
+			<button id="delete-btn" class="btn btn-danger" type="button" th:if='${@viewAuth.allowed("ROLE_CUSTOMER_INFO_DELETE")}'>
+				<i class="bi bi-trash-fill"></i>
+			</button>
+			
+			<button id="edit-btn" class="btn btn-success" type="button" th:if='${@viewAuth.allowed("ROLE_CUSTOMER_INFO_EDIT")}'>
 				<i class="bi bi-pencil-fill"></i>
 			</button>
 		</div>

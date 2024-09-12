@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/clear.html}">
+
+<head>
+	<title>Example</title>
+	<script th:inline="javascript">
+		
+		const rowid = /*[[${rowid}]]*/ "";
+		
+		$(() => {
+		
+			const doQuery = () => {
+				HttpUtils.doPost({
+					url: "/userMgr/qryAuth/" + rowid,
+					success: (response) => {
+						renderCategories(response.data);
+					}
+				})
+			}
+			
+			const renderCategories = (categories) => {
+				const $categories = $("#categories");
+				
+				categories.forEach(category => {
+					
+					const $category = $(ElementUtils.createElement(`
+						<ul class="list-group mb-4">
+							<lh>${category.category}</lh>
+						</ul>
+					`));
+					
+					category.auths.forEach(auth => {
+						
+						const $auth = $(ElementUtils.createElement(`
+							<label class="list-group-item">
+								<input class="form-check-input me-1" type="checkbox" ${auth.enabled ? "checked" : ""} value="${auth.code}" />
+								${auth.desc}
+							</label>
+						`));
+						
+						$category.append($auth)						
+					})
+					
+					$categories.append($category);
+				})
+				
+			}
+
+			$("#save-btn").click(() => {
+				
+				const enableds = [];
+				$("input[type=checkbox]", "#categories").each((index, item) => {
+					if($(item).is(":checked")){
+						enableds.push(item.value)
+					}
+				})
+				
+				HttpUtils.doPost({
+					url: "userMgr/editAuth/" + rowid,
+					data: {auths: enableds},
+					success: (response) => {
+						if(response.data){
+							PromptUtils.success("儲存成功")
+							DialogUtils.closeWindow(window)
+						}
+					}
+				})
+				
+			})
+			
+			doQuery();
+			
+		});
+		
+		
+	</script>
+</head>
+
+<body layout:fragment="content">
+	<div class="text-end my-2">
+		<button id="save-btn" type="button" class="btn btn-success">儲存</button>
+	</div>
+	<div id="categories" class="none-select"></div>
+	<br />
+</body>
+
+</html>

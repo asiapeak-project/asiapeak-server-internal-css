@@ -327,7 +327,7 @@
 		<button id="cancel-btn" type="button" class="btn btn-secondary">
 			取消
 		</button>
-		<button id="save-btn" type="button" class="btn btn-success">
+		<button id="save-btn" type="button" class="btn btn-success" th:if='${@viewAuth.allowed("ROLE_CUSTOMER_DOCUMENT_EDIT")}'>
 			儲存
 		</button>
 	</div>
@@ -362,7 +362,7 @@
 	
 	<hr />
 	
-	<div class="my-3 text-end">
+	<div class="my-3 text-end" th:if='${@viewAuth.allowed("ROLE_CUSTOMER_DOCUMENT_DELETE")}'>
 		<button id="delete-btn" class="btn btn-danger">
 			<i class="bi bi-trash"></i>
 			刪除文件

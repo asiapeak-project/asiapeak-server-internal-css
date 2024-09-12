@@ -16,7 +16,9 @@
 	<script th:inline="javascript">
 		
 		const rowid = /*[[${rowid}]]*/ "";
-		
+		const allowEdit = /*[[${viewAuth.allowed("ROLE_CUSTOMER_DEPLOYMENT_EDIT")}]]*/ false;
+		const allowDelete = /*[[${viewAuth.allowed("ROLE_CUSTOMER_DEPLOYMENT_DELETE")}]]*/ false;
+
 		$(() => {
 			
 			const doQuery = () => {
@@ -74,13 +76,16 @@
 										</table>
 										
 										<div class="d-flex justify-content-between">
-											<button data-btn-delete type="button" class="btn btn-danger">
-												<i class="bi bi-trash3"></i>
-											</button>
-											
-											<button data-btn-edit type="button" class="btn btn-secondary">
-												<i class="bi bi-pencil-fill"></i>
-											</button>
+											${allowDelete ? `
+												<button data-btn-delete type="button" class="btn btn-danger">
+													<i class="bi bi-trash3"></i>
+												</button>
+											` : ""}
+											${allowEdit ? `
+												<button data-btn-edit type="button" class="btn btn-secondary">
+													<i class="bi bi-pencil-fill"></i>
+												</button>
+											` : ""}
 										</div>
 										<div class="text-secondary d-flex justify-content-evenly mt-2">
 											<span>更新日期: ${TextUtils.formatDate(new Date(item.udate))}</span>	
@@ -93,35 +98,41 @@
 					</div>
 				`)
 				
-				$("[data-btn-edit]", card).click(() => {
-					DialogUtils.window({
-						title: "編輯環境部屬",
-						url: "/customers/editDeployment/" + item.rowid,
-						callback: (rtnVal) => {
-							if(rtnVal){
-								doQuery();
-							}
-						}
-					})
-				});
-				
-				$("[data-btn-delete]", card).click(() => {
-					DialogUtils.confirm({
-						titls: "刪除環境部屬提醒",
-						text: "是否要刪除「" + item.subject + "」?",
-						onConfirm: () => {
-							HttpUtils.doPost({
-								url: "/customers/delDeployment/" + item.rowid,
-								success: (response) => {
-									if(response.data){
-										PromptUtils.success("刪除成功")
-										doQuery();
-									}
+				if(allowEdit){
+					$("[data-btn-edit]", card).click(() => {
+						DialogUtils.window({
+							title: "編輯環境部屬",
+							url: "/customers/editDeployment/" + item.rowid,
+							callback: (rtnVal) => {
+								if(rtnVal){
+									doQuery();
 								}
-							})
-						}
-					})
-				});
+							}
+						})
+					});
+				}
+				
+				
+				
+				if(allowDelete){
+					$("[data-btn-delete]", card).click(() => {
+						DialogUtils.confirm({
+							titls: "刪除環境部屬提醒",
+							text: "是否要刪除「" + item.subject + "」?",
+							onConfirm: () => {
+								HttpUtils.doPost({
+									url: "/customers/delDeployment/" + item.rowid,
+									success: (response) => {
+										if(response.data){
+											PromptUtils.success("刪除成功")
+											doQuery();
+										}
+									}
+								})
+							}
+						})
+					});
+				}
 				
 				$("[data-subject]", card).val(item.subject);
 				
@@ -178,7 +189,7 @@
 
 <body layout:fragment="content" class="contect-container">
 	
-	<div class="text-end mb-3">
+	<div class="text-end mb-3" th:if='${@viewAuth.allowed("ROLE_CUSTOMER_DEPLOYMENT_CREATE")}'>
 		<button id="create-btn" class="btn btn-success" type="button">
 			<i class="bi bi-plus"></i>
 		</button>

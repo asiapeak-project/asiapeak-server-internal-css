@@ -8,12 +8,145 @@
 	<script th:inline="javascript">
 		$(() => {
 			DocumentUtils.setSideBarActived("userMgr")
-		})
+			
+			const doQuery = () => {
+				HttpUtils.doPost({
+					url: "/userMgr/qryUsers",
+					success: (response) => {
+						renderTable(response.data)
+					}
+				})
+			}
+			
+			const renderTable = (data) => {
+				ElementUtils.renderTable({
+					table: document.getElementById("myTable"),
+					data: data,
+					thead: [
+						{html: "功能", style: "width: 75px;"},
+						{html: "帳號"},
+					],
+					tbody: [
+						{attrs: "data='btn'"},
+						{html: "@{account}", style: "vertical-align: middle;"}
+					],
+					treach: (item, $tr, index) => {
+						
+						const dropDown = ElementUtils.createElement(`
+							<div class="btn-group">
+								<button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+									<i class="bi bi-gear-fill"></i>
+								</button>
+								<ul class="dropdown-menu">
+									<li>
+										<a data-auth class="dropdown-item">編輯權限</a>
+									</li>
+									<li>
+										<a data-chpwd class="dropdown-item">修改密碼</a>
+									</li>
+									
+									${item.hasTotp ? `
+										<li>
+											<a data-totp class="dropdown-item">移除 TOTP</a>
+										</li>
+									` : ""}
+									
+									<li>
+										<a data-delete class="dropdown-item">刪除使用者</a>
+									</li>
+								</ul>
+							</div>
+						`)
+						
+						$("[data-auth]", dropDown).click(() => {
+							openAuth(item)
+						})
+						
+						$("[data-chpwd]", dropDown).click(() => {
+							openChpwd(item)
+						})
+						
+						$("[data-delete]", dropDown).click(() => {
+							doDelete(item)
+						})		
+						
+						if(item.hasTotp){
+							$("[data-totp]", dropDown).click(() => {
+								removeTotp(item)
+							})	
+						}				
+						
+						$("[data=btn]", $tr).append(dropDown)
+						
+					}
+				})
+				
+			}
+
+			const openAuth = (item) => {
+				DialogUtils.window({
+					title: "編輯使用者「" + item.account + "」權限",
+					url: "/userMgr/auth/" + item.rowid
+				})
+			}
+			
+			const openChpwd = (item) => {
+				DialogUtils.window({
+					title: "修改使用者「" + item.account + "」密碼",
+					url: "/userMgr/chpwd/" + item.rowid
+				})
+			}
+			
+			const doDelete = (item) => {
+				DialogUtils.confirm({
+					title: "刪除使用者確認",
+					text: "確定要刪除「" + item.account + "」使用者?",
+					onConfirm: () => {
+						HttpUtils.doPost({
+							url: "/userMgr/delUser/" + item.rowid,
+							success: (response) => {
+								if(response.data){
+									PromptUtils.success("刪除使用者成功");
+									doQuery();		
+								}
+							}
+						})
+					}
+				})
+			}
+			
+			const removeTotp = (item) => {
+				
+			}
+			
+			$("#create-btn").click(() => {
+				DialogUtils.window({
+					title: "新增使用者",
+					url: "/userMgr/createUser",
+					callback: () => {
+						doQuery();
+					}
+				})
+			});
+			
+			doQuery();
+			
+		});
 	</script>
 </head>
 
 <body layout:fragment="content">
-	
+	<nav aria-label="breadcrumb">
+		<ol class="breadcrumb">
+			<li class="breadcrumb-item active" aria-current="page">使用者管理</li>
+		</ol>
+	</nav>
+	<div class="mb-3">
+		<button class="btn btn-success" id="create-btn">
+			新增使用者
+		</button>
+	</div>
+	<table id="myTable" class="table table-bordered table-hover table-striped"></table>
 </body>
 
 </html>

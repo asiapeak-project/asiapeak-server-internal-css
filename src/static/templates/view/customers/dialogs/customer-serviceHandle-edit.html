@@ -357,7 +357,7 @@
 			<option value="處理中">處理中</option>
 			<option value="已解決">已解決</option>
 		</select>
-		<button id="save-btn" type="button" class="btn btn-success">
+		<button id="save-btn" type="button" class="btn btn-success" th:if='${@viewAuth.allowed("ROLE_CUSTOMER_SERVICEHANDLE_EDIT")}'>
 			更新
 		</button>
 	</div>
@@ -379,9 +379,9 @@
 		</button>
 	</div>	
 	
-	<hr />
+	<hr th:if='${@viewAuth.allowed("ROLE_CUSTOMER_SERVICEHANDLE_DELETE")}' />
 	
-	<div class="my-3 text-end">
+	<div class="my-3 text-end" th:if='${@viewAuth.allowed("ROLE_CUSTOMER_SERVICEHANDLE_DELETE")}'>
 		<button id="delete-btn" class="btn btn-danger">
 			<i class="bi bi-trash"></i>
 			刪除處理結果

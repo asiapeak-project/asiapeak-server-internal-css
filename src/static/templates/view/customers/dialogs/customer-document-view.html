@@ -124,7 +124,7 @@
 			文件文檔名稱
 		</div>
 		<input type="text" class="form-control" id="subject" readonly />
-		<button id="edit-btn" type="button" class="btn btn-success">
+		<button id="edit-btn" type="button" class="btn btn-success" th:if='${@viewAuth.allowed("ROLE_CUSTOMER_DOCUMENT_EDIT")}'>
 			編輯
 		</button>
     </div>

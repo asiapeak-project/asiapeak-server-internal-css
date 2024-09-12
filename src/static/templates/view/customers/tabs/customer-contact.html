@@ -17,6 +17,9 @@
 		
 		const rowid = /*[[${rowid}]]*/ "";
 		
+		const allowEdit = /*[[${viewAuth.allowed("ROLE_CUSTOMER_CONTACT_EDIT")}]]*/ false;
+		const allowDelete = /*[[${viewAuth.allowed("ROLE_CUSTOMER_CONTACT_DELETE")}]]*/ false;
+		
 		$(() => {
 			
 			const doQuery = () => {
@@ -115,13 +118,19 @@
 											</div>
 							
 											<div class="col-md-12 mb-2 d-flex justify-content-between">
-												<button class="btn btn-danger my-2" type="button" name="delete-btn">
-													<i class="bi bi-trash3-fill"></i>
-												</button>
-							
-												<button class="btn btn-success my-2" type="button" name="edit-btn">
-													<i class="bi bi-pencil-fill"></i>
-												</button>
+												
+												${allowDelete ? `
+													<button class="btn btn-danger my-2" type="button" name="delete-btn">
+														<i class="bi bi-trash3-fill"></i>
+													</button>
+												` : ""}
+												
+												${allowEdit ? `
+													<button class="btn btn-success my-2" type="button" name="edit-btn">
+														<i class="bi bi-pencil-fill"></i>
+													</button>
+												` : ""}
+												
 											</div>
 							
 										</div>
@@ -146,35 +155,39 @@
 					contact.querySelector("[name=memo]").value = item.memo;
 					$("[data-udate]", contact).text(TextUtils.formatDate(new Date(item.udate)))
 					$("[data-uuser]", contact).text(item.uuser)
-										
-					contact.querySelector("[name=delete-btn]").addEventListener("click", () => {
-						DialogUtils.confirm({
-							title: "刪除聯絡人",
-							text: "是否要刪除「" + item.dname + "」聯絡人?",
-							onConfirm: () => {
-								HttpUtils.doPost({
-									url: "/customers/delContact/" + item.rowid,
-									success: () => {
-										PromptUtils.success("刪除成功")
+					
+					if(allowDelete){
+						contact.querySelector("[name=delete-btn]").addEventListener("click", () => {
+							DialogUtils.confirm({
+								title: "刪除聯絡人",
+								text: "是否要刪除「" + item.dname + "」聯絡人?",
+								onConfirm: () => {
+									HttpUtils.doPost({
+										url: "/customers/delContact/" + item.rowid,
+										success: () => {
+											PromptUtils.success("刪除成功")
+											doQuery();
+										}
+									})
+									
+								}
+							})
+						})
+					}
+					
+					if(allowEdit){
+						contact.querySelector("[name=edit-btn]").addEventListener("click", () => {
+							DialogUtils.window({
+								title: "編輯聯絡人「" + item.dname + "」",
+								url: "/customers/editContact/" + item.rowid,
+								callback: (rtnVal) => {
+									if(rtnVal === true){
 										doQuery();
 									}
-								})
-								
-							}
-						})
-					})
-					
-					contact.querySelector("[name=edit-btn]").addEventListener("click", () => {
-						DialogUtils.window({
-							title: "編輯聯絡人「" + item.dname + "」",
-							url: "/customers/editContact/" + item.rowid,
-							callback: (rtnVal) => {
-								if(rtnVal === true){
-									doQuery();
 								}
-							}
+							})
 						})
-					})
+					}
 					
 					contects.appendChild(contact);
 				})
@@ -200,7 +213,7 @@
 </head>
 
 <body layout:fragment="content" class="contect-container">
-	<div class="text-end">
+	<div class="text-end" th:if='${@viewAuth.allowed("ROLE_CUSTOMER_CONTACT_CREATE")}'>
 		<button id="create-btn" class="btn btn-success" type="button">
 			<i class="bi bi-plus"></i>
 		</button>

@@ -9,6 +9,7 @@
 		const rowid = /*[[${rowid}]]*/ "";
 		var customerRowid;
 		
+		const allowEdit = /*[[${viewAuth.allowed("ROLE_CUSTOMER_SERVICEHANDLE_EDIT")}]]*/ false;
 		
 		$(() => {
 			
@@ -110,10 +111,14 @@
 								<span>處理人員:</span>
 								<span data-handlePerson></span>
 							</span>
-							<a data-edit class="clickable underline text-primary">
-								<i class="bi bi-pencil-fill"></i>
-								編輯處理紀錄
-							</a>
+							
+							${allowEdit ? `
+								<a data-edit class="clickable underline text-primary">
+									<i class="bi bi-pencil-fill"></i>
+									編輯處理紀錄
+								</a>
+							` : ""}							
+							
 						</div>
 						<div data-content class="border p-2" style="min-height: 300px;"></div>
 						<div data-attachements class="d-flex justify-content-start border-start  border-bottom border-end py-2"></div>
@@ -142,11 +147,12 @@
 				udate.innerText =  TextUtils.formatDate(new Date(item.udate))
 				handlePerson.innerText =  item.handlePerson
 				
-				const edit = handle.querySelector("[data-edit]")
-				
-				edit.addEventListener("click", () => {
-					openEditHandle(item.rowid);
-				})
+				if(allowEdit){
+					const edit = handle.querySelector("[data-edit]")
+					edit.addEventListener("click", () => {
+						openEditHandle(item.rowid);
+					})	
+				}				
 				
 				return handle;
 				
@@ -225,7 +231,7 @@
 				<span>更新人員:</span>
 				<span id="uuser"></span>
 			</span>
-			<a id="edit-service-record-btn" class="clickable underline text-primary">
+			<a id="edit-service-record-btn" class="clickable underline text-primary" th:if='${@viewAuth.allowed("ROLE_CUSTOMER_SERVICERECORD_EDIT")}'>
 				<i class="bi bi-pencil-fill"></i>
 				編輯服務紀錄
 			</a>
@@ -234,7 +240,7 @@
 		<div id="service-attachments" class="d-flex justify-content-start border-start border-bottom border-end py-2"></div>
 	</div>
 	
-	<div class="text-end my-4">
+	<div class="text-end my-4" th:if='${@viewAuth.allowed("ROLE_CUSTOMER_SERVICEHANDLE_CREATE")}'>
 		<button id="add-handle-btn" class="btn btn-success" type="button">新增處理結果</button>
 	</div>
 	

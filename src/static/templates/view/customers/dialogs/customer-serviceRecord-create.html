@@ -210,7 +210,7 @@
 				<span class="text-danger">*</span>
 			</div>
 			<input type="text" class="form-control" id="subject">
-			<button id="save-btn" type="button" class="btn btn-success">
+			<button id="save-btn" type="button" class="btn btn-success" th:if='${@viewAuth.allowed("ROLE_CUSTOMER_SERVICERECORD_CREATE")}'>
 				新增
 			</button>
 	    </div>

@@ -358,7 +358,7 @@
 				<span class="text-danger">*</span>
 			</div>
 			<input type="text" class="form-control" id="subject">
-			<button id="save-btn" type="button" class="btn btn-success">
+			<button id="save-btn" type="button" class="btn btn-success" th:if='${@viewAuth.allowed("ROLE_CUSTOMER_SERVICERECORD_EDIT")}'>
 				更新
 			</button>
 	    </div>
@@ -407,9 +407,9 @@
 		</button>
 	</div>	
 	
-	<hr />
+	<hr th:if='${@viewAuth.allowed("ROLE_CUSTOMER_SERVICERECORD_DELETE")}' />
 	
-	<div class="my-3 text-end">
+	<div class="my-3 text-end" th:if='${@viewAuth.allowed("ROLE_CUSTOMER_SERVICERECORD_DELETE")}'>
 		<button id="delete-btn" class="btn btn-danger">
 			<i class="bi bi-trash"></i>
 			刪除服務紀錄

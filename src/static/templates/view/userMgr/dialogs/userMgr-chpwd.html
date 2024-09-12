@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/clear.html}">
+
+<head>
+	<script th:inline="javascript">
+		
+		const rowid = /*[[${rowid}]]*/ "";
+		
+		$(() => {
+			
+			$("#save-btn").click(() => {
+				
+				const pwd = $("#password").val();
+				
+				if(!pwd || !pwd.trim()){
+					PromptUtils.warning("密碼不允許空白")					
+					return;
+				}
+				
+				HttpUtils.doPost({
+					url: "/userMgr/chpwd/" + rowid,
+					data: {password: pwd},
+					success: (response) => {
+						if(response.data){
+							PromptUtils.success("密碼更新成功")
+							DialogUtils.closeWindow(window);		
+						}
+					}
+				})
+				
+				
+				
+			})
+			
+		})
+	</script>
+</head>
+
+<body layout:fragment="content">
+	<form id="myform" class="row g-3 py-3">
+		
+		<div class="col-md-12">
+			<label for="password" class="form-label">密碼</label>
+			<input type="text" class="form-control" id="password" name="password" />
+		</div>
+		
+	</form>
+	
+	<div class="text-end">
+		<button id="save-btn" type="button" class="btn btn-success">變更密碼</button>
+	</div>
+	
+	<br />
+</body>
+
+</html>

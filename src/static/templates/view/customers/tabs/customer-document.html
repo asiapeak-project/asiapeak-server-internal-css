@@ -194,7 +194,7 @@
 			
 		</div>
 		
-		<button id="create-btn" class="btn btn-success" type="button">
+		<button id="create-btn" class="btn btn-success" type="button" th:if='${@viewAuth.allowed("ROLE_CUSTOMER_DOCUMENT_CREATE")}'>
 			<i class="bi bi-plus"></i>
 		</button>
 	</div>
