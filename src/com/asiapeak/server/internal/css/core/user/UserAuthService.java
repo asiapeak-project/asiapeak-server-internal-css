@@ -114,7 +114,7 @@ public class UserAuthService {
 		return SecurityContextHolder.getContext().getAuthentication().getName();
 	}
 
-	private static final ThreadLocal<List<String>> threadAuthRoles = new ThreadLocal<List<String>>() {
+	public static final ThreadLocal<List<String>> threadAuthRoles = new ThreadLocal<List<String>>() {
 		@Override
 		protected List<String> initialValue() {
 			return null;
@@ -122,6 +122,7 @@ public class UserAuthService {
 	};
 
 	public List<String> getCurrentAuthRoles() {
+
 		if (threadAuthRoles.get() == null) {
 			if (SecurityContextHolder.getContext().getAuthentication() == null) {
 				threadAuthRoles.set(new ArrayList<>());

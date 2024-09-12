@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.boot.autoconfigure.thymeleaf.ThymeleafAutoConfiguration;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -18,6 +19,8 @@ import org.thymeleaf.spring5.SpringTemplateEngine;
 import org.thymeleaf.spring5.view.ThymeleafViewResolver;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
+
+import com.asiapeak.server.internal.css.core.user.ClearThreadAuthRoleFilter;
 
 import nz.net.ultraq.thymeleaf.layoutdialect.LayoutDialect;
 import nz.net.ultraq.thymeleaf.layoutdialect.decorators.strategies.GroupingStrategy;
@@ -61,6 +64,14 @@ public class CustomerServiceApplication implements WebMvcConfigurer {
 		resolver.setTemplateEngine(templateEngine());
 		resolver.setCharacterEncoding("UTF-8");
 		return resolver;
+	}
+
+	@Bean
+	FilterRegistrationBean<ClearThreadAuthRoleFilter> clearThreadAuthRoleFilter() {
+		FilterRegistrationBean<ClearThreadAuthRoleFilter> registrationBean = new FilterRegistrationBean<>();
+		registrationBean.setFilter(new ClearThreadAuthRoleFilter());
+		registrationBean.setOrder(Integer.MAX_VALUE);
+		return registrationBean;
 	}
 
 }
