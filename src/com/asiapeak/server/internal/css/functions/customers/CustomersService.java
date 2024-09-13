@@ -617,7 +617,7 @@ public class CustomersService {
 		return dto;
 	}
 
-	public File downloadAttachement(Integer parentRowid, Integer rowid, String filename) throws IOException {
+	public File downloadDocumentAttachement(Integer parentRowid, Integer rowid, String filename) throws IOException {
 
 		Customer customer = customerRepo.findById(parentRowid).orElse(null);
 		if (customer == null) {
@@ -638,7 +638,7 @@ public class CustomersService {
 		return new File(folder, filename);
 	}
 
-	public List<File> downloadAttachements(Integer parentRowid, Integer rowid) throws IOException {
+	public List<File> downloadDocumentAttachements(Integer parentRowid, Integer rowid) throws IOException {
 
 		Customer customer = customerRepo.findById(parentRowid).orElse(null);
 		if (customer == null) {
@@ -1126,6 +1126,48 @@ public class CustomersService {
 	@Transactional
 	public List<String> qryHandlePeople() {
 		return usersRepo.findByRole(UserRole.USER).stream().map(Users::getAccount).collect(Collectors.toList());
+	}
+
+	@Transactional
+	public File downloaServiceRecorddAttachement(Integer parentRowid, Integer rowid, String filename) throws IOException {
+		Customer customer = customerRepo.findById(parentRowid).orElse(null);
+		if (customer == null) {
+			throw new RuntimeException("客戶資訊不存在");
+		}
+
+		ServiceRecord dao = serviceRecordRepo.findById(rowid).orElse(null);
+
+		if (dao == null) {
+			throw new RuntimeException("服務紀錄不存在");
+		}
+
+		if (!dao.getCustomer().getRowid().equals(parentRowid)) {
+			throw new RuntimeException("客戶資訊與服務紀錄不符合");
+		}
+
+		File folder = fileService.getServiceRecordFolder(parentRowid, rowid);
+		return new File(folder, filename);
+	}
+
+	@Transactional
+	public File downloadServiceHandleAttachement(Integer parentRowid, Integer rowid, String filename) throws IOException {
+		Customer customer = customerRepo.findById(parentRowid).orElse(null);
+		if (customer == null) {
+			throw new RuntimeException("客戶資訊不存在");
+		}
+
+		ServiceRecordHandle dao = serviceRecordHandleRepo.findById(rowid).orElse(null);
+
+		if (dao == null) {
+			throw new RuntimeException("服務紀錄處理不存在");
+		}
+
+		if (!dao.getServiceRecord().getCustomer().getRowid().equals(parentRowid)) {
+			throw new RuntimeException("客戶資訊與服務紀錄處理不符合");
+		}
+
+		File folder = fileService.getServiceRecordHandleFolder(parentRowid, rowid);
+		return new File(folder, filename);
 	}
 
 }

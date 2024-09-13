@@ -34,7 +34,6 @@ import com.asiapeak.server.internal.css.functions.customers.dto.ServiceRecordOut
 import com.asiapeak.spring.downloader.dto.ResponseFile;
 import com.asiapeak.spring.downloader.dto.ResponseZip;
 
-
 @Controller
 @RequestMapping("customers")
 @Secured("ROLE_CUSTOMER_FUNCTION")
@@ -470,8 +469,8 @@ public class CustomersController {
 
 	@ResponseBody
 	@GetMapping(value = "document/{parentRowid}/attachement/{rowid}/{filename}", consumes = MediaType.ALL_VALUE, produces = MediaType.ALL_VALUE)
-	public ResponseFile downloadAttachement(@PathVariable("parentRowid") Integer parentRowid, @PathVariable("rowid") Integer rowid, @PathVariable("filename") String filename) throws IOException {
-		File file = customersService.downloadAttachement(parentRowid, rowid, filename);
+	public ResponseFile downloadDocumentAttachement(@PathVariable("parentRowid") Integer parentRowid, @PathVariable("rowid") Integer rowid, @PathVariable("filename") String filename) throws IOException {
+		File file = customersService.downloadDocumentAttachement(parentRowid, rowid, filename);
 		ResponseFile responseFile = new ResponseFile();
 		responseFile.setFile(file);
 		return responseFile;
@@ -479,8 +478,8 @@ public class CustomersController {
 
 	@ResponseBody
 	@GetMapping(value = "document/{parentRowid}/attachements/{rowid}", consumes = MediaType.ALL_VALUE, produces = MediaType.ALL_VALUE)
-	public ResponseZip downloadAttachements(@PathVariable("parentRowid") Integer parentRowid, @PathVariable("rowid") Integer rowid) throws IOException {
-		List<File> files = customersService.downloadAttachements(parentRowid, rowid);
+	public ResponseZip downloadDocumentAttachements(@PathVariable("parentRowid") Integer parentRowid, @PathVariable("rowid") Integer rowid) throws IOException {
+		List<File> files = customersService.downloadDocumentAttachements(parentRowid, rowid);
 		String zipName = customersService.downloadAttachementsZipName(parentRowid, rowid);
 		ResponseZip responseZip = new ResponseZip(files);
 		responseZip.setZipName(zipName);
@@ -681,4 +680,21 @@ public class CustomersController {
 		}
 	}
 
+	@ResponseBody
+	@GetMapping(value = "serviceRecord/{parentRowid}/attachement/{rowid}/{filename}", consumes = MediaType.ALL_VALUE, produces = MediaType.ALL_VALUE)
+	public ResponseFile downloadServiceRecordAttachement(@PathVariable("parentRowid") Integer parentRowid, @PathVariable("rowid") Integer rowid, @PathVariable("filename") String filename) throws IOException {
+		File file = customersService.downloaServiceRecorddAttachement(parentRowid, rowid, filename);
+		ResponseFile responseFile = new ResponseFile();
+		responseFile.setFile(file);
+		return responseFile;
+	}
+
+	@ResponseBody
+	@GetMapping(value = "serviceHandle/{parentRowid}/attachement/{rowid}/{filename}", consumes = MediaType.ALL_VALUE, produces = MediaType.ALL_VALUE)
+	public ResponseFile downloadServiceHandleAttachement(@PathVariable("parentRowid") Integer parentRowid, @PathVariable("rowid") Integer rowid, @PathVariable("filename") String filename) throws IOException {
+		File file = customersService.downloadServiceHandleAttachement(parentRowid, rowid, filename);
+		ResponseFile responseFile = new ResponseFile();
+		responseFile.setFile(file);
+		return responseFile;
+	}
 }

@@ -55,18 +55,18 @@
 					div.classList.remove("d-none")
 					files.forEach(file => {
 						div.appendChild(
-							generateAttachementElement(file)
+							generateAttachementElement(file, rowid, "serviceRecord")
 						)
 					})
 				}
 				
 			}
 			
-			const generateAttachementElement = (file) => {
+			const generateAttachementElement = (file, _rowid, type) => {
 				const title = `檔案大小:${TextUtils.formatFileSizeNum(file.size)}\n檔案日期:${TextUtils.formatDate(new Date(file.udate))}`
-				const href = `/customers/serviceRecord/${customerRowid}/attachement/${rowid}/${decodeURI(file.name)}`
+				const href = `/customers/${type}/${customerRowid}/attachement/${_rowid}/${decodeURI(file.name)}`
 				return ElementUtils.createElement(`
-					<a target="_blank" class="text-decoration-none mx-2" title="${title}" href="${href}">
+					<a target="_blank" download class="text-decoration-none mx-2" title="${title}" href="${href}">
 						${ElementUtils.createFileIcon(file.name).outerHTML}
 						${file.name}
 					</a>
@@ -138,7 +138,7 @@
 				} else {
 					item.files.forEach(file => {
 						attachements.appendChild(
-							generateAttachementElement(file)
+							generateAttachementElement(file, item.rowid, "serviceHandle")
 						)
 					})
 				}
