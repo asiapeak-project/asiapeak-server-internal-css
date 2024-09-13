@@ -4,6 +4,12 @@
 	layout:decorate="~{layouts/clear.html}">
 
 <head>
+	<style>
+		.template-name:hover{
+			color: blue;
+			text-decoration: underline;
+		}
+	</style>
 	<script th:inline="javascript">
 		$(() => {
 			const doQuery = () => {
@@ -20,19 +26,12 @@
 					table: document.getElementById("myTable"),
 					data: data,
 					thead: [
-						{html: "選用", style: "width: 58px;"},
 						{html: "名稱"},
 						{html: "編輯", style: "width: 58px;"},
 						{html: "刪除", style: "width: 58px;"}
 					],
 					tbody: [
-						{html: ElementUtils.iconButtonHtml({
-							attrs: "select-btn",
-							color: "success",
-							icon: "bi bi-check",
-							title: "選用"							
-						})},
-						{html: "@{name}", style: "vertical-align: middle;"},
+						{html: "<span select-btn class='clickable template-name'>@{name}</span>", style: "vertical-align: middle;"},
 						{html: ElementUtils.iconButtonHtml({
 							attrs: "edit-btn",
 							color: "secondary",
@@ -111,7 +110,7 @@
 		<button id="btn-new" class="btn btn-success">新增</button>
 	</div>
 	
-	<table id="myTable" class="table table-bordered table-hover"></table>
+	<table id="myTable" class="table table-bordered"></table>
 </body>
 
 </html>

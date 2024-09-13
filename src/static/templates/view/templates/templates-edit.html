@@ -44,7 +44,7 @@
 				})
 				
 				HttpUtils.doPost({
-					url: "/templates/edit/" + rowid,
+					url: "/templates/update/" + rowid,
 					data: {
 						name: name,
 						infoColumns: JSON.stringify(infoColumns),
@@ -186,7 +186,7 @@
 <body layout:fragment="content">
 	<div class="d-flex justify-content-between">
 		<button id="template-btn" type="button" class="btn btn-primary">加入範本</button>
-		<button id="save-btn" type="button" class="btn btn-success">編輯範本</button>
+		<button id="save-btn" type="button" class="btn btn-success">儲存範本</button>
 	</div>
 	
 	<div class="input-group my-4">
