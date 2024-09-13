@@ -22,8 +22,12 @@ public class ModelAndViewModifier {
 	@Autowired
 	ViewAuth viewAuth;
 
-	@AfterReturning(pointcut = "execution(org.springframework.web.servlet.ModelAndView com.asiapeak.server.internal.css.functions.*.*.*(..))", returning = "modelAndView")
+	@AfterReturning(pointcut = "execution(org.springframework.web.servlet.ModelAndView *(..))", returning = "modelAndView")
 	public void afterReturningControllerMethod(ModelAndView modelAndView) {
+		doAction(modelAndView);
+	}
+
+	private void doAction(ModelAndView modelAndView) {
 		if (modelAndView != null) {
 
 			String userName = userAuthService.getCurrentUserName();

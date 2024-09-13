@@ -12,6 +12,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.asiapeak.server.internal.css.core.dto.ResponseBean;
 import com.asiapeak.server.internal.css.core.user.UserAuthService;
+import com.asiapeak.server.internal.css.system.dto.ChangePasswordInputDto;
 import com.asiapeak.server.internal.css.system.dto.LoginInputDto;
 
 @Controller
@@ -28,7 +29,7 @@ public class SystemController {
 		} else if (StringUtils.isBlank(userAuthService.getCurrentUserName())) {
 			return new ModelAndView("view/login");
 		} else {
-			return new ModelAndView("redirect:customers");
+			return new ModelAndView("view/home");
 		}
 	}
 
@@ -70,11 +71,28 @@ public class SystemController {
 		userAuthService.doLogout();
 		return ResponseBean.success(true);
 	}
-	
+
 	@GetMapping("accessDenied")
 	public ModelAndView accessDenied() {
 		return new ModelAndView("view/accessDenied");
 	}
 
-	
+	@GetMapping("changePassword")
+	public ModelAndView changePassword() {
+		return new ModelAndView("view/changePassword");
+	}
+
+	@ResponseBody
+	@PostMapping("changePassword")
+	public ResponseBean<Boolean> changePassword(@RequestBody ChangePasswordInputDto dto) {
+
+		String msg = userAuthService.changeCurrentUserPassword(dto.getOldPassword(), dto.getNewPassword());
+
+		if (StringUtils.isBlank(msg)) {
+			return ResponseBean.success(true);
+		} else {
+			return ResponseBean.success(false).message(msg);
+		}
+	}
+
 }

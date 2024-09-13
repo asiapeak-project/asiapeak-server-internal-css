@@ -107,6 +107,28 @@ public class UserAuthService {
 		return true;
 	}
 
+	public String changeCurrentUserPassword(String oldPassword, String newPassword) {
+
+		String hashed = OneWayHash.SHA512(oldPassword);
+
+		Optional<Users> oUser = usersRepo.findByAccountAndPassword(getCurrentUserName().toLowerCase(), hashed);
+
+		if (!oUser.isPresent()) {
+			return "當前密碼輸入錯誤";
+		}
+
+		Users users = oUser.get();
+
+		hashed = OneWayHash.SHA512(newPassword);
+
+		users.setPassword(hashed);
+
+		usersRepo.save(users);
+
+		return null;
+
+	}
+
 	public String getCurrentUserName() {
 		if (SecurityContextHolder.getContext().getAuthentication() == null) {
 			return null;

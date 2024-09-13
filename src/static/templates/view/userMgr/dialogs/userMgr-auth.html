@@ -27,20 +27,29 @@
 					
 					const $category = $(ElementUtils.createElement(`
 						<ul class="list-group mb-4">
-							<lh>${category.category}</lh>
+							<lh>
+								<input type="checkbox" />
+								${category.category}
+							</lh>
 						</ul>
 					`));
+					
+					const $titleCheckBox = $("input", $category)
 					
 					category.auths.forEach(auth => {
 						
 						const $auth = $(ElementUtils.createElement(`
 							<label class="list-group-item">
-								<input class="form-check-input me-1" type="checkbox" ${auth.enabled ? "checked" : ""} value="${auth.code}" />
+								<input data-auth class="form-check-input me-1" type="checkbox" ${auth.enabled ? "checked" : ""} value="${auth.code}" />
 								${auth.desc}
 							</label>
 						`));
 						
 						$category.append($auth)						
+					})
+					
+					$titleCheckBox.click(() => {
+						$("input[data-auth]", $category).prop("checked", $titleCheckBox.is(":checked"))
 					})
 					
 					$categories.append($category);
@@ -51,7 +60,7 @@
 			$("#save-btn").click(() => {
 				
 				const enableds = [];
-				$("input[type=checkbox]", "#categories").each((index, item) => {
+				$("input[data-auth]", "#categories").each((index, item) => {
 					if($(item).is(":checked")){
 						enableds.push(item.value)
 					}
