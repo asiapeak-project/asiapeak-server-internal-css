@@ -21,6 +21,8 @@ import com.asiapeak.server.internal.css.dao.entity.Document;
 import com.asiapeak.server.internal.css.dao.entity.Product;
 import com.asiapeak.server.internal.css.dao.entity.ServiceRecord;
 import com.asiapeak.server.internal.css.dao.entity.ServiceRecordHandle;
+import com.asiapeak.server.internal.css.dao.entity.Users;
+import com.asiapeak.server.internal.css.dao.enums.UserRole;
 import com.asiapeak.server.internal.css.dao.repo.ContactRepo;
 import com.asiapeak.server.internal.css.dao.repo.CustomerRepo;
 import com.asiapeak.server.internal.css.dao.repo.DeploymentRepo;
@@ -28,6 +30,7 @@ import com.asiapeak.server.internal.css.dao.repo.DocumentRepo;
 import com.asiapeak.server.internal.css.dao.repo.ProductRepo;
 import com.asiapeak.server.internal.css.dao.repo.ServiceRecordHandleRepo;
 import com.asiapeak.server.internal.css.dao.repo.ServiceRecordRepo;
+import com.asiapeak.server.internal.css.dao.repo.UsersRepo;
 import com.asiapeak.server.internal.css.functions.FileService;
 import com.asiapeak.server.internal.css.functions.customers.dto.ContactDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.CustomerDto;
@@ -70,6 +73,9 @@ public class CustomersService {
 
 	@Autowired
 	ServiceRecordHandleRepo serviceRecordHandleRepo;
+
+	@Autowired
+	UsersRepo usersRepo;
 
 	@Transactional
 	public List<CustomerDto> qryCustomers() {
@@ -1115,6 +1121,11 @@ public class CustomersService {
 		FileUtils.deleteQuietly(folder);
 
 		return null;
+	}
+
+	@Transactional
+	public List<String> qryHandlePeople() {
+		return usersRepo.findByRole(UserRole.USER).stream().map(Users::getAccount).collect(Collectors.toList());
 	}
 
 }

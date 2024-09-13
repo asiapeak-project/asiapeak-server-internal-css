@@ -2,7 +2,6 @@ package com.asiapeak.server.internal.css.functions.customers;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -631,7 +630,8 @@ public class CustomersController {
 	@ResponseBody
 	@PostMapping("qryHandlePeople")
 	public ResponseBean<List<String>> qryHandlePeople() {
-		return ResponseBean.success(new ArrayList<>()); // TODO
+		List<String> list = customersService.qryHandlePeople();
+		return ResponseBean.success(list);
 	}
 
 	@ResponseBody

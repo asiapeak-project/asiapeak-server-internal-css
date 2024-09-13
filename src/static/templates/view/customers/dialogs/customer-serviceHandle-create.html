@@ -10,6 +10,8 @@
 	<script th:inline="javascript">
 		
 		const rowid = /*[[${rowid}]]*/ "";
+		const currentUser = /*[[${USER_NAME}]]*/
+		
 		
 		$(() => {
 			
@@ -21,7 +23,7 @@
 							div: document.getElementById("handlePerson-select"),
 							id: "handlePerson",
 							values: response.data,
-							value: ""
+							value: currentUser.toLowerCase()
 						})
 					}
 				})

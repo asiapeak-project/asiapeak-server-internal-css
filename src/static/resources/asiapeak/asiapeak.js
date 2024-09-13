@@ -915,6 +915,13 @@ var ElementUtils = top.ElementUtils || {
 			</select>
 		`);
 		
+		
+		if(!values.includes(value)){
+			const option = ElementUtils.createElement(`<option selected}></option>`)
+			option.innerText = value;
+			select.appendChild(option);
+		}
+		
 		values.forEach(v => {
 			const option = ElementUtils.createElement(`<option ${v === value ? 'selected' : ''}></option>`)
 			option.innerText = v;
