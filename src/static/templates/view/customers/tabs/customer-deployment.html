@@ -35,7 +35,7 @@
 				mydiv.innerHTML = "";
 				
 				if(items.length === 0){
-					mydiv.innerHTML = "<h3 class='none-select'>環境部屬-尚無資料</h3>"
+					mydiv.innerHTML = "<h3 class='none-select'>環境部署-尚無資料</h3>"
 				}
 				
 				items.forEach(item => {
@@ -68,7 +68,7 @@
 								<div class="accordion-body">
 									<div class="p-4 mb-4 contect-item">
 										<div class="input-group pb-3">
-											<div class="input-group-text">環境部屬名稱</div>
+											<div class="input-group-text">環境部署名稱</div>
 											<input data-subject type="text" class="form-control" readonly />
 									    </div>
 										<table class="table table-bordered">
@@ -101,7 +101,7 @@
 				if(allowEdit){
 					$("[data-btn-edit]", card).click(() => {
 						DialogUtils.window({
-							title: "編輯環境部屬",
+							title: "編輯環境部署",
 							url: "/customers/editDeployment/" + item.rowid,
 							callback: (rtnVal) => {
 								if(rtnVal){
@@ -117,7 +117,7 @@
 				if(allowDelete){
 					$("[data-btn-delete]", card).click(() => {
 						DialogUtils.confirm({
-							titls: "刪除環境部屬提醒",
+							titls: "刪除環境部署提醒",
 							text: "是否要刪除「" + item.subject + "」?",
 							onConfirm: () => {
 								HttpUtils.doPost({
@@ -172,7 +172,7 @@
 			
 			$("#create-btn").click(() => {
 				DialogUtils.window({
-					title: "新增環境部屬",
+					title: "新增環境部署",
 					url: "/customers/createDeployment/" + rowid,
 					callback: (rtnVal) => {
 						if(rtnVal){
