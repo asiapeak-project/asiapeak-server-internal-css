@@ -28,13 +28,7 @@
 			<i class="bi bi-search"></i>&nbsp;
 			進階搜尋
 		</a>
-	</li>
-	<li class="nav-item" th:if='${@viewAuth.allowed("ROLE_VM_FUNCTION")}'>
-		<a data-id="vm" href="/vm" class="nav-link text-white" tabindex="-1">
-			<i class="bi bi-pc-display-horizontal"></i>&nbsp;
-			虛擬機資訊
-		</a>
-	</li>
+	</li>	
 	<li class="nav-item" th:if='${@viewAuth.allowed("ROLE_SOFTWARE_FUNCTION")}'>
 		<a data-id="software" href="/software" class="nav-link text-white" tabindex="-1">
 			<i class="bi bi-tools"></i>&nbsp;

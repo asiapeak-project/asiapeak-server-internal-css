@@ -17,5 +17,25 @@
 	<script th:src="@{/resources/vendors/bootstrap@5.0.2/bootstrap.bundle.min.js}"></script>
 	<script th:src="@{/resources/vendors/datetimepicker/jquery.datetimepicker.full.min.js}"></script>
 	<script th:src="@{/resources/asiapeak/asiapeak.js(version=${RESOURCE_UUID})}"></script>
+	<script>
+		
+		const disableAutoComplete = () => {
+			$("form").attr("autocomplete", "off")
+			$("form").prop("autocomplete", "off")
+			
+			$("input").attr("autocomplete", "false")
+			$("input").prop("autocomplete", "false")
+			
+			$("select").attr("autocomplete", "false")
+			$("select").prop("autocomplete", "false")
+			
+			$("textarea").attr("autocomplete", "false")
+			$("textarea").prop("autocomplete", "false")
+		}
+		
+		$(() => {
+			disableAutoComplete();
+		})
+	</script>
 </body>
 </html>

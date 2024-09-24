@@ -53,6 +53,7 @@
 				rows.forEach((item, index) => {
 					myrows.appendChild( createDynamicRowElement(index, item) )
 				})
+				disableAutoComplete();
 			};
 			
 			const createDynamicRowElement = (index, item) => {
