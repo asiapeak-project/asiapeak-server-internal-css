@@ -72,10 +72,15 @@
 				`)
 				
 				cmp.addEventListener("click",() => {
-					HttpUtils.doDownload({
-						url: "/customers/document/" + parentRowid + "/attachement/" + rowid + "/" + decodeURI(fileName)
-					})
-					PromptUtils.info("「" + fileName + "」已執行下載，請稍號。")
+					const url = "/customers/document/" + parentRowid + "/attachement/" + rowid + "/" + decodeURI(fileName)	
+					if(fileName.toLowerCase().endWith(".pdf")){
+						window.open(url, '_blank').focus();
+					} else {
+						HttpUtils.doDownload({
+							url: url
+						})
+						PromptUtils.info("「" + fileName + "」已執行下載，請稍號。")
+					}
 				});
 				
 				cmp.querySelector("[data-icon]").appendChild(
