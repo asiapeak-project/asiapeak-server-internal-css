@@ -73,7 +73,7 @@
 				
 				cmp.addEventListener("click",() => {
 					const url = "/customers/document/" + parentRowid + "/attachement/" + rowid + "/" + decodeURI(fileName)	
-					if(fileName.toLowerCase().endWith(".pdf")){
+					if(fileName.toLowerCase().endsWith(".pdf")){
 						window.open(url, '_blank').focus();
 					} else {
 						HttpUtils.doDownload({
