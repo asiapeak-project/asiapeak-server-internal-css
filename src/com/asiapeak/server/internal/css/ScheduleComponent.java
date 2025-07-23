@@ -58,7 +58,6 @@ public class ScheduleComponent {
 		List<MailRow> d30Products = new ArrayList<>();
 		List<MailRow> d60Products = new ArrayList<>();
 		List<MailRow> d90Products = new ArrayList<>();
-
 		List<MailRow> errorProducts = new ArrayList<>();
 
 		for (Product product : products) {
@@ -130,9 +129,9 @@ public class ScheduleComponent {
 			sb.append("<br />");
 		}
 
-		if (expiredProducts.size() > 0) {
+		if (errorProducts.size() > 0) {
 			sb.append("<br />");
-			sb.append(buildTable("日期格式錯誤之清單(需修正成 yyyy/MM/dd 格式)", expiredProducts));
+			sb.append(buildTable("日期格式錯誤之清單(需修正成 yyyy/MM/dd 格式)", errorProducts));
 			sb.append("<br />");
 		}
 
