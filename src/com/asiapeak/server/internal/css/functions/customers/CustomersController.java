@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.asiapeak.server.internal.css.ScheduleComponent;
 import com.asiapeak.server.internal.css.core.dto.ResponseBean;
 import com.asiapeak.server.internal.css.dao.entity.Customer;
 import com.asiapeak.server.internal.css.functions.customers.dto.ContactDto;
@@ -696,5 +697,15 @@ public class CustomersController {
 		ResponseFile responseFile = new ResponseFile();
 		responseFile.setFile(file);
 		return responseFile;
+	}
+
+	@Autowired
+	ScheduleComponent scheduleComponent;
+
+	@ResponseBody
+	@PostMapping("doSendMail")
+	public ResponseBean<Boolean> doSendMail() throws Exception {
+		scheduleComponent.MaintenanceDueReminder();
+		return ResponseBean.success(true);
 	}
 }

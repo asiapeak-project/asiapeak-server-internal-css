@@ -12,6 +12,7 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -25,6 +26,7 @@ import com.asiapeak.server.internal.css.core.user.ClearThreadAuthRoleFilter;
 import nz.net.ultraq.thymeleaf.layoutdialect.LayoutDialect;
 import nz.net.ultraq.thymeleaf.layoutdialect.decorators.strategies.GroupingStrategy;
 
+@EnableScheduling
 @Configuration
 @SpringBootApplication(exclude = { DataSourceAutoConfiguration.class, ThymeleafAutoConfiguration.class, JdbcTemplateAutoConfiguration.class, UserDetailsServiceAutoConfiguration.class })
 @ComponentScan("com.asiapeak")

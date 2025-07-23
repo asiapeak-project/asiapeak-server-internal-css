@@ -144,6 +144,14 @@
 			$("#clearFilter").hide();
 			doQuery();
 			
+			$("#doSendMail").click(() => {
+				HttpUtils.doPost({
+					url: "/customers/doSendMail",
+					success: (response) => {
+						PromptUtils.success("發送信件成功！")
+					}				
+				});
+			})
 		});
 	</script>
 </head>
@@ -179,6 +187,7 @@
 	
 	<table id="table" class="table table-striped table-hover table-bordered"></table>
 	<div id="pager" class="d-flex justify-content-between"></div>
+	<button id="doSendMail" style="display: none">寄送排程信件</button>
 </body>
 
 </html>
