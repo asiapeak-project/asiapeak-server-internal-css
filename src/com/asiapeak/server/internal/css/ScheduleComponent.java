@@ -174,7 +174,7 @@ public class ScheduleComponent {
 
 		String style = "border: 1px solid black;border-collapse: collapse;";
 
-		sb.append("<table style='width: 80%; margin-bottom: 24px'>");
+		sb.append("<table style='width: 80%'>");
 
 		sb.append("<thead>");
 
