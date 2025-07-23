@@ -101,54 +101,54 @@ public class ScheduleComponent {
 		StringBuilder sb = new StringBuilder();
 
 		if (expiredProducts.size() > 0) {
-			sb.append("</br>");
+			sb.append("<br />");
 			sb.append(buildTable("已經過期之清單", expiredProducts));
-			sb.append("</br>");
+			sb.append("<br />");
 		}
 
 		if (d7Products.size() > 0) {
-			sb.append("</br>");
+			sb.append("<br />");
 			sb.append(buildTable("到期日 7 天之內清單", d7Products));
-			sb.append("</br>");
+			sb.append("<br />");
 		}
 
 		if (d30Products.size() > 0) {
-			sb.append("</br>");
+			sb.append("<br />");
 			sb.append(buildTable("到期日 30 天之內清單", d30Products));
-			sb.append("</br>");
+			sb.append("<br />");
 		}
 
 		if (d60Products.size() > 0) {
-			sb.append("</br>");
+			sb.append("<br />");
 			sb.append(buildTable("到期日 60 天之內清單", d60Products));
-			sb.append("</br>");
+			sb.append("<br />");
 		}
 
 		if (d90Products.size() > 0) {
-			sb.append("</br>");
+			sb.append("<br />");
 			sb.append(buildTable("到期日 90 天之內清單", d90Products));
-			sb.append("</br>");
+			sb.append("<br />");
 		}
 
 		if (expiredProducts.size() > 0) {
-			sb.append("</br>");
+			sb.append("<br />");
 			sb.append(buildTable("日期格式錯誤之清單(需修正成 yyyy/MM/dd 格式)", expiredProducts));
-			sb.append("</br>");
+			sb.append("<br />");
 		}
 
 		if (sb.length() == 0) {
-			sb.append("</br>");
+			sb.append("<br />");
 			sb.append("<p>目前無任何快到期的客戶！</p>");
-			sb.append("</br>");
+			sb.append("<br />");
 		}
 
-		sb.append("</br>");
-		sb.append("</br>");
-		sb.append("</br>");
-		sb.append("</br>");
+		sb.append("<br />");
+		sb.append("<br />");
+		sb.append("<br />");
+		sb.append("<br />");
 
 		sb.append("<p>此信件是由系統自動寄出，請勿回信。</p>");
-		sb.append("</br>");
+		sb.append("<br />");
 
 		sendMail(new String[] { //
 				// "fred@asiapeak.com", //
