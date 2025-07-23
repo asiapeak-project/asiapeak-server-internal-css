@@ -1,5 +1,6 @@
 package com.asiapeak.server.internal.css;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -75,7 +76,7 @@ public class ScheduleComponent {
 
 					MailRow row = new MailRow(product.getCustomer().getDname(), product.getSubject(), valueColumn);
 
-					Date date = formateDate(valueColumn);
+					Date date = parseFlexibleDate1(valueColumn.trim());
 					if (date == null) {
 						errorProducts.add(row);
 						continue;
@@ -150,7 +151,7 @@ public class ScheduleComponent {
 		sb.append("</br>");
 
 		sendMail(new String[] { //
-				"fred@asiapeak.com", //
+				// "fred@asiapeak.com", //
 				"derrek@asiapeak.com",//
 		}, "玉山科技-客戶服務系統-保固到期日通知信件", sb.toString());
 
@@ -173,7 +174,7 @@ public class ScheduleComponent {
 
 		String style = "border: 1px solid black;border-collapse: collapse;";
 
-		sb.append("<table style='width: 80%'>");
+		sb.append("<table style='width: 80%; margin-bottom: 24px'>");
 
 		sb.append("<thead>");
 
@@ -314,14 +315,24 @@ public class ScheduleComponent {
 		return dateCal.compareTo(thresholdCal) <= 0;
 	}
 
-	private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+	private Date parseFlexibleDate1(String dateString) {
+		List<String> patterns = Arrays.asList("yyyy/MM/dd", // 2025/01/01
+				"yyyy/M/d", // 2025/1/1
+				"yyyy/MM/d", // 2025/01/1
+				"yyyy/M/dd" // 2025/1/01
+		);
 
-	private Date formateDate(String str) {
-		try {
-			return sdf.parse(str);
-		} catch (Exception e) {
-			return null;
+		for (String pattern : patterns) {
+			try {
+				SimpleDateFormat formatter = new SimpleDateFormat(pattern);
+				formatter.setLenient(false); // 嚴格模式
+				return formatter.parse(dateString);
+			} catch (ParseException e) {
+				// 繼續嘗試下一個格式
+			}
 		}
+
+		return null;
 	}
 
 	private List<String> parseJsonArray(String jsonArray) throws JsonMappingException, JsonProcessingException {
