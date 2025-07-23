@@ -150,7 +150,7 @@ public class ScheduleComponent {
 		sb.append("<br />");
 
 		sendMail(new String[] { //
-				// "fred@asiapeak.com", //
+				"fred@asiapeak.com", //
 				"derrek@asiapeak.com",//
 		}, "玉山科技-客戶服務系統-保固到期日通知信件", sb.toString());
 
@@ -182,9 +182,9 @@ public class ScheduleComponent {
 		sb.append("    </tr>");
 
 		sb.append("    <tr>");
-		sb.append("        <th style='" + style + "text-align:left;'>客戶名稱</th>");
-		sb.append("        <th style='" + style + "text-align:left;'>產品名稱</th>");
-		sb.append("        <th style='" + style + "text-align:left;'>到期日期</th>");
+		sb.append("        <th style='" + style + "text-align:left; width: 30%;'>客戶名稱</th>");
+		sb.append("        <th style='" + style + "text-align:left; width: 40%;'>產品名稱</th>");
+		sb.append("        <th style='" + style + "text-align:left; width: 30%;'>到期日期</th>");
 		sb.append("    </tr>");
 
 		sb.append("</thead>");
