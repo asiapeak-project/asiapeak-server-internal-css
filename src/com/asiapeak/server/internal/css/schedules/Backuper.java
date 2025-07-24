@@ -184,6 +184,7 @@ public class Backuper {
 		log.info("Zip folder src=" + folder.getAbsolutePath());
 		log.info("Zip folder to=" + outputZip.getAbsolutePath());
 		try (FileOutputStream fos = new FileOutputStream(outputZip); ZipOutputStream zos = new ZipOutputStream(fos)) {
+			zos.setLevel(9);
 			zipFolderRecursive(folder, folder.getName(), zos);
 		} catch (IOException e) {
 			throw new RuntimeException("Failed to create zip file: " + outputZip.getAbsolutePath(), e);
