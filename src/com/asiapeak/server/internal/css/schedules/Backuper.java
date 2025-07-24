@@ -96,7 +96,7 @@ public class Backuper {
 	@Scheduled(cron = "0 30 23 * * ?")
 	public void run() throws Exception {
 		hasExecutedOnStartup = true;
-		
+
 		log.info("Start Backup.....");
 
 		log.info("Parsing contacts");
@@ -171,6 +171,27 @@ public class Backuper {
 		log.info("Delete temp folder=" + backupTargetFolder.getAbsolutePath());
 		FileTools.deleteDirectory(backupTargetFolder);
 		log.info("Backup completed");
+
+		File _backupFolder = new File(backupFolder);
+
+		log.info("Start delete old backup");
+		long fourteenDaysAgo = System.currentTimeMillis() - (14 * 24 * 60 * 60 * 1000L);
+
+		File[] files = _backupFolder.listFiles();
+		if (files != null) {
+			for (File f : files) {
+				if (f.lastModified() < fourteenDaysAgo) {
+					if (f.delete()) {
+						log.info("已刪除檔案: " + f.getName());
+					} else {
+						log.info("無法刪除檔案: " + f.getName());
+					}
+				}
+			}
+		}
+
+		log.info("All completed");
+
 	}
 
 	private void saveTableJson(List<Map<String, Object>> list, File outFile) throws JsonProcessingException {
@@ -183,7 +204,7 @@ public class Backuper {
 	private void zipFolder(File folder, File outputZip) {
 		log.info("Zip folder src=" + folder.getAbsolutePath());
 		log.info("Zip folder to=" + outputZip.getAbsolutePath());
-		try (FileOutputStream fos = new FileOutputStream(outputZip); ZipOutputStream zos = new ZipOutputStream(fos)) {
+		try (FileOutputStream fos = new FileOutputStream(outputZip, false); ZipOutputStream zos = new ZipOutputStream(fos)) {
 			zos.setLevel(9);
 			zipFolderRecursive(folder, folder.getName(), zos);
 		} catch (IOException e) {
