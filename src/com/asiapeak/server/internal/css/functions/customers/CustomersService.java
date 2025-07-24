@@ -635,10 +635,12 @@ public class CustomersService {
 		}
 
 		File folder = fileService.getDocumentFolder(parentRowid, rowid);
-		
-		filename = filename.replace("%20", " ");
-		
-		return new File(folder, filename);
+
+		File file = new File(folder, filename);
+		if (!file.exists()) {
+			file = new File(folder, filename.replace("%20", " "));
+		}
+		return file;
 	}
 
 	public List<File> downloadDocumentAttachements(Integer parentRowid, Integer rowid) throws IOException {
