@@ -168,8 +168,9 @@ public class Backuper {
 
 		zipFolder(backupTargetFolder, resultZip);
 
-		System.out.println("Delete temp folder=" + backupTargetFolder.getAbsolutePath());
+		log.info("Delete temp folder=" + backupTargetFolder.getAbsolutePath());
 		FileTools.deleteDirectory(backupTargetFolder);
+		log.info("Backup completed");
 	}
 
 	private void saveTableJson(List<Map<String, Object>> list, File outFile) throws JsonProcessingException {
