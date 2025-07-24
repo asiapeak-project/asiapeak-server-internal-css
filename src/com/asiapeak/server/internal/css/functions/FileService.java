@@ -2,8 +2,8 @@ package com.asiapeak.server.internal.css.functions;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -25,17 +25,19 @@ public class FileService {
 		return files.stream().map(file -> {
 			AttachementDto attach = new AttachementDto();
 			attach.setName(file.getName());
-			attach.setUrlEncoded(encodFileName(file.getName()));
+			attach.setUrlEncoded(encodeFileName(file.getName()));
 			attach.setSize(file.length());
 			attach.setUdate(new Date(file.lastModified()));
 			return attach;
 		}).collect(Collectors.toList());
 	}
 
-	private String encodFileName(String fileName) {
+	public String encodeFileName(String fileName) {
 		try {
-			return URLEncoder.encode(fileName, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
+			// 使用 URI 進行編碼，它遵循 RFC 3986
+			URI uri = new URI(null, null, fileName, null);
+			return uri.toASCIIString();
+		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
 		}
 	}

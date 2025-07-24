@@ -73,7 +73,8 @@
 				`)
 				
 				cmp.addEventListener("click",() => {
-					const url = "/customers/document/" + parentRowid + "/attachement/" + rowid + "/" + urlEncoded	
+					const url = "/customers/document/" + parentRowid + "/attachement/" + rowid + "/" + urlEncoded;
+					console.log(url);
 					if(fileName.toLowerCase().endsWith(".pdf")){
 						window.open(url, '_blank').focus();
 					} else {
