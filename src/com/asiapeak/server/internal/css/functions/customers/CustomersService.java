@@ -637,9 +637,6 @@ public class CustomersService {
 		File folder = fileService.getDocumentFolder(parentRowid, rowid);
 
 		File file = new File(folder, filename);
-		if (!file.exists()) {
-			file = new File(folder, filename.replace("%20", " "));
-		}
 		return file;
 	}
 

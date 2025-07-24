@@ -56,6 +56,7 @@
 			
 			const createUploadComponent = (file) => {
 				const fileName = file.name;
+				const urlEncoded = file.urlEncoded;
 				const cmp = ElementUtils.createElement(`
 					<div style="width: 300px; min-width: 220px; height: 70px; min-height: 70px;" class="border border-secondary rounded m-2 none-select clickable attachment-item">
 						<span data-icon style="font-size: 34px; position: relative; left: 11px; top: 8px;"></span>
@@ -72,7 +73,7 @@
 				`)
 				
 				cmp.addEventListener("click",() => {
-					const url = "/customers/document/" + parentRowid + "/attachement/" + rowid + "/" + decodeURI(fileName)	
+					const url = "/customers/document/" + parentRowid + "/attachement/" + rowid + "/" + urlEncoded	
 					if(fileName.toLowerCase().endsWith(".pdf")){
 						window.open(url, '_blank').focus();
 					} else {

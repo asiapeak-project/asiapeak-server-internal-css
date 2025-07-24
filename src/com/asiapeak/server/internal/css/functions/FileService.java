@@ -2,6 +2,8 @@ package com.asiapeak.server.internal.css.functions;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -23,10 +25,19 @@ public class FileService {
 		return files.stream().map(file -> {
 			AttachementDto attach = new AttachementDto();
 			attach.setName(file.getName());
+			attach.setUrlEncoded(encodFileName(file.getName()));
 			attach.setSize(file.length());
 			attach.setUdate(new Date(file.lastModified()));
 			return attach;
 		}).collect(Collectors.toList());
+	}
+
+	private String encodFileName(String fileName) {
+		try {
+			return URLEncoder.encode(fileName, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	private File getFolder(String name, Integer customerRowid, Integer targetRowid) throws IOException {
