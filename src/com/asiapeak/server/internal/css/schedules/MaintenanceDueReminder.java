@@ -1,4 +1,4 @@
-package com.asiapeak.server.internal.css;
+package com.asiapeak.server.internal.css.schedules;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -31,7 +31,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component
-public class ScheduleComponent {
+public class MaintenanceDueReminder {
 
 	@Autowired
 	ProductRepo productRepo;
@@ -47,7 +47,7 @@ public class ScheduleComponent {
 	 * @throws JsonMappingException
 	 */
 	@Scheduled(cron = "0 0 8 ? * MON")
-	public void MaintenanceDueReminder() throws Exception {
+	public void run() throws Exception {
 
 		final Date now = new Date();
 

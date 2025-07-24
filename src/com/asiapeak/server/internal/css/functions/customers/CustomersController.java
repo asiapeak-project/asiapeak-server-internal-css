@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.asiapeak.server.internal.css.ScheduleComponent;
 import com.asiapeak.server.internal.css.core.dto.ResponseBean;
 import com.asiapeak.server.internal.css.dao.entity.Customer;
 import com.asiapeak.server.internal.css.functions.customers.dto.ContactDto;
@@ -32,6 +31,7 @@ import com.asiapeak.server.internal.css.functions.customers.dto.ServiceRecordHan
 import com.asiapeak.server.internal.css.functions.customers.dto.ServiceRecordHandleOutputDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.ServiceRecordInputDto;
 import com.asiapeak.server.internal.css.functions.customers.dto.ServiceRecordOutputDto;
+import com.asiapeak.server.internal.css.schedules.MaintenanceDueReminder;
 import com.asiapeak.spring.downloader.dto.ResponseFile;
 import com.asiapeak.spring.downloader.dto.ResponseZip;
 
@@ -700,12 +700,12 @@ public class CustomersController {
 	}
 
 	@Autowired
-	ScheduleComponent scheduleComponent;
+	MaintenanceDueReminder maintenanceDueReminder;
 
 	@ResponseBody
 	@PostMapping("doSendMail")
 	public ResponseBean<Boolean> doSendMail() throws Exception {
-		scheduleComponent.MaintenanceDueReminder();
+		maintenanceDueReminder.run();
 		return ResponseBean.success(true);
 	}
 }
