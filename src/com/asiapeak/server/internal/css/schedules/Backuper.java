@@ -5,10 +5,12 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -41,6 +43,11 @@ import com.asiapeak.server.internal.css.dao.repo.UsersAuthRepo;
 import com.asiapeak.server.internal.css.dao.repo.UsersRepo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.Session;
+import com.jcraft.jsch.SftpException;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -175,23 +182,72 @@ public class Backuper {
 		File _backupFolder = new File(backupFolder);
 
 		log.info("Start delete old backup");
-		long fourteenDaysAgo = System.currentTimeMillis() - (14 * 24 * 60 * 60 * 1000L);
+		long fourteenDaysAgo = System.currentTimeMillis() - (1 * 24 * 60 * 60 * 1000L);
+
+		List<String> deletedFileNames = new ArrayList<>();
 
 		File[] files = _backupFolder.listFiles();
 		if (files != null) {
 			for (File f : files) {
 				if (f.lastModified() < fourteenDaysAgo) {
 					if (f.delete()) {
-						log.info("已刪除檔案: " + f.getName());
+						deletedFileNames.add(f.getName());
+						log.info("已刪除本地檔案: " + f.getName());
 					} else {
-						log.info("無法刪除檔案: " + f.getName());
+						log.error("無法刪除本地檔案: " + f.getName());
 					}
 				}
 			}
 		}
 
+		sftp_backup("/", deletedFileNames, resultZip);
+
 		log.info("All completed");
 
+	}
+
+	private void sftp_backup(String remotePath, List<String> deletedFileNames, File resultZip) throws Exception {
+
+		deletedFileNames.add(resultZip.getName());
+
+		Session session = null;
+		Channel channel = null;
+		ChannelSftp sftpChannel = null;
+
+		JSch jsch = new JSch();
+		session = jsch.getSession("apcss", "192.168.1.248", 22);
+		session.setPassword("1qaz@WSX3edc");
+
+		// 跳過主機金鑰檢查（生產環境建議設置已知主機）
+		session.setConfig("StrictHostKeyChecking", "no");
+
+		session.connect();
+
+		channel = session.openChannel("sftp");
+		channel.connect();
+		sftpChannel = (ChannelSftp) channel;
+
+		Vector<ChannelSftp.LsEntry> fileList = sftpChannel.ls(remotePath);
+
+		for (ChannelSftp.LsEntry entry : fileList) {
+			String filename = entry.getFilename();
+			if (filename.equals(".") || filename.equals("..") || entry.getAttrs().isDir()) {
+				continue;
+			}
+			if (deletedFileNames.contains(filename)) {
+				try {
+					String fullPath = remotePath.endsWith("/") ? remotePath + filename : remotePath + "/" + filename;
+					sftpChannel.rm(fullPath);
+					log.info("SFTP 已刪除: " + filename);
+					deletedFileNames.remove(filename);
+				} catch (SftpException e) {
+					log.error("SFTP 刪除失敗 " + filename + ": {}", e);
+				}
+			}
+		}
+
+		sftpChannel.put(resultZip.getAbsolutePath(), "/" + resultZip.getName());
+		log.info("SFTP 檔案上傳成功 " + resultZip.getName());
 	}
 
 	private void saveTableJson(List<Map<String, Object>> list, File outFile) throws JsonProcessingException {
