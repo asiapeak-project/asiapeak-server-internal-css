@@ -214,40 +214,66 @@ public class Backuper {
 		Channel channel = null;
 		ChannelSftp sftpChannel = null;
 
-		JSch jsch = new JSch();
-		session = jsch.getSession("apcss", "192.168.1.248", 22);
-		session.setPassword("1qaz@WSX3edc");
+		try {
+			JSch jsch = new JSch();
+			session = jsch.getSession("apcss", "192.168.1.248", 22);
+			session.setPassword("1qaz@WSX3edc");
+			session.setConfig("StrictHostKeyChecking", "no");
+			session.connect();
 
-		// 跳過主機金鑰檢查（生產環境建議設置已知主機）
-		session.setConfig("StrictHostKeyChecking", "no");
+			channel = session.openChannel("sftp");
+			channel.connect();
+			sftpChannel = (ChannelSftp) channel;
 
-		session.connect();
+			// 刪除舊檔案
+			Vector<ChannelSftp.LsEntry> fileList = sftpChannel.ls(remotePath);
 
-		channel = session.openChannel("sftp");
-		channel.connect();
-		sftpChannel = (ChannelSftp) channel;
-
-		Vector<ChannelSftp.LsEntry> fileList = sftpChannel.ls(remotePath);
-
-		for (ChannelSftp.LsEntry entry : fileList) {
-			String filename = entry.getFilename();
-			if (filename.equals(".") || filename.equals("..") || entry.getAttrs().isDir()) {
-				continue;
+			for (ChannelSftp.LsEntry entry : fileList) {
+				String filename = entry.getFilename();
+				if (filename.equals(".") || filename.equals("..") || entry.getAttrs().isDir()) {
+					continue;
+				}
+				if (deletedFileNames.contains(filename)) {
+					try {
+						String fullPath = remotePath.endsWith("/") ? remotePath + filename : remotePath + "/" + filename;
+						sftpChannel.rm(fullPath);
+						log.info("SFTP 已刪除: " + filename);
+						deletedFileNames.remove(filename);
+					} catch (SftpException e) {
+						log.error("SFTP 刪除失敗 " + filename + ": {}", e.getMessage());
+					}
+				}
 			}
-			if (deletedFileNames.contains(filename)) {
+
+			// 上傳新檔案
+			String uploadPath = remotePath.endsWith("/") ? remotePath + resultZip.getName() : remotePath + "/" + resultZip.getName();
+			sftpChannel.put(resultZip.getAbsolutePath(), uploadPath);
+			log.info("SFTP 檔案上傳成功: " + resultZip.getName());
+
+		} finally {
+			// 確保連線被關閉
+			if (sftpChannel != null) {
 				try {
-					String fullPath = remotePath.endsWith("/") ? remotePath + filename : remotePath + "/" + filename;
-					sftpChannel.rm(fullPath);
-					log.info("SFTP 已刪除: " + filename);
-					deletedFileNames.remove(filename);
-				} catch (SftpException e) {
-					log.error("SFTP 刪除失敗 " + filename + ": {}", e);
+					sftpChannel.disconnect();
+				} catch (Exception e) {
+					/* ignore */
+				}
+			}
+			if (channel != null) {
+				try {
+					channel.disconnect();
+				} catch (Exception e) {
+					/* ignore */
+				}
+			}
+			if (session != null) {
+				try {
+					session.disconnect();
+				} catch (Exception e) {
+					/* ignore */
 				}
 			}
 		}
-
-		sftpChannel.put(resultZip.getAbsolutePath(), "/" + resultZip.getName());
-		log.info("SFTP 檔案上傳成功 " + resultZip.getName());
 	}
 
 	private void saveTableJson(List<Map<String, Object>> list, File outFile) throws JsonProcessingException {
