@@ -182,7 +182,7 @@ public class Backuper {
 		File _backupFolder = new File(backupFolder);
 
 		log.info("Start delete old backup");
-		long fourteenDaysAgo = System.currentTimeMillis() - (1 * 24 * 60 * 60 * 1000L);
+		long fourteenDaysAgo = System.currentTimeMillis() - (3 * 24 * 60 * 60 * 1000L);
 
 		List<String> deletedFileNames = new ArrayList<>();
 
